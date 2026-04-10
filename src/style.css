@@ -49,7 +49,9 @@ html,
 }
 
 #viewport.orbiting {
-  cursor: grab;
+  cursor:
+    url("/cursors/scan-eye.svg") 12 12,
+    crosshair;
 }
 #viewport canvas {
   display: block;

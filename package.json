@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "electron": "^41.2.0",
+    "lucide": "^1.8.0",
     "three": "^0.183.2"
   }
 }
