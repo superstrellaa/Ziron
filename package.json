@@ -1,0 +1,23 @@
+{
+  "name": "ziron",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "electron/main.js",
+  "scripts": {
+    "dev": "vite",
+    "electron": "electron .",
+    "start": "concurrently \"vite\" \"wait-on http://localhost:5173 && electron .\"",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1",
+    "vite": "^8.0.4",
+    "wait-on": "^9.0.4"
+  },
+  "dependencies": {
+    "electron": "^41.2.0",
+    "three": "^0.183.2"
+  }
+}
