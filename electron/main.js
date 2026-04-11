@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from "electron";
+import { app, BrowserWindow, ipcMain } from "electron";
 import { createServer } from "vite";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -14,10 +14,11 @@ async function createWindow() {
     minHeight: 600,
     backgroundColor: "#1a1a2e",
     titleBarStyle: "hidden",
+    frame: false,
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
-      preload: path.join(__dirname, "preload.js"),
+      preload: path.join(__dirname, "preload.cjs"),
     },
   });
 
@@ -32,6 +33,15 @@ async function createWindow() {
 }
 
 app.whenReady().then(createWindow);
+
+ipcMain.on("window:minimize", () =>
+  BrowserWindow.getFocusedWindow()?.minimize(),
+);
+ipcMain.on("window:maximize", () => {
+  const win = BrowserWindow.getFocusedWindow();
+  win?.isMaximized() ? win.unmaximize() : win.maximize();
+});
+ipcMain.on("window:close", () => BrowserWindow.getFocusedWindow()?.close());
 
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") app.quit();

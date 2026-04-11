@@ -18,11 +18,6 @@ export function createViewport(container) {
 
   const flyControls = createFlyCamera(camera, container);
 
-  const info = document.createElement("div");
-  info.id = "info";
-  info.innerHTML = "Click derecho + arrastrar → orbitar";
-  container.appendChild(info);
-
   function resize() {
     const w = container.clientWidth;
     const h = container.clientHeight;

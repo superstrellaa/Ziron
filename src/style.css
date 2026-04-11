@@ -38,6 +38,7 @@ html,
   font-size: 13px;
   font-weight: 600;
   letter-spacing: 1px;
+  pointer-events: none;
 }
 
 /* ── Viewport ── */
@@ -57,13 +58,54 @@ html,
   display: block;
 }
 
-/* ── Info overlay ── */
-#info {
-  position: absolute;
-  bottom: 12px;
-  left: 14px;
+#toolbar {
+  -webkit-app-region: drag;
+}
+
+#toolbar span {
+  color: #a78bfa;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  user-select: none;
+}
+
+#toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+
+#toolbar-window-controls {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  -webkit-app-region: no-drag;
+  padding-right: 4px;
+}
+
+#toolbar-window-controls button {
+  background: none;
+  border: none;
   color: #6b7280;
-  font-size: 11px;
-  pointer-events: none;
-  line-height: 1.8;
+  width: 28px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    color 0.15s;
+}
+#toolbar-window-controls button:hover {
+  background: #2a2a3e;
+  color: #e5e7eb;
+}
+
+#btn-close:hover {
+  background: #dc2626 !important;
+  color: white !important;
 }
