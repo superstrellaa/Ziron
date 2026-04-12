@@ -1,5 +1,4 @@
 import { app, BrowserWindow, ipcMain } from "electron";
-import { createServer } from "vite";
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -23,8 +22,6 @@ async function createWindow() {
   });
 
   if (isDev) {
-    const viteServer = await createServer({ server: { port: 5173 } });
-    await viteServer.listen();
     win.loadURL("http://localhost:5173");
     win.webContents.openDevTools({ mode: "detach" });
   } else {
