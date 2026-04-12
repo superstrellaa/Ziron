@@ -14,12 +14,16 @@ async function createWindow() {
     backgroundColor: "#1a1a2e",
     titleBarStyle: "hidden",
     frame: false,
+    show: false,
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
       preload: path.join(__dirname, "preload.cjs"),
     },
   });
+
+  win.maximize();
+  win.show();
 
   if (isDev) {
     win.loadURL("http://localhost:5173");
