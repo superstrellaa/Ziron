@@ -10,8 +10,8 @@
     "dev": "vite",
     "electron": "electron .",
     "start": "concurrently \"vite\" \"wait-on http://localhost:5173 && electron .\"",
-    "build": "vite build && electron-builder",
-    "build:dir": "vite build && electron-builder --dir"
+    "build": "vite build && electron-builder --config electron-builder.config.json",
+    "build:dir": "vite build && electron-builder --dir --config electron-builder.config.json"
   },
   "devDependencies": {
     "concurrently": "^9.2.1",

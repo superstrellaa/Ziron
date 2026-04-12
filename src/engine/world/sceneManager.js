@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { logger } from "../core/logger";
 
 // lista chula de geometrías disponibles
 const GEOMETRIES = {
@@ -39,16 +40,25 @@ export function createSceneManager(scene) {
     const entity = { id: nextId++, name, type, mesh };
     entities.set(entity.id, entity);
 
+    logger.info(
+      "SceneManager",
+      `Added entity "${name}" (type: ${type}, id: ${entity.id})`,
+    );
+
     return entity;
   }
 
   function remove(id) {
     const entity = entities.get(id);
-    if (!entity) return false;
+    if (!entity) {
+      logger.warn("SceneManager", `Entity id ${id} not found, cannot remove`);
+      return false;
+    }
     scene.remove(entity.mesh);
     entity.mesh.geometry.dispose();
     entity.mesh.material.dispose();
     entities.delete(id);
+    logger.info("SceneManager", `Removed entity "${entity.name}" (id: ${id})`);
     return true;
   }
 

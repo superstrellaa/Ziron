@@ -2,8 +2,10 @@ import * as THREE from "three";
 import { createFlyCamera } from "../engine/camera/flyCamera.js";
 import { createScene } from "../engine/core/scene.js";
 import { createGizmo } from "../engine/gizmos/transformGizmo.js";
+import { logger } from "../engine/core/logger.js";
 
 export function createViewport(container) {
+  logger.info("Viewport", "Initializing viewport");
   const renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setPixelRatio(window.devicePixelRatio);
   renderer.shadowMap.enabled = true;
@@ -42,4 +44,5 @@ export function createViewport(container) {
     renderer.render(scene, camera);
   }
   animate();
+  logger.info("Viewport", "Renderer ready");
 }
