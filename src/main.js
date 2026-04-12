@@ -19,7 +19,7 @@ document.querySelector("#app").innerHTML = `
 
 createIcons({
   icons: { Box, Minimize, Maximize, X },
-  attrs: { width: 14, height: 14, stroke: "currentColor" },
+  attrs: { width: 14, height: 14, stroke: "#cccccc" },
 });
 
 document

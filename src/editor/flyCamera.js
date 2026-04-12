@@ -4,6 +4,7 @@ export function createFlyCamera(camera, domElement) {
   const state = {
     isFlying: false,
     enabled: true,
+    shift: false,
     lastX: 0,
     lastY: 0,
     yaw: 0,
@@ -13,7 +14,7 @@ export function createFlyCamera(camera, domElement) {
 
   const LOOK_SPEED = 0.003;
   const FLY_SPEED = 0.08;
-  const MAX_PITCH = Math.PI / 2 - 0.01;
+  const FLY_SPEED_FAST = 0.28;
 
   const euler = new THREE.Euler().setFromQuaternion(camera.quaternion, "YXZ");
   state.yaw = euler.y;
@@ -26,26 +27,23 @@ export function createFlyCamera(camera, domElement) {
     state.isFlying = true;
     state.lastX = e.clientX;
     state.lastY = e.clientY;
-    domElement.classList.add("orbiting");
+    domElement.requestPointerLock();
   }
 
   function onMouseMove(e) {
     if (!state.isFlying) return;
-    const dx = e.clientX - state.lastX;
-    const dy = e.clientY - state.lastY;
-    state.lastX = e.clientX;
-    state.lastY = e.clientY;
+    const dx = e.movementX;
+    const dy = e.movementY;
 
     state.yaw -= dx * LOOK_SPEED;
     state.pitch -= dy * LOOK_SPEED;
-    state.pitch = Math.max(-MAX_PITCH, Math.min(MAX_PITCH, state.pitch));
   }
 
   function onMouseUp(e) {
     if (e.button !== 2) return;
     state.isFlying = false;
     for (const k in state.keys) state.keys[k] = false;
-    domElement.classList.remove("orbiting");
+    document.exitPointerLock();
   }
 
   function onWheel(e) {
@@ -61,6 +59,10 @@ export function createFlyCamera(camera, domElement) {
   }
 
   function onKeyDown(e) {
+    if (e.key === "Shift") {
+      state.shift = true;
+      return;
+    }
     if (!state.isFlying) return;
     const k = e.key.toLowerCase();
     if (k in state.keys) {
@@ -70,6 +72,10 @@ export function createFlyCamera(camera, domElement) {
   }
 
   function onKeyUp(e) {
+    if (e.key === "Shift") {
+      state.shift = false;
+      return;
+    }
     const k = e.key.toLowerCase();
     if (k in state.keys) state.keys[k] = false;
   }
@@ -107,12 +113,15 @@ export function createFlyCamera(camera, domElement) {
       _up.setFromMatrixColumn(camera.matrixWorld, 1);
 
       _move.set(0, 0, 0);
-      if (w) _move.addScaledVector(_forward, FLY_SPEED);
-      if (s) _move.addScaledVector(_forward, -FLY_SPEED);
-      if (d) _move.addScaledVector(_right, FLY_SPEED);
-      if (a) _move.addScaledVector(_right, -FLY_SPEED);
-      if (e) _move.addScaledVector(_up, FLY_SPEED);
-      if (qKey) _move.addScaledVector(_up, -FLY_SPEED);
+
+      const speed = state.shift ? FLY_SPEED_FAST : FLY_SPEED;
+
+      if (w) _move.addScaledVector(_forward, speed);
+      if (s) _move.addScaledVector(_forward, -speed);
+      if (d) _move.addScaledVector(_right, speed);
+      if (a) _move.addScaledVector(_right, -speed);
+      if (e) _move.addScaledVector(_up, speed);
+      if (qKey) _move.addScaledVector(_up, -speed);
 
       camera.position.add(_move);
     }
