@@ -14,7 +14,7 @@ export function createViewport(container) {
   camera.position.set(5, 4, 7);
   camera.lookAt(0, 0, 0);
 
-  const { scene, cube } = createScene();
+  const { scene, sceneManager, defaultCube } = createScene();
 
   const flyControls = createFlyCamera(camera, container);
 
@@ -32,7 +32,7 @@ export function createViewport(container) {
     camera,
     renderer.domElement,
     scene,
-    cube,
+    defaultCube.mesh,
     flyControls,
   );
 
