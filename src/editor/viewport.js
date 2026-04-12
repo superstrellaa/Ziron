@@ -1,7 +1,7 @@
 import * as THREE from "three";
-import { createFlyCamera } from "./flyCamera.js";
-import { createScene } from "./scene.js";
-import { createGizmo } from "./gizmo.js";
+import { createFlyCamera } from "../engine/camera/flyCamera.js";
+import { createScene } from "../engine/core/scene.js";
+import { createGizmo } from "../engine/gizmos/transformGizmo.js";
 
 export function createViewport(container) {
   const renderer = new THREE.WebGLRenderer({ antialias: true });

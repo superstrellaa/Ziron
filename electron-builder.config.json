@@ -1,0 +1,33 @@
+{
+  "appId": "com.ziron.engine",
+  "productName": "Ziron Engine",
+  "copyright": "Copyright © 2026 Ziron | superstrellaa",
+  "files": ["dist/**/*", "electron/**/*"],
+  "extraResources": [
+    { "from": "LICENSE", "to": "LICENSE" },
+    { "from": "CREDITS", "to": "CREDITS" }
+  ],
+  "win": {
+    "target": "nsis",
+    "icon": "public/icon.ico"
+  },
+  "nsis": {
+    "oneClick": false,
+    "allowToChangeInstallationDirectory": true,
+    "createDesktopShortcut": true,
+    "createStartMenuShortcut": true,
+    "shortcutName": "Ziron Engine",
+    "license": "LICENSE",
+    "installerIcon": "public/icon.ico",
+    "uninstallerIcon": "public/icon.ico",
+    "include": "installer.nsh"
+  },
+  "mac": {
+    "target": "dmg",
+    "icon": "public/icon.icns"
+  },
+  "linux": {
+    "target": "AppImage",
+    "icon": "public/icon.png"
+  }
+}
