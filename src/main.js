@@ -1,6 +1,9 @@
 import "./style.css";
 import { createIcons, Box, Minimize, Maximize, X } from "lucide";
 import { createViewport } from "./editor/viewport.js";
+import { setLocale } from "./engine/i18n/i18n.js";
+
+setLocale("es");
 
 document.querySelector("#app").innerHTML = `
   <div id="toolbar">

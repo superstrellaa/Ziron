@@ -3,6 +3,7 @@ import { createFlyCamera } from "../engine/camera/flyCamera.js";
 import { createScene } from "../engine/core/scene.js";
 import { createGizmo } from "../engine/gizmos/transformGizmo.js";
 import { logger } from "../engine/core/logger.js";
+import { createContextMenu } from "./contextMenu.js";
 
 export function createViewport(container) {
   logger.info("Viewport", "Initializing viewport");
@@ -17,6 +18,8 @@ export function createViewport(container) {
   camera.lookAt(0, 0, 0);
 
   const { scene, sceneManager, defaultCube } = createScene();
+
+  createContextMenu(container, sceneManager);
 
   const flyControls = createFlyCamera(camera, container);
 
