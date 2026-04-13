@@ -1,15 +1,25 @@
 import { TransformControls } from "three/addons/controls/TransformControls.js";
 
-export function createGizmo(camera, domElement, scene, object, orbitControls) {
+export function createGizmo(camera, domElement, scene, flyControls) {
   const gizmo = new TransformControls(camera, domElement);
-  gizmo.attach(object);
   gizmo.setMode("translate");
-
   scene.add(gizmo.getHelper());
 
   gizmo.addEventListener("dragging-changed", (e) => {
-    orbitControls.enabled = !e.value;
+    flyControls.enabled = !e.value;
   });
 
-  return gizmo;
+  function attach(mesh) {
+    gizmo.attach(mesh);
+    gizmo.getHelper().visible = true;
+  }
+
+  function detach() {
+    gizmo.detach();
+    gizmo.getHelper().visible = false;
+  }
+
+  detach();
+
+  return { attach, detach, gizmo };
 }

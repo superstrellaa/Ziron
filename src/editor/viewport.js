@@ -2,11 +2,13 @@ import * as THREE from "three";
 import { createFlyCamera } from "../engine/camera/flyCamera.js";
 import { createScene } from "../engine/core/scene.js";
 import { createGizmo } from "../engine/gizmos/transformGizmo.js";
-import { logger } from "../engine/core/logger.js";
+import { createSelectionSystem } from "./selection.js";
 import { createContextMenu } from "./contextMenu.js";
+import { logger } from "../engine/core/logger.js";
 
 export function createViewport(container) {
   logger.info("Viewport", "Initializing viewport");
+
   const renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setPixelRatio(window.devicePixelRatio);
   renderer.shadowMap.enabled = true;
@@ -18,9 +20,6 @@ export function createViewport(container) {
   camera.lookAt(0, 0, 0);
 
   const { scene, sceneManager, defaultCube } = createScene();
-
-  createContextMenu(container, sceneManager);
-
   const flyControls = createFlyCamera(camera, container);
 
   function resize() {
@@ -33,13 +32,22 @@ export function createViewport(container) {
   resize();
   new ResizeObserver(resize).observe(container);
 
-  const gizmo = createGizmo(
+  const gizmo = createGizmo(camera, renderer.domElement, scene, flyControls);
+
+  const selection = createSelectionSystem(
     camera,
-    renderer.domElement,
+    renderer,
     scene,
-    defaultCube.mesh,
-    flyControls,
+    sceneManager,
+    gizmo,
   );
+  selection.selectEntity(defaultCube);
+
+  sceneManager.on("onAdd", (entity) => {
+    selection.selectEntity(entity);
+  });
+
+  createContextMenu(container, sceneManager);
 
   function animate() {
     requestAnimationFrame(animate);

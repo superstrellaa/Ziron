@@ -12,6 +12,7 @@ const GEOMETRIES = {
 };
 
 export function createSceneManager(scene) {
+  const listeners = { onAdd: [], onRemove: [] };
   const entities = new Map();
   let nextId = 1;
 
@@ -40,11 +41,12 @@ export function createSceneManager(scene) {
     const entity = { id: nextId++, name, type, mesh };
     entities.set(entity.id, entity);
 
+    listeners.onAdd.forEach((cb) => cb(entity));
+
     logger.info(
       "SceneManager",
       `Added entity "${name}" (type: ${type}, id: ${entity.id})`,
     );
-
     return entity;
   }
 
@@ -58,6 +60,9 @@ export function createSceneManager(scene) {
     entity.mesh.geometry.dispose();
     entity.mesh.material.dispose();
     entities.delete(id);
+
+    listeners.onRemove.forEach((cb) => cb(entity));
+
     logger.info("SceneManager", `Removed entity "${entity.name}" (id: ${id})`);
     return true;
   }
@@ -70,5 +75,9 @@ export function createSceneManager(scene) {
     return entities.get(id) ?? null;
   }
 
-  return { add, remove, getAll, getById };
+  function on(event, callback) {
+    listeners[event]?.push(callback);
+  }
+
+  return { add, remove, getAll, getById, on };
 }
