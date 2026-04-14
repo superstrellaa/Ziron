@@ -12,4 +12,10 @@ export default {
     plane: "Plano",
     cone: "Cono",
   },
+  transform: {
+    translate: "Mover (W)",
+    rotate: "Rotar (E)",
+    scale: "Escalar (R)",
+    handle: "Arrastrar / Ajustar posición",
+  },
 };

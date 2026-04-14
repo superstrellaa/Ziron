@@ -5,7 +5,10 @@ export function createGizmo(camera, domElement, scene, flyControls) {
   gizmo.setMode("translate");
   scene.add(gizmo.getHelper());
 
+  let isDragging = false;
+
   gizmo.addEventListener("dragging-changed", (e) => {
+    isDragging = e.value;
     flyControls.enabled = !e.value;
   });
 
@@ -21,5 +24,5 @@ export function createGizmo(camera, domElement, scene, flyControls) {
 
   detach();
 
-  return { attach, detach, gizmo };
+  return { attach, detach, gizmo, isDragging: () => isDragging };
 }

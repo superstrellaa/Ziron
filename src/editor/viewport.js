@@ -5,6 +5,7 @@ import { createGizmo } from "../engine/gizmos/transformGizmo.js";
 import { createSelectionSystem } from "./selection.js";
 import { createContextMenu } from "./contextMenu.js";
 import { logger } from "../engine/core/logger.js";
+import { createTransformToolbar } from "./transformToolbar.js";
 
 export function createViewport(container) {
   logger.info("Viewport", "Initializing viewport");
@@ -33,6 +34,8 @@ export function createViewport(container) {
   new ResizeObserver(resize).observe(container);
 
   const gizmo = createGizmo(camera, renderer.domElement, scene, flyControls);
+
+  createTransformToolbar(container, gizmo, flyControls); // Se pasa flyControls para desactivar las herramientas al moverse por la escena de mierda
 
   const selection = createSelectionSystem(
     camera,

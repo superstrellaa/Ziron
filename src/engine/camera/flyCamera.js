@@ -135,5 +135,6 @@ export function createFlyCamera(camera, domElement) {
     get enabled() {
       return state.enabled;
     },
+    isFlying: () => state.isFlying,
   };
 }

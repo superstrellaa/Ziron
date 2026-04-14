@@ -157,3 +157,92 @@ html,
 .ctx-has-sub:hover > .ctx-submenu {
   display: block;
 }
+
+/* ── Transform Toolbar ── */
+#transform-toolbar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform: translate(12px, 12px);
+
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  background: #12121f;
+  border: 1px solid #2a2a3e;
+  border-radius: 8px;
+  padding: 6px;
+
+  z-index: 100;
+
+  transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1);
+  user-select: none;
+}
+
+#tt-handle {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 22px;
+  color: #4b5563;
+  cursor: grab;
+  border-radius: 4px;
+  transition:
+    color 0.15s,
+    background 0.15s;
+}
+
+#tt-handle:hover {
+  color: #a78bfa;
+  background: #1e1e35;
+}
+
+#tt-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tt-btn {
+  background: none;
+  border: none;
+  color: #6b7280;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    color 0.15s;
+}
+
+.tt-btn:hover {
+  background: #1e1e35;
+  color: #e5e7eb;
+}
+
+.tt-btn.active {
+  background: #2a1f4e;
+  color: #a78bfa;
+}
+
+/* ── Tooltip ── */
+#tooltip {
+  position: fixed;
+  pointer-events: none;
+  background: #12121f;
+  border: 1px solid #2a2a3e;
+  color: #e5e7eb;
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+  z-index: 2000;
+  opacity: 0;
+  transition: opacity 0.1s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
