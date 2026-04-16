@@ -50,6 +50,16 @@ export function createSceneManager(scene) {
     return entity;
   }
 
+  // para entidades especiales como el sol, que no siguen las geometries esas raras
+  function addRaw(entity) {
+    entities.set(entity.id, entity);
+    listeners.onAdd.forEach((cb) => cb(entity));
+    logger.info(
+      "SceneManager",
+      `Added raw entity "${entity.name}" (id: ${entity.id})`,
+    );
+  }
+
   function remove(id) {
     const entity = entities.get(id);
     if (!entity) {
@@ -79,5 +89,5 @@ export function createSceneManager(scene) {
     listeners[event]?.push(callback);
   }
 
-  return { add, remove, getAll, getById, on };
+  return { add, remove, getAll, getById, on, addRaw };
 }

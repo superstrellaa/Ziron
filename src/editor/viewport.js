@@ -2,12 +2,12 @@ import * as THREE from "three";
 import { createFlyCamera } from "../engine/camera/flyCamera.js";
 import { createScene } from "../engine/core/scene.js";
 import { createGizmo } from "../engine/gizmos/transformGizmo.js";
-import { createSelectionSystem } from "./selection.js";
-import { createContextMenu } from "./contextMenu.js";
+import { createSelectionSystem } from "./scene/selection.js";
+import { createContextMenu } from "./scene/contextMenu.js";
 import { logger } from "../engine/core/logger.js";
-import { createTransformToolbar } from "./transformToolbar.js";
+import { createTransformToolbar } from "./ui/transformToolbar.js";
 
-export function createViewport(container) {
+export async function createViewport(container) {
   logger.info("Viewport", "Initializing viewport");
 
   const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -20,7 +20,8 @@ export function createViewport(container) {
   camera.position.set(5, 4, 7);
   camera.lookAt(0, 0, 0);
 
-  const { scene, sceneManager, defaultCube } = createScene();
+  const { scene, sceneManager, defaultCube, sun } = await createScene(renderer);
+
   const flyControls = createFlyCamera(camera, container);
 
   function resize() {
@@ -34,8 +35,7 @@ export function createViewport(container) {
   new ResizeObserver(resize).observe(container);
 
   const gizmo = createGizmo(camera, renderer.domElement, scene, flyControls);
-
-  createTransformToolbar(container, gizmo, flyControls); // Se pasa flyControls para desactivar las herramientas al moverse por la escena de mierda
+  createTransformToolbar(container, gizmo, flyControls);
 
   const selection = createSelectionSystem(
     camera,
@@ -47,7 +47,7 @@ export function createViewport(container) {
   selection.selectEntity(defaultCube);
 
   sceneManager.on("onAdd", (entity) => {
-    selection.selectEntity(entity);
+    if (entity.type !== "sun") selection.selectEntity(entity);
   });
 
   createContextMenu(container, sceneManager);
@@ -55,6 +55,7 @@ export function createViewport(container) {
   function animate() {
     requestAnimationFrame(animate);
     flyControls.update();
+    sun.update();
     renderer.render(scene, camera);
   }
   animate();

@@ -5,7 +5,8 @@ import {
   Scale3d,
   TextAlignCenter,
 } from "lucide";
-import { t } from "../engine/i18n/i18n.js";
+import { t } from "../../engine/i18n/i18n.js";
+import { logger } from "../../engine/core/logger.js";
 
 const MODES = [
   { key: "translate", icon: "move" },
@@ -58,47 +59,18 @@ export function createTransformToolbar(container, gizmo, flyControls) {
   applyCorner(currentCorner, false);
 
   widget.querySelectorAll(".tt-btn").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      currentMode = btn.dataset.mode;
-      gizmo.gizmo.setMode(currentMode);
-
-      widget
-        .querySelectorAll(".tt-btn")
-        .forEach((b) => b.classList.remove("active"));
-
-      btn.classList.add("active");
-    });
+    btn.addEventListener("click", () => setMode(btn.dataset.mode));
   });
 
   window.addEventListener("keydown", (e) => {
     if (e.repeat) return;
     if (document.activeElement.tagName === "INPUT") return;
-
     if (gizmo.isDragging()) return;
     if (flyControls.isFlying()) return;
 
-    let newMode = null;
-
-    switch (e.key.toLowerCase()) {
-      case "w":
-        newMode = "translate";
-        break;
-      case "e":
-        newMode = "rotate";
-        break;
-      case "r":
-        newMode = "scale";
-        break;
-    }
-
-    if (!newMode) return;
-
-    currentMode = newMode;
-    gizmo.gizmo.setMode(currentMode);
-
-    widget.querySelectorAll(".tt-btn").forEach((b) => {
-      b.classList.toggle("active", b.dataset.mode === currentMode);
-    });
+    const keyMap = { w: "translate", e: "rotate", r: "scale" };
+    const newMode = keyMap[e.key.toLowerCase()];
+    if (newMode) setMode(newMode);
   });
 
   const handle = widget.querySelector("#tt-handle");
@@ -179,6 +151,16 @@ export function createTransformToolbar(container, gizmo, flyControls) {
     }
 
     widget.style.transform = `translate(${x}px, ${y}px)`;
+  }
+
+  function setMode(mode) {
+    if (mode === currentMode) return;
+    currentMode = mode;
+    gizmo.gizmo.setMode(currentMode);
+    widget.querySelectorAll(".tt-btn").forEach((b) => {
+      b.classList.toggle("active", b.dataset.mode === currentMode);
+    });
+    logger.info("TransformToolbar", `Mode changed to "${currentMode}"`);
   }
 
   return widget;

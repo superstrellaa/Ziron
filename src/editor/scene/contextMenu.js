@@ -1,5 +1,5 @@
 import { createIcons, ChevronRight } from "lucide";
-import { t } from "../engine/i18n/i18n.js";
+import { t } from "../../engine/i18n/i18n.js";
 
 function getMenuStructure() {
   return {

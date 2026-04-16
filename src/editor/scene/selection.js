@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { logger } from "../engine/core/logger.js";
+import { logger } from "../../engine/core/logger.js";
 
 export function createSelectionSystem(
   camera,
