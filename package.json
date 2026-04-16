@@ -1,27 +1,21 @@
 {
   "name": "ziron-engine",
-  "version": "1.0.0",
-  "description": "Ziron Engine — 3D game engine",
-  "author": "superstrellaa",
   "private": true,
+  "version": "0.1.0",
   "type": "module",
-  "main": "electron/main.js",
   "scripts": {
     "dev": "vite",
-    "electron": "electron .",
-    "start": "concurrently \"vite\" \"wait-on http://localhost:5173 && electron .\"",
-    "build": "vite build && electron-builder --config electron-builder.config.json",
-    "build:dir": "vite build && electron-builder --dir --config electron-builder.config.json"
+    "build": "vite build",
+    "preview": "vite preview",
+    "tauri": "tauri"
   },
   "devDependencies": {
-    "concurrently": "^9.2.1",
-    "electron": "^41.2.0",
-    "electron-builder": "^25.0.0",
-    "vite": "^8.0.4",
-    "wait-on": "^9.0.4"
+    "@tauri-apps/cli": "^2",
+    "vite": "^5"
   },
   "dependencies": {
+    "@tauri-apps/api": "^2.10.1",
     "lucide": "^1.8.0",
-    "three": "^0.183.2"
+    "three": "^0.184.0"
   }
 }

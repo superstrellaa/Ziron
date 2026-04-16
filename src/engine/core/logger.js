@@ -1,17 +1,44 @@
-function send(level, module, message) {
-  const timestamp = new Date().toISOString();
-  const line = `[${timestamp}] [${level.padEnd(5)}] [${module}] ${message}`;
+import { invoke } from "@tauri-apps/api/core";
 
-  if (level === "ERROR") console.error(line);
-  else if (level === "WARN") console.warn(line);
-  else console.log(line);
-
-  window.ziron?.log(level, module, message);
-}
+let initialized = false;
 
 export const logger = {
-  info: (module, msg) => send("INFO", module, msg),
-  warn: (module, msg) => send("WARN", module, msg),
-  error: (module, msg) => send("ERROR", module, msg),
-  debug: (module, msg) => send("DEBUG", module, msg),
+  async init() {
+    if (initialized) return;
+
+    await invoke("init_logger");
+    initialized = true;
+  },
+
+  info(module, msg) {
+    return invoke("log", {
+      level: "INFO",
+      module,
+      message: msg,
+    });
+  },
+
+  warn(module, msg) {
+    return invoke("log", {
+      level: "WARN",
+      module,
+      message: msg,
+    });
+  },
+
+  error(module, msg) {
+    return invoke("log", {
+      level: "ERROR",
+      module,
+      message: msg,
+    });
+  },
+
+  debug(module, msg) {
+    return invoke("log", {
+      level: "DEBUG",
+      module,
+      message: msg,
+    });
+  },
 };

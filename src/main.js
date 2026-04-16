@@ -1,8 +1,15 @@
-import "./style.css";
+import "./styles.css";
 import { createIcons, Box, Minimize, Maximize, X } from "lucide";
+import { getCurrentWindow } from "@tauri-apps/api/window";
+
+const appWindow = getCurrentWindow();
+
 import { createViewport } from "./editor/viewport.js";
 import { setLocale } from "./engine/i18n/i18n.js";
 import { initTooltipSystem } from "./engine/ui/tooltip.js";
+import { logger } from "./engine/core/logger.js";
+
+await logger.init();
 
 setLocale("en");
 initTooltipSystem();
@@ -29,12 +36,14 @@ createIcons({
 
 document
   .getElementById("btn-minimize")
-  .addEventListener("click", () => window.ziron.minimize());
+  .addEventListener("click", () => appWindow.minimize());
+
 document
   .getElementById("btn-maximize")
-  .addEventListener("click", () => window.ziron.maximize());
+  .addEventListener("click", () => appWindow.toggleMaximize());
+
 document
   .getElementById("btn-close")
-  .addEventListener("click", () => window.ziron.close());
+  .addEventListener("click", () => appWindow.close());
 
 createViewport(document.getElementById("viewport"));
