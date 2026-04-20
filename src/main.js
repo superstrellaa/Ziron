@@ -2,6 +2,7 @@ import "./styles.css";
 import { createIcons, Box, Minimize, Maximize, X } from "lucide";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 
+// Crear la ventana actual antes de cosas
 const appWindow = getCurrentWindow();
 
 import { createViewport } from "./editor/viewport.js";

@@ -1,12 +1,11 @@
 use std::fs::{create_dir_all, OpenOptions};
 use std::io::Write;
-use std::path::PathBuf;
 use std::sync::Mutex;
 
 use chrono::Utc;
 use once_cell::sync::Lazy;
 use rand::{Rng};
-use tauri::Manager;
+use tauri::{ Manager, PhysicalPosition };
 
 // =========================
 // GLOBAL STATE
@@ -80,16 +79,49 @@ fn log(level: String, module: String, message: String) {
 }
 
 // =========================
-// RUN APP
+// CURSOR CONTROL
+// =========================
+
+#[tauri::command]
+fn grab_cursor(window: tauri::Window) {
+    let _ = window.set_cursor_visible(false);
+}
+
+#[tauri::command]
+fn release_cursor(window: tauri::Window) {
+    let _ = window.set_cursor_visible(true);
+}
+
+#[tauri::command]
+fn recenter_cursor(window: tauri::Window) -> Result<(i32, i32), String> {
+    let size = window.inner_size().map_err(|e| e.to_string())?;
+    let cx = (size.width / 2) as i32;
+    let cy = (size.height / 2) as i32;
+    window
+        .set_cursor_position(PhysicalPosition::new(cx, cy))
+        .map_err(|e| e.to_string())?;
+    Ok((cx, cy))
+}
+
+// =========================
+// RUN APPLICATION
 // =========================
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
+        .setup(|app| {
+            let window = app.get_webview_window("main").unwrap();
+            let _ = window.maximize();
+            Ok(())
+        })
         .invoke_handler(tauri::generate_handler![
             log,
-            init_logger
+            init_logger,
+            grab_cursor,
+            release_cursor,
+            recenter_cursor
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

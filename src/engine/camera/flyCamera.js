@@ -1,15 +1,22 @@
+import { invoke } from "@tauri-apps/api/core";
 import * as THREE from "three";
 
 export function createFlyCamera(camera, domElement) {
   const state = {
     isFlying: false,
+    flyStarted: false,
+    mouseDownTime: null,
+    mouseDownX: 0,
+    mouseDownY: 0,
     enabled: true,
     shift: false,
-    lastX: 0,
-    lastY: 0,
     yaw: 0,
     pitch: 0,
     keys: { w: false, a: false, s: false, d: false, q: false, e: false },
+    centerX: 0,
+    centerY: 0,
+    deltaX: 0,
+    deltaY: 0,
   };
 
   const LOOK_SPEED = 0.003;
@@ -20,38 +27,68 @@ export function createFlyCamera(camera, domElement) {
   state.yaw = euler.y;
   state.pitch = euler.x;
 
-  function onMouseDown(e) {
+  async function onMouseDown(e) {
     if (e.button !== 2) return;
     if (!state.enabled) return;
     e.preventDefault();
-    state.isFlying = true;
-    state.lastX = e.clientX;
-    state.lastY = e.clientY;
-    domElement.requestPointerLock();
+    state.mouseDownTime = performance.now();
+    state.mouseDownX = e.clientX;
+    state.mouseDownY = e.clientY;
+    state.flyStarted = false;
   }
 
   function onMouseMove(e) {
-    if (!state.isFlying) return;
-    const dx = e.movementX;
-    const dy = e.movementY;
+    if (e.buttons !== 2) return;
 
-    state.yaw -= dx * LOOK_SPEED;
-    state.pitch -= dy * LOOK_SPEED;
+    if (!state.flyStarted) {
+      const elapsed = performance.now() - (state.mouseDownTime ?? 0);
+      const dx = Math.abs(e.clientX - state.mouseDownX);
+      const dy = Math.abs(e.clientY - state.mouseDownY);
+      const moved = dx > 4 || dy > 4;
+
+      if (elapsed < 150 && !moved) return;
+
+      state.flyStarted = true;
+      state.isFlying = true;
+      state.deltaX = 0;
+      state.deltaY = 0;
+      document.body.classList.add("cursor-hidden");
+      invoke("grab_cursor");
+      invoke("recenter_cursor").then(([cx, cy]) => {
+        state.centerX = cx;
+        state.centerY = cy;
+      });
+      return;
+    }
+
+    if (!state.isFlying) return;
+    state.deltaX += e.screenX - state.centerX;
+    state.deltaY += e.screenY - state.centerY;
   }
 
-  function onMouseUp(e) {
+  async function onMouseUp(e) {
     if (e.button !== 2) return;
+
+    if (!state.flyStarted) {
+      state.mouseDownTime = null;
+      return;
+    }
+
     state.isFlying = false;
+    state.flyStarted = false;
+    state.deltaX = 0;
+    state.deltaY = 0;
     for (const k in state.keys) state.keys[k] = false;
-    document.exitPointerLock();
+    document.body.classList.remove("cursor-hidden");
+    await invoke("release_cursor");
   }
 
   function onWheel(e) {
     e.preventDefault();
     if (!state.enabled) return;
-    const _fwd = new THREE.Vector3();
-    camera.getWorldDirection(_fwd);
-    camera.position.addScaledVector(_fwd, -e.deltaY * 0.01);
+    const fwd = new THREE.Vector3();
+    camera.getWorldDirection(fwd);
+    camera.position.addScaledVector(fwd, -e.deltaY * 0.01);
   }
 
   function onContextMenu(e) {
@@ -93,8 +130,19 @@ export function createFlyCamera(camera, domElement) {
   const _up = new THREE.Vector3();
   const _move = new THREE.Vector3();
 
-  function update() {
-    const q = new THREE.Quaternion();
+  async function update() {
+    if (state.isFlying) {
+      state.yaw -= state.deltaX * LOOK_SPEED;
+      state.pitch -= state.deltaY * LOOK_SPEED;
+      state.pitch = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, state.pitch));
+      state.deltaX = 0;
+      state.deltaY = 0;
+
+      const [cx, cy] = await invoke("recenter_cursor");
+      state.centerX = cx;
+      state.centerY = cy;
+    }
+
     const qYaw = new THREE.Quaternion().setFromAxisAngle(
       new THREE.Vector3(0, 1, 0),
       state.yaw,
@@ -103,19 +151,16 @@ export function createFlyCamera(camera, domElement) {
       new THREE.Vector3(1, 0, 0),
       state.pitch,
     );
-    q.multiplyQuaternions(qYaw, qPitch);
-    camera.quaternion.copy(q);
+    camera.quaternion.multiplyQuaternions(qYaw, qPitch);
 
     const { w, a, s, d, q: qKey, e } = state.keys;
     if (w || a || s || d || qKey || e) {
       camera.getWorldDirection(_forward);
       _right.setFromMatrixColumn(camera.matrixWorld, 0);
       _up.setFromMatrixColumn(camera.matrixWorld, 1);
-
       _move.set(0, 0, 0);
 
       const speed = state.shift ? FLY_SPEED_FAST : FLY_SPEED;
-
       if (w) _move.addScaledVector(_forward, speed);
       if (s) _move.addScaledVector(_forward, -speed);
       if (d) _move.addScaledVector(_right, speed);

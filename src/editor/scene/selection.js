@@ -7,6 +7,7 @@ export function createSelectionSystem(
   scene,
   sceneManager,
   gizmo,
+  flyControls,
 ) {
   const raycaster = new THREE.Raycaster();
   const mouse = new THREE.Vector2();
@@ -47,6 +48,8 @@ export function createSelectionSystem(
 
   domElement.addEventListener("mouseup", (e) => {
     if (e.button !== 0) return;
+
+    if (flyControls?.isFlying()) return;
 
     if (gizmo.gizmo.dragging) return;
 

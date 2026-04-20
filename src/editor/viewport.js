@@ -37,12 +37,14 @@ export async function createViewport(container) {
   const gizmo = createGizmo(camera, renderer.domElement, scene, flyControls);
   createTransformToolbar(container, gizmo, flyControls);
 
+  //NOTa: se pasa fly controls para desactivar la meirda esa luegop
   const selection = createSelectionSystem(
     camera,
     renderer,
     scene,
     sceneManager,
     gizmo,
+    flyControls,
   );
   selection.selectEntity(defaultCube);
 
