@@ -1,5 +1,6 @@
 import { createIcons, ChevronRight } from "lucide";
 import { t } from "../../engine/i18n/i18n.js";
+import { CreateCommand } from "../../engine/history/commands.js";
 
 function getMenuStructure() {
   return {
@@ -18,7 +19,7 @@ function getMenuStructure() {
 
 let activeMenu = null;
 
-export function createContextMenu(container, sceneManager) {
+export function createContextMenu(container, sceneManager, history) {
   let mouseDownTime = 0;
   let mouseDownX = 0;
   let mouseDownY = 0;
@@ -42,7 +43,7 @@ export function createContextMenu(container, sceneManager) {
       dx < DRAG_THRESHOLD_PX &&
       dy < DRAG_THRESHOLD_PX
     ) {
-      showMenu(e.clientX, e.clientY, sceneManager);
+      showMenu(e.clientX, e.clientY, sceneManager, history);
     }
   });
 
@@ -61,10 +62,10 @@ function closeMenu() {
   activeMenu = null;
 }
 
-function showMenu(x, y, sceneManager) {
+function showMenu(x, y, sceneManager, history) {
   closeMenu();
 
-  const menu = buildMenu(getMenuStructure(), sceneManager);
+  const menu = buildMenu(getMenuStructure(), sceneManager, history);
   menu.style.left = x + "px";
   menu.style.top = y + "px";
   document.body.appendChild(menu);
@@ -81,7 +82,7 @@ function showMenu(x, y, sceneManager) {
   });
 }
 
-function buildMenu(structure, sceneManager) {
+function buildMenu(structure, sceneManager, history) {
   const ul = document.createElement("ul");
   ul.className = "ctx-menu";
 
@@ -93,7 +94,7 @@ function buildMenu(structure, sceneManager) {
       li.innerHTML = `<span class="ctx-label">${label}</span><i data-lucide="chevron-right"></i>`;
       li.classList.add("ctx-has-sub");
 
-      const sub = buildMenu(value, sceneManager);
+      const sub = buildMenu(value, sceneManager, history);
       sub.classList.add("ctx-submenu");
       li.appendChild(sub);
 
@@ -124,7 +125,9 @@ function buildMenu(structure, sceneManager) {
     } else {
       li.innerHTML = `<span class="ctx-label">${label}</span>`;
       li.addEventListener("click", () => {
-        sceneManager.add(value);
+        const cmd = CreateCommand(sceneManager, value, { name: value });
+        cmd.execute();
+        history.push(cmd);
         closeMenu();
       });
     }
