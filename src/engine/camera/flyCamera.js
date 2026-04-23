@@ -92,7 +92,7 @@ export function createFlyCamera(camera, domElement) {
   }
 
   function onContextMenu(e) {
-    e.preventDefault();
+    if (state.flyStarted) e.preventDefault();
   }
 
   function onKeyDown(e) {
@@ -181,5 +181,6 @@ export function createFlyCamera(camera, domElement) {
       return state.enabled;
     },
     isFlying: () => state.isFlying,
+    didFly: () => state.flyStarted,
   };
 }

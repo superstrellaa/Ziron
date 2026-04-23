@@ -33,7 +33,14 @@ export async function createViewport(container) {
   });
 
   const history = setupHistory(gizmo.gizmo);
-  createContextMenu(container, sceneManager, history);
+  createContextMenu(
+    container,
+    sceneManager,
+    history,
+    selection,
+    camera,
+    flyControls,
+  );
 
   function animate() {
     requestAnimationFrame(animate);

@@ -4,6 +4,7 @@ export default {
   },
   contextMenu: {
     add: "Añadir",
+    delete: "Eliminar",
     objects3d: "Objeto 3D",
     cube: "Cubo",
     sphere: "Esfera",

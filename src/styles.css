@@ -112,7 +112,6 @@ body.cursor-hidden * {
 
 /* ── Context Menu ── */
 .ctx-menu {
-  position: fixed;
   list-style: none;
   background: #12121f;
   border: 1px solid #2a2a3e;
@@ -120,7 +119,6 @@ body.cursor-hidden * {
   padding: 4px;
   min-width: 160px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
-  z-index: 1000;
   font-size: 12px;
 }
 
@@ -146,8 +144,27 @@ body.cursor-hidden * {
   stroke: #a78bfa;
 }
 
+.ctx-menu-wrapper {
+  position: fixed;
+  z-index: 1000;
+}
+
 .ctx-label {
   flex: 1;
+}
+
+.ctx-separator {
+  height: 1px;
+  background: var(--color-border, #2a2a4e);
+  margin: 4px 0;
+}
+
+.ctx-item--danger .ctx-label {
+  color: #f87171;
+}
+
+.ctx-item--danger:hover {
+  background: rgba(248, 113, 113, 0.1);
 }
 
 /* Submenú */
