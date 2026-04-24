@@ -4,9 +4,10 @@ import {
   MoveCommand,
   RotateCommand,
   ScaleCommand,
+  DuplicateCommand,
 } from "../../engine/history/commands.js";
 
-export function setupHistory(tc) {
+export function setupHistory(tc, selection, sceneManager) {
   const history = createHistoryManager();
 
   window.addEventListener("keydown", (e) => {
@@ -18,6 +19,14 @@ export function setupHistory(tc) {
     if (e.key === "y") {
       e.preventDefault();
       history.redo();
+    }
+    if (e.key === "d") {
+      e.preventDefault();
+      const entity = selection.getSelected();
+      if (!entity || entity.type === "sun") return;
+      const cmd = DuplicateCommand(sceneManager, entity);
+      cmd.execute();
+      history.push(cmd);
     }
   });
 

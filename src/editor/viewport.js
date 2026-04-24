@@ -32,7 +32,7 @@ export async function createViewport(container) {
     if (entity.type !== "sun") selection.selectEntity(entity);
   });
 
-  const history = setupHistory(gizmo.gizmo);
+  const history = setupHistory(gizmo.gizmo, selection, sceneManager);
   createContextMenu(
     container,
     sceneManager,

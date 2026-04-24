@@ -51,6 +51,28 @@ export function CreateCommand(sceneManager, type, options, onCreated) {
   };
 }
 
+export function DuplicateCommand(sceneManager, sourceEntity, onCreated) {
+  let entity = null;
+  return {
+    type: EventType.CreateObject,
+    execute() {
+      entity = sceneManager.add(sourceEntity.type, {
+        name: sourceEntity.name + " (copy)",
+        color: sourceEntity.mesh.material.color.getHex(),
+        position: sourceEntity.mesh.position
+          .clone()
+          .add(new THREE.Vector3(1, 0, 0)),
+      });
+      entity.mesh.quaternion.copy(sourceEntity.mesh.quaternion);
+      entity.mesh.scale.copy(sourceEntity.mesh.scale);
+      onCreated?.(entity);
+    },
+    undo() {
+      if (entity) sceneManager.remove(entity.id);
+    },
+  };
+}
+
 export function DeleteCommand(sceneManager, entity) {
   const snapshot = {
     type: entity.type,
