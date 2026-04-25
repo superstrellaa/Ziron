@@ -75,16 +75,6 @@ export function createContextMenu(
     showMenu(e.clientX, e.clientY, sceneManager, history, selection, hitEntity);
   });
 
-  window.addEventListener("keydown", (e) => {
-    if (e.key !== "Delete") return;
-    const entity = selection.getSelected();
-    if (!entity || entity.type === "sun") return;
-    const cmd = DeleteCommand(sceneManager, entity);
-    cmd.execute();
-    history.push(cmd);
-    selection.deselect();
-  });
-
   window.addEventListener("mousedown", (e) => {
     if (activeMenu && !activeMenu.contains(e.target)) closeMenu();
   });

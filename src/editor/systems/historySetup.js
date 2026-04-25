@@ -5,12 +5,36 @@ import {
   RotateCommand,
   ScaleCommand,
   DuplicateCommand,
+  MultiDeleteCommand,
+  MultiDuplicateCommand,
+  DeleteCommand,
+  MultiTransformCommand,
 } from "../../engine/history/commands.js";
 
 export function setupHistory(tc, selection, sceneManager) {
   const history = createHistoryManager();
 
+  let _multiSnapshotBefore = null;
+
   window.addEventListener("keydown", (e) => {
+    if (e.key === "Delete") {
+      const multiSelected = selection.getMultiSelected();
+      if (multiSelected.length > 0) {
+        const cmd = MultiDeleteCommand(sceneManager, multiSelected);
+        cmd.execute();
+        history.push(cmd);
+        selection.deselect();
+        return;
+      }
+      const entity = selection.getSelected();
+      if (!entity || entity.type === "sun") return;
+      const cmd = DeleteCommand(sceneManager, entity);
+      cmd.execute();
+      history.push(cmd);
+      selection.deselect();
+      return;
+    }
+
     if (!e.ctrlKey) return;
     if (e.key === "z") {
       e.preventDefault();
@@ -20,8 +44,24 @@ export function setupHistory(tc, selection, sceneManager) {
       e.preventDefault();
       history.redo();
     }
+
     if (e.key === "d") {
       e.preventDefault();
+      const multiSelected = selection.getMultiSelected();
+
+      if (multiSelected.length > 0) {
+        const cmd = MultiDuplicateCommand(
+          sceneManager,
+          multiSelected,
+          (created) => {
+            selection.selectMultiple(created);
+          },
+        );
+        cmd.execute();
+        history.push(cmd);
+        return;
+      }
+
       const entity = selection.getSelected();
       if (!entity || entity.type === "sun") return;
       const cmd = DuplicateCommand(sceneManager, entity);
@@ -40,11 +80,44 @@ export function setupHistory(tc, selection, sceneManager) {
     _posBefore.copy(mesh.position);
     _quatBefore.copy(mesh.quaternion);
     _scaleBefore.copy(mesh.scale);
+
+    const multiSelected = selection.getMultiSelected();
+    if (multiSelected.length > 1) {
+      _multiSnapshotBefore = multiSelected.map((e) => ({
+        entity: e,
+        position: e.mesh.position.clone(),
+        quaternion: e.mesh.quaternion.clone(),
+        scale: e.mesh.scale.clone(),
+      }));
+    } else {
+      _multiSnapshotBefore = null;
+    }
   });
 
   tc.addEventListener("mouseUp", () => {
     const mesh = tc.object;
     if (!mesh) return;
+
+    const multiSelected = selection.getMultiSelected();
+    if (multiSelected.length > 1 && _multiSnapshotBefore) {
+      const before = _multiSnapshotBefore;
+      const after = multiSelected.map((e) => ({
+        entity: e,
+        position: e.mesh.position.clone(),
+        quaternion: e.mesh.quaternion.clone(),
+        scale: e.mesh.scale.clone(),
+      }));
+      const changed = before.some(
+        (b, i) =>
+          !b.position.equals(after[i].position) ||
+          !b.quaternion.equals(after[i].quaternion) ||
+          !b.scale.equals(after[i].scale),
+      );
+      if (changed)
+        history.push(MultiTransformCommand(before, after, selection));
+      return;
+    }
+
     const mode = tc.getMode();
     if (mode === "translate") {
       const from = _posBefore.clone(),

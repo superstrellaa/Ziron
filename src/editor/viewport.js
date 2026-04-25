@@ -1,7 +1,7 @@
 import { createScene } from "../engine/core/scene.js";
 import { createFlyCamera } from "../engine/camera/flyCamera.js";
 import { createGizmo } from "../engine/gizmos/transformGizmo.js";
-import { createSelectionSystem } from "./scene/selection.js";
+import { createSelectionSystem } from "./scene/selection/selection.js";
 import { createContextMenu } from "./scene/contextMenu.js";
 import { createTransformToolbar } from "./ui/transformToolbar.js";
 import { createRenderer } from "./systems/rendererSetup.js";
