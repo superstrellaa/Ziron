@@ -47,4 +47,12 @@ document
   .getElementById("btn-close")
   .addEventListener("click", () => appWindow.close());
 
+// ==== Bloquear teclas de navegador tipicas de mierda ====
+const BLOCKED = new Set(["f", "p", "g"]);
+document.addEventListener("keydown", (e) => {
+  if ((e.ctrlKey || e.metaKey) && BLOCKED.has(e.key.toLowerCase()))
+    e.preventDefault();
+});
+// =========================================================
+
 createViewport(document.getElementById("viewport"));
