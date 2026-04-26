@@ -2,6 +2,8 @@ import "./styles.css";
 import { createIcons, Box, Minimize, Maximize, X } from "lucide";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { onKeybind } from "./editor/systems/keybinds";
+import { loadConfig, get } from "./editor/systems/config.js";
+import { applyConfigKeybinds } from "./editor/systems/keybinds.js";
 
 // Crear la ventana actual antes de cosas
 const appWindow = getCurrentWindow();
@@ -12,8 +14,10 @@ import { initTooltipSystem } from "./engine/ui/tooltip.js";
 import { logger } from "./engine/core/logger.js";
 
 await logger.init();
+await loadConfig();
+applyConfigKeybinds();
 
-setLocale("en");
+setLocale(get("editor.locale") ?? "en");
 initTooltipSystem();
 
 document.querySelector("#app").innerHTML = `

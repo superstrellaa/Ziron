@@ -5,6 +5,9 @@
  * Cada acción tiene un nombre semántico y una definición de tecla.
  * En el futuro, este objeto puede ser reemplazado por uno cargado desde config.
  */
+
+import { getConfig } from "./config.js";
+
 export const KEYBINDS = {
   // ── Herramientas de transformación ──
   TOOL_TRANSLATE: { key: "w", ctrl: false, shift: false, alt: false },
@@ -66,4 +69,16 @@ export function onKeybind(actions, handler, target = window) {
 
   target.addEventListener("keydown", onKeyDown);
   return () => target.removeEventListener("keydown", onKeyDown);
+}
+
+/**
+ * Aplica los keybinds guardados en la configuración.
+ */
+export function applyConfigKeybinds() {
+  const config = getConfig();
+  const saved = config?.keybinds;
+  if (!saved) return;
+  for (const action of Object.keys(KEYBINDS)) {
+    if (saved[action]) KEYBINDS[action] = saved[action];
+  }
 }

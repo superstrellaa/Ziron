@@ -1,5 +1,6 @@
 mod logger;
 mod cursor;
+mod config;
 
 use tauri::Manager;
 
@@ -18,6 +19,8 @@ pub fn run() {
             cursor::grab_cursor,
             cursor::release_cursor,
             cursor::recenter_cursor,
+            config::load_config,
+            config::save_config
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
