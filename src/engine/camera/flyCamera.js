@@ -8,6 +8,7 @@ export function createFlyCamera(camera, domElement) {
     mouseDownTime: null,
     mouseDownX: 0,
     mouseDownY: 0,
+    mouseDownValid: false,
     enabled: true,
     shift: false,
     yaw: 0,
@@ -30,7 +31,18 @@ export function createFlyCamera(camera, domElement) {
   async function onMouseDown(e) {
     if (e.button !== 2) return;
     if (!state.enabled) return;
+    const rect = domElement.getBoundingClientRect();
+    const inside =
+      e.clientX >= rect.left &&
+      e.clientX <= rect.right &&
+      e.clientY >= rect.top &&
+      e.clientY <= rect.bottom;
+    if (!inside) {
+      state.mouseDownValid = false;
+      return;
+    }
     e.preventDefault();
+    state.mouseDownValid = true;
     state.mouseDownTime = performance.now();
     state.mouseDownX = e.clientX;
     state.mouseDownY = e.clientY;
@@ -39,6 +51,7 @@ export function createFlyCamera(camera, domElement) {
 
   function onMouseMove(e) {
     if (e.buttons !== 2) return;
+    if (!state.mouseDownValid) return;
 
     if (!state.flyStarted) {
       const elapsed = performance.now() - (state.mouseDownTime ?? 0);
@@ -68,6 +81,7 @@ export function createFlyCamera(camera, domElement) {
 
   async function onMouseUp(e) {
     if (e.button !== 2) return;
+    state.mouseDownValid = false;
 
     if (!state.flyStarted) {
       state.mouseDownTime = null;
@@ -117,7 +131,7 @@ export function createFlyCamera(camera, domElement) {
     if (k in state.keys) state.keys[k] = false;
   }
 
-  domElement.addEventListener("mousedown", onMouseDown);
+  window.addEventListener("mousedown", onMouseDown);
   window.addEventListener("mousemove", onMouseMove);
   window.addEventListener("mouseup", onMouseUp);
   domElement.addEventListener("wheel", onWheel, { passive: false });

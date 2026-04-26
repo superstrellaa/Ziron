@@ -27,7 +27,9 @@ document.querySelector("#app").innerHTML = `
       <button id="btn-close"><i data-lucide="x"></i></button>
     </div>
   </div>
-  <div id="viewport"></div>
+  <div id="workspace">
+    <div id="viewport"></div>
+  </div>
 `;
 
 createIcons({
@@ -55,4 +57,4 @@ document.addEventListener("keydown", (e) => {
 });
 // =========================================================
 
-createViewport(document.getElementById("viewport"));
+createViewport(document.getElementById("workspace"));

@@ -82,6 +82,12 @@ export function createContextMenu(
   window.addEventListener("keydown", (e) => {
     if (e.key === "Escape") closeMenu();
   });
+
+  return {
+    showAt(x, y, hitEntity = null) {
+      showMenu(x, y, sceneManager, history, selection, hitEntity);
+    },
+  };
 }
 
 function closeMenu() {

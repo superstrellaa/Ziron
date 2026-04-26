@@ -89,5 +89,14 @@ export function createSceneManager(scene) {
     listeners[event]?.push(callback);
   }
 
-  return { add, remove, getAll, getById, on, addRaw };
+  function rename(id, newName) {
+    const entity = entities.get(id);
+    if (!entity) return false;
+    const old = entity.name;
+    entity.name = newName;
+    logger.info("SceneManager", `Renamed "${old}" → "${newName}" (id: ${id})`);
+    return true;
+  }
+
+  return { add, remove, getAll, getById, on, addRaw, rename };
 }

@@ -47,6 +47,7 @@ pub fn init_logger(app: tauri::AppHandle) -> Result<String, String> {
 
     let msg = format!("Logger started — RUN_ID: {}", *RUN_ID);
     println!("{}", msg);
+    log("INFO".to_string(), "logger".to_string(), msg.clone());
     Ok(msg)
 }
 

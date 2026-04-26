@@ -19,4 +19,7 @@ export default {
     scale: "Escalar (R)",
     handle: "Arrastrar / Ajustar posición",
   },
+  hierarchy: {
+    header: "Escena",
+  },
 };

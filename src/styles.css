@@ -268,3 +268,110 @@ body.cursor-hidden * {
   transition: opacity 0.1s ease;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
 }
+
+/* ── Layout principal ── */
+#workspace {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+/* ── Hierarchy panel ── */
+#hierarchy {
+  width: 220px;
+  min-width: 160px;
+  max-width: 320px;
+  background: #0e0e1a;
+  border-right: 1px solid #2a2a3e;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+#hierarchy-header {
+  height: 28px;
+  padding: 0 10px;
+  display: flex;
+  align-items: center;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: #4b5563;
+  border-bottom: 1px solid #1e1e30;
+  flex-shrink: 0;
+}
+
+#hierarchy-list {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 4px 0;
+}
+
+#hierarchy-list::-webkit-scrollbar {
+  width: 4px;
+}
+#hierarchy-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+#hierarchy-list::-webkit-scrollbar-thumb {
+  background: #2a2a3e;
+  border-radius: 2px;
+}
+
+.h-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  font-size: 12px;
+  color: #9ca3af;
+  cursor: pointer;
+  border-radius: 0;
+  transition:
+    background 0.1s,
+    color 0.1s;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.h-row:hover {
+  background: #1a1a2e;
+  color: #e5e7eb;
+}
+
+.h-row.h-selected {
+  background: #1e1535;
+  color: #a78bfa;
+}
+
+.h-row.h-selected .h-icon {
+  color: #7c5cbf;
+}
+
+.h-icon {
+  font-size: 10px;
+  color: #374151;
+  flex-shrink: 0;
+}
+
+.h-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.h-rename-input {
+  background: #0a0a14;
+  border: 1px solid #7c5cbf;
+  border-radius: 3px;
+  color: #e5e7eb;
+  font-size: 12px;
+  font-family: system-ui, sans-serif;
+  padding: 0 4px;
+  height: 20px;
+  width: 100%;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(124, 92, 191, 0.25);
+}

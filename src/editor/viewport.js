@@ -7,16 +7,17 @@ import { createTransformToolbar } from "./ui/transformToolbar.js";
 import { createRenderer } from "./systems/rendererSetup.js";
 import { setupHistory } from "./systems/historySetup.js";
 import { logger } from "../engine/core/logger.js";
+import { createHierarchy } from "./ui/hierarchy.js";
 
 export async function createViewport(container) {
-  logger.info("Viewport", "Initializing viewport");
+  const viewportEl = container.querySelector("#viewport");
 
-  const { renderer, camera } = createRenderer(container);
+  const { renderer, camera } = createRenderer(viewportEl);
   const { scene, sceneManager, defaultCube, sun } = await createScene(renderer);
-  const flyControls = createFlyCamera(camera, container);
+  const flyControls = createFlyCamera(camera, viewportEl);
   const gizmo = createGizmo(camera, renderer.domElement, scene, flyControls);
 
-  createTransformToolbar(container, gizmo, flyControls);
+  createTransformToolbar(viewportEl, gizmo, flyControls);
 
   const selection = createSelectionSystem(
     camera,
@@ -26,6 +27,10 @@ export async function createViewport(container) {
     gizmo,
     flyControls,
   );
+  const hierarchy = createHierarchy(container, sceneManager, selection);
+  container.insertBefore(container.querySelector("#hierarchy"), viewportEl);
+
+  selection.onChange((single, multi) => hierarchy.setSelected(single, multi));
   selection.selectEntity(defaultCube);
 
   sceneManager.on("onAdd", (entity) => {
@@ -33,14 +38,16 @@ export async function createViewport(container) {
   });
 
   const history = setupHistory(gizmo.gizmo, selection, sceneManager);
-  createContextMenu(
-    container,
+
+  const ctxMenu = createContextMenu(
+    viewportEl,
     sceneManager,
     history,
     selection,
     camera,
     flyControls,
   );
+  hierarchy.setContextMenu(ctxMenu);
 
   function animate() {
     requestAnimationFrame(animate);

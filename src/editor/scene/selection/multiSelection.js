@@ -20,7 +20,7 @@ export function createMultiSelection(
   let _offsets = [];
 
   function getSelected() {
-    return selected;
+    return selected ?? [];
   }
 
   function setSelected(entities) {

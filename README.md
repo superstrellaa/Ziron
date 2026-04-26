@@ -95,16 +95,6 @@ npm run tauri build
 
 ---
 
-## Roadmap (This can be outdated)
-
-- [ ] Entity inspector panel (position, rotation, scale inputs)
-- [ ] Asset drag-and-drop (glTF / OBJ)
-- [ ] Scene save / load (JSON)
-- [ ] Scripting layer (runtime)
-- [ ] Physics integration
-
----
-
 ## License
 
-MIT
+[MIT](LICENSE)

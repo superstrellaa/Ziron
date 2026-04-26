@@ -18,6 +18,7 @@ export function createSelectionSystem(
 
   let selected = null;
   let mouseDownInCanvas = false;
+  const changeListeners = [];
   const domElement = renderer.domElement;
 
   const selBox = createSelectionBox(domElement.parentElement);
@@ -33,11 +34,18 @@ export function createSelectionSystem(
     multi.syncToMeshes();
   });
 
+  function notifyChange() {
+    const single = selected;
+    const multi_ = multi.getSelected();
+    changeListeners.forEach((cb) => cb(single, multi_));
+  }
+
   function selectEntity(entity) {
     multi.clear();
     selected = entity;
     gizmo.attach(entity.mesh);
     logger.info("Selection", `Selected "${entity.name}" (id: ${entity.id})`);
+    notifyChange();
   }
 
   function deselect() {
@@ -46,6 +54,7 @@ export function createSelectionSystem(
     selected = null;
     multi.clear();
     gizmo.detach();
+    notifyChange();
   }
 
   function getSelected() {
@@ -121,6 +130,7 @@ export function createSelectionSystem(
         selected = null;
         multi.setSelected(hits);
         logger.info("Selection", `Multi-selected ${hits.length} entities`);
+        notifyChange();
       }
       return;
     }
@@ -161,6 +171,7 @@ export function createSelectionSystem(
   function selectMultiple(entities) {
     selected = null;
     multi.setSelected(entities);
+    notifyChange();
   }
 
   function refreshMultiPivot() {
@@ -174,5 +185,8 @@ export function createSelectionSystem(
     getMultiSelected,
     selectMultiple,
     refreshMultiPivot,
+    onChange(cb) {
+      changeListeners.push(cb);
+    },
   };
 }

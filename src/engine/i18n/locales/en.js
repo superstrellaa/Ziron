@@ -19,4 +19,7 @@ export default {
     scale: "Scale (R)",
     handle: "Drag / Snap position",
   },
+  hierarchy: {
+    header: "Scene",
+  },
 };
