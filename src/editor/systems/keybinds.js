@@ -19,6 +19,8 @@ export const KEYBINDS = {
   DELETE: { key: "Delete", ctrl: false, shift: false, alt: false },
   DUPLICATE: { key: "d", ctrl: true, shift: false, alt: false },
   RENAME: { key: "F2", ctrl: false, shift: false, alt: false },
+  COPY: { key: "c", ctrl: true, shift: false, alt: false },
+  PASTE: { key: "v", ctrl: true, shift: false, alt: false },
 
   // ── Navegador (bloqueadas) ──
   _BLOCK_FIND: { key: "f", ctrl: true, shift: false, alt: false },

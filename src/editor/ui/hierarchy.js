@@ -112,6 +112,16 @@ export function createHierarchy(container, sceneManager, selection) {
       startRename([...selectedIds][0]);
     });
 
+    window.addEventListener("ziron:rename", (e) => {
+      const id = e.detail?.id;
+      if (!id) return;
+      if (!selectedIds.has(id)) {
+        const entity = sceneManager.getById(id);
+        if (entity) selection.selectEntity(entity);
+      }
+      startRename(id);
+    });
+
     input.addEventListener("blur", () => commitRename());
   }
 

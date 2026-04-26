@@ -5,6 +5,10 @@ export default {
   contextMenu: {
     add: "Add",
     delete: "Delete",
+    duplicate: "Duplicate",
+    rename: "Rename",
+    copy: "Copy",
+    paste: "Paste",
     objects3d: "3D Object",
     cube: "Cube",
     sphere: "Sphere",

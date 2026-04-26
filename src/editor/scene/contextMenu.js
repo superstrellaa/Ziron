@@ -1,7 +1,11 @@
 import * as THREE from "three";
 import { createIcons, ChevronRight } from "lucide";
 import { t } from "../../engine/i18n/i18n.js";
-import { CreateCommand, DeleteCommand } from "../../engine/history/commands.js";
+import {
+  CreateCommand,
+  DeleteCommand,
+  DuplicateCommand,
+} from "../../engine/history/commands.js";
 
 function getMenuStructure() {
   return {
@@ -18,6 +22,15 @@ function getMenuStructure() {
   };
 }
 
+let _clipboard = null;
+
+export function getClipboard() {
+  return _clipboard;
+}
+export function setClipboard(entity) {
+  _clipboard = entity;
+}
+
 let activeMenu = null;
 
 export function createContextMenu(
@@ -28,13 +41,11 @@ export function createContextMenu(
   camera,
   flyControls,
 ) {
-  let mouseDownX = 0;
-  let mouseDownY = 0;
-  let mouseDownTime = 0;
+  let mouseDownX = 0,
+    mouseDownY = 0,
+    mouseDownTime = 0;
 
-  window.addEventListener("contextmenu", (e) => {
-    e.preventDefault();
-  });
+  window.addEventListener("contextmenu", (e) => e.preventDefault());
 
   container.addEventListener("mousedown", (e) => {
     if (e.button !== 2) return;
@@ -45,7 +56,6 @@ export function createContextMenu(
 
   container.addEventListener("mouseup", (e) => {
     if (e.button !== 2) return;
-
     if (flyControls.didFly()) return;
 
     const elapsed = performance.now() - mouseDownTime;
@@ -67,9 +77,8 @@ export function createContextMenu(
     if (hits.length > 0) {
       hitEntity =
         sceneManager.getAll().find((en) => en.mesh === hits[0].object) ?? null;
-      if (hitEntity && hitEntity.type !== "sun") {
+      if (hitEntity && hitEntity.type !== "sun")
         selection.selectEntity(hitEntity);
-      }
     }
 
     showMenu(e.clientX, e.clientY, sceneManager, history, selection, hitEntity);
@@ -106,22 +115,59 @@ function showMenu(x, y, sceneManager, history, selection, hitEntity) {
     const ul = document.createElement("ul");
     ul.className = "ctx-menu";
 
-    const li = document.createElement("li");
-    li.className = "ctx-item ctx-item--danger";
-    li.innerHTML = `<span class="ctx-label">${t("contextMenu.delete")}</span>`;
-    li.addEventListener("click", () => {
-      const cmd = DeleteCommand(sceneManager, hitEntity);
-      cmd.execute();
-      history.push(cmd);
-      selection.deselect();
+    const liCopy = makeItem(t("contextMenu.copy"), () => {
+      _clipboard = hitEntity;
       closeMenu();
     });
-    ul.appendChild(li);
-    menu.appendChild(ul);
+    ul.appendChild(liCopy);
 
-    const sep = document.createElement("div");
-    sep.className = "ctx-separator";
-    menu.appendChild(sep);
+    const liDup = makeItem(t("contextMenu.duplicate"), () => {
+      const cmd = DuplicateCommand(sceneManager, hitEntity);
+      cmd.execute();
+      history.push(cmd);
+      closeMenu();
+    });
+    ul.appendChild(liDup);
+
+    const liRename = makeItem(t("contextMenu.rename"), () => {
+      closeMenu();
+      window.dispatchEvent(
+        new CustomEvent("ziron:rename", { detail: { id: hitEntity.id } }),
+      );
+    });
+    ul.appendChild(liRename);
+
+    ul.appendChild(makeSeparator());
+
+    const liDelete = makeItem(
+      t("contextMenu.delete"),
+      () => {
+        const cmd = DeleteCommand(sceneManager, hitEntity);
+        cmd.execute();
+        history.push(cmd);
+        selection.deselect();
+        closeMenu();
+      },
+      true,
+    );
+    ul.appendChild(liDelete);
+
+    menu.appendChild(ul);
+    menu.appendChild(makeSeparator());
+  }
+
+  if (_clipboard) {
+    const ulPaste = document.createElement("ul");
+    ulPaste.className = "ctx-menu";
+    const liPaste = makeItem(t("contextMenu.paste"), () => {
+      const cmd = DuplicateCommand(sceneManager, _clipboard);
+      cmd.execute();
+      history.push(cmd);
+      closeMenu();
+    });
+    ulPaste.appendChild(liPaste);
+    menu.appendChild(ulPaste);
+    menu.appendChild(makeSeparator());
   }
 
   const addMenu = buildMenu(getMenuStructure(), sceneManager, history);
@@ -141,6 +187,20 @@ function showMenu(x, y, sceneManager, history, selection, hitEntity) {
     attrs: { width: 12, height: 12, stroke: "#6b7280" },
     root: menu,
   });
+}
+
+function makeItem(label, onClick, danger = false) {
+  const li = document.createElement("li");
+  li.className = "ctx-item" + (danger ? " ctx-item--danger" : "");
+  li.innerHTML = `<span class="ctx-label">${label}</span>`;
+  li.addEventListener("click", onClick);
+  return li;
+}
+
+function makeSeparator() {
+  const sep = document.createElement("div");
+  sep.className = "ctx-separator";
+  return sep;
 }
 
 function buildMenu(structure, sceneManager, history) {

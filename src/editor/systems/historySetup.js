@@ -11,62 +11,82 @@ import {
   MultiTransformCommand,
 } from "../../engine/history/commands.js";
 import { onKeybind } from "./keybinds.js";
+import { getClipboard, setClipboard } from "../scene/contextMenu.js";
 
 export function setupHistory(tc, selection, sceneManager) {
   const history = createHistoryManager();
 
   let _multiSnapshotBefore = null;
 
-  onKeybind(["DELETE", "UNDO", "REDO", "DUPLICATE"], (e, action) => {
-    if (action === "UNDO") {
-      e.preventDefault();
-      history.undo();
-      return;
-    }
-    if (action === "REDO") {
-      e.preventDefault();
-      history.redo();
-      return;
-    }
+  onKeybind(
+    ["DELETE", "UNDO", "REDO", "DUPLICATE", "COPY", "PASTE"],
+    (e, action) => {
+      if (action === "UNDO") {
+        e.preventDefault();
+        history.undo();
+        return;
+      }
+      if (action === "REDO") {
+        e.preventDefault();
+        history.redo();
+        return;
+      }
 
-    if (action === "DELETE") {
-      const multiSelected = selection.getMultiSelected();
-      if (multiSelected.length > 0) {
-        const cmd = MultiDeleteCommand(sceneManager, multiSelected);
+      if (action === "DELETE") {
+        const multiSelected = selection.getMultiSelected();
+        if (multiSelected.length > 0) {
+          const cmd = MultiDeleteCommand(sceneManager, multiSelected);
+          cmd.execute();
+          history.push(cmd);
+          selection.deselect();
+          return;
+        }
+        const entity = selection.getSelected();
+        if (!entity || entity.type === "sun") return;
+        const cmd = DeleteCommand(sceneManager, entity);
         cmd.execute();
         history.push(cmd);
         selection.deselect();
         return;
       }
-      const entity = selection.getSelected();
-      if (!entity || entity.type === "sun") return;
-      const cmd = DeleteCommand(sceneManager, entity);
-      cmd.execute();
-      history.push(cmd);
-      selection.deselect();
-      return;
-    }
 
-    if (action === "DUPLICATE") {
-      e.preventDefault();
-      const multiSelected = selection.getMultiSelected();
-      if (multiSelected.length > 0) {
-        const cmd = MultiDuplicateCommand(
-          sceneManager,
-          multiSelected,
-          (created) => selection.selectMultiple(created),
-        );
+      if (action === "DUPLICATE") {
+        e.preventDefault();
+        const multiSelected = selection.getMultiSelected();
+        if (multiSelected.length > 0) {
+          const cmd = MultiDuplicateCommand(
+            sceneManager,
+            multiSelected,
+            (created) => selection.selectMultiple(created),
+          );
+          cmd.execute();
+          history.push(cmd);
+          return;
+        }
+        const entity = selection.getSelected();
+        if (!entity || entity.type === "sun") return;
+        const cmd = DuplicateCommand(sceneManager, entity);
         cmd.execute();
         history.push(cmd);
+      }
+
+      if (action === "COPY") {
+        const entity = selection.getSelected();
+        if (!entity || entity.type === "sun") return;
+        setClipboard(entity);
         return;
       }
-      const entity = selection.getSelected();
-      if (!entity || entity.type === "sun") return;
-      const cmd = DuplicateCommand(sceneManager, entity);
-      cmd.execute();
-      history.push(cmd);
-    }
-  });
+
+      if (action === "PASTE") {
+        e.preventDefault();
+        const src = getClipboard();
+        if (!src) return;
+        const cmd = DuplicateCommand(sceneManager, src);
+        cmd.execute();
+        history.push(cmd);
+      }
+    },
+  );
 
   const _posBefore = new THREE.Vector3();
   const _quatBefore = new THREE.Quaternion();
