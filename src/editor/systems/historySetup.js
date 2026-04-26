@@ -10,14 +10,26 @@ import {
   DeleteCommand,
   MultiTransformCommand,
 } from "../../engine/history/commands.js";
+import { onKeybind } from "./keybinds.js";
 
 export function setupHistory(tc, selection, sceneManager) {
   const history = createHistoryManager();
 
   let _multiSnapshotBefore = null;
 
-  window.addEventListener("keydown", (e) => {
-    if (e.key === "Delete") {
+  onKeybind(["DELETE", "UNDO", "REDO", "DUPLICATE"], (e, action) => {
+    if (action === "UNDO") {
+      e.preventDefault();
+      history.undo();
+      return;
+    }
+    if (action === "REDO") {
+      e.preventDefault();
+      history.redo();
+      return;
+    }
+
+    if (action === "DELETE") {
       const multiSelected = selection.getMultiSelected();
       if (multiSelected.length > 0) {
         const cmd = MultiDeleteCommand(sceneManager, multiSelected);
@@ -35,33 +47,19 @@ export function setupHistory(tc, selection, sceneManager) {
       return;
     }
 
-    if (!e.ctrlKey) return;
-    if (e.key === "z") {
-      e.preventDefault();
-      history.undo();
-    }
-    if (e.key === "y") {
-      e.preventDefault();
-      history.redo();
-    }
-
-    if (e.key === "d") {
+    if (action === "DUPLICATE") {
       e.preventDefault();
       const multiSelected = selection.getMultiSelected();
-
       if (multiSelected.length > 0) {
         const cmd = MultiDuplicateCommand(
           sceneManager,
           multiSelected,
-          (created) => {
-            selection.selectMultiple(created);
-          },
+          (created) => selection.selectMultiple(created),
         );
         cmd.execute();
         history.push(cmd);
         return;
       }
-
       const entity = selection.getSelected();
       if (!entity || entity.type === "sun") return;
       const cmd = DuplicateCommand(sceneManager, entity);

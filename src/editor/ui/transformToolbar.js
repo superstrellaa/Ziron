@@ -7,6 +7,7 @@ import {
 } from "lucide";
 import { t } from "../../engine/i18n/i18n.js";
 import { logger } from "../../engine/core/logger.js";
+import { onKeybind } from "../systems/keybinds.js";
 
 const MODES = [
   { key: "translate", icon: "move" },
@@ -62,15 +63,18 @@ export function createTransformToolbar(container, gizmo, flyControls) {
     btn.addEventListener("click", () => setMode(btn.dataset.mode));
   });
 
-  window.addEventListener("keydown", (e) => {
+  onKeybind(["TOOL_TRANSLATE", "TOOL_ROTATE", "TOOL_SCALE"], (e, action) => {
     if (e.repeat) return;
     if (document.activeElement.tagName === "INPUT") return;
     if (gizmo.isDragging()) return;
     if (flyControls.isFlying()) return;
 
-    const keyMap = { w: "translate", e: "rotate", r: "scale" };
-    const newMode = keyMap[e.key.toLowerCase()];
-    if (newMode) setMode(newMode);
+    const modeMap = {
+      TOOL_TRANSLATE: "translate",
+      TOOL_ROTATE: "rotate",
+      TOOL_SCALE: "scale",
+    };
+    setMode(modeMap[action]);
   });
 
   const handle = widget.querySelector("#tt-handle");

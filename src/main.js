@@ -1,6 +1,7 @@
 import "./styles.css";
 import { createIcons, Box, Minimize, Maximize, X } from "lucide";
 import { getCurrentWindow } from "@tauri-apps/api/window";
+import { onKeybind } from "./editor/systems/keybinds";
 
 // Crear la ventana actual antes de cosas
 const appWindow = getCurrentWindow();
@@ -50,10 +51,8 @@ document
   .addEventListener("click", () => appWindow.close());
 
 // ==== Bloquear teclas de navegador tipicas de mierda ====
-const BLOCKED = new Set(["f", "p", "g"]);
-document.addEventListener("keydown", (e) => {
-  if ((e.ctrlKey || e.metaKey) && BLOCKED.has(e.key.toLowerCase()))
-    e.preventDefault();
+onKeybind(["_BLOCK_FIND", "_BLOCK_PRINT", "_BLOCK_GOTO"], (e) => {
+  e.preventDefault();
 });
 // =========================================================
 
