@@ -1,7 +1,9 @@
 import * as THREE from "three";
+import { logger } from "./logger.js";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 import { createSceneManager } from "../world/sceneManager.js";
 import { createSunEntity } from "../world/sunEntity.js";
+import { loadScene } from "../../editor/systems/persistence/scenePersistence.js";
 
 const vertexShader = `
   varying vec3 vWorldDir;
@@ -80,7 +82,7 @@ export function createProceduralSky() {
   return { skyMesh, updateSky };
 }
 
-export async function createScene(renderer) {
+export async function createScene(renderer, projectData) {
   const scene = new THREE.Scene();
 
   const pmrem = new THREE.PMREMGenerator(renderer);
@@ -89,14 +91,55 @@ export async function createScene(renderer) {
 
   const { skyMesh, updateSky } = createProceduralSky();
   scene.add(skyMesh);
-
   scene.add(new THREE.GridHelper(20, 20, 0x2a3060, 0x1e2448));
   scene.add(new THREE.AxesHelper(2));
   scene.add(new THREE.AmbientLight(0xffffff, 0.15));
 
   const sceneManager = createSceneManager(scene);
-  const defaultCube = sceneManager.add("cube", { name: "Cube" });
+
   const sun = await createSunEntity(scene, sceneManager, updateSky);
 
-  return { scene, sceneManager, defaultCube, sun };
+  let firstSelected = null;
+
+  if (projectData) {
+    const saved = await loadScene(projectData);
+
+    const hasEntities = saved?.entities?.some((e) => e.type !== "sun");
+    if (!hasEntities) {
+      firstSelected = sceneManager.add("cube", { name: "Cube" });
+      logger.info("Scene", "New scene — default cube added");
+    } else {
+      for (const e of saved.entities) {
+        if (e.type === "sun") continue;
+        const entity = sceneManager.add(e.type, {
+          name: e.name,
+          color: e.color ? parseInt(e.color.replace("#", ""), 16) : undefined,
+        });
+        if (!entity) continue;
+        entity.mesh.position.fromArray(e.position);
+        entity.mesh.rotation.set(e.rotation[0], e.rotation[1], e.rotation[2]);
+        entity.mesh.scale.fromArray(e.scale);
+        if (firstSelected === null) firstSelected = entity;
+      }
+
+      const savedSun = saved.entities.find((e) => e.type === "sun");
+      if (savedSun) {
+        sun.entity.mesh.rotation.set(
+          savedSun.rotation[0],
+          savedSun.rotation[1],
+          savedSun.rotation[2],
+        );
+        sun.update();
+      }
+
+      logger.info(
+        "Scene",
+        `Loaded ${saved.entities.length} entities from disk`,
+      );
+    }
+  } else {
+    firstSelected = sceneManager.add("cube", { name: "Cube" });
+  }
+
+  return { scene, sceneManager, firstSelected, sun };
 }

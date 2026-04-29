@@ -6,7 +6,7 @@
  * En el futuro, este objeto puede ser reemplazado por uno cargado desde config.
  */
 
-import { getConfig } from "./config.js";
+import { getConfig } from "../persistence/config.js";
 
 export const KEYBINDS = {
   // ── Herramientas de transformación ──
@@ -17,6 +17,9 @@ export const KEYBINDS = {
   // ── Historial ──
   UNDO: { key: "z", ctrl: true, shift: false, alt: false },
   REDO: { key: "y", ctrl: true, shift: false, alt: false },
+
+  // ── General ──
+  SAVE: { key: "s", ctrl: true, shift: false, alt: false },
 
   // ── Entidades ──
   DELETE: { key: "Delete", ctrl: false, shift: false, alt: false },

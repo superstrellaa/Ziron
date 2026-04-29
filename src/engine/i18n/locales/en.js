@@ -1,6 +1,28 @@
 export default {
   toolbar: {
     title: "ZIRON",
+    file: "File",
+    save: "Save",
+    load: "Open Project",
+    newProject: "New Project",
+    closeProject: "Close Project",
+  },
+  welcome: {
+    recentProjects: "Recent Projects",
+    newProject: "New Project",
+    openProject: "Open Project",
+    noRecents: "No recent projects",
+    version: "ZIRON Engine — Early Dev",
+    newProjectPanel: {
+      title: "New Project",
+      nameLabel: "Project Name",
+      namePlaceholder: "MyGame",
+      folderLabel: "Projects Folder",
+      folderPlaceholder: "No folder selected",
+      browseBtn: "Browse",
+      createBtn: "Create Project",
+      preview: "Will be created at:",
+    },
   },
   contextMenu: {
     add: "Add",

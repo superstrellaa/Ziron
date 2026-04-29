@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { createHistoryManager } from "../../engine/history/historyManager.js";
+import { createHistoryManager } from "../../../engine/history/historyManager.js";
 import {
   MoveCommand,
   RotateCommand,
@@ -9,9 +9,9 @@ import {
   MultiDuplicateCommand,
   DeleteCommand,
   MultiTransformCommand,
-} from "../../engine/history/commands.js";
-import { onKeybind } from "./keybinds.js";
-import { getClipboard, setClipboard } from "../scene/contextMenu.js";
+} from "../../../engine/history/commands.js";
+import { onKeybind } from "../input/keybinds.js";
+import { getClipboard, setClipboard } from "../../scene/contextMenu.js";
 
 export function setupHistory(tc, selection, sceneManager) {
   const history = createHistoryManager();

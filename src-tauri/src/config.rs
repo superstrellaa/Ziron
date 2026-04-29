@@ -33,7 +33,8 @@ fn default_config() -> Value {
         },
         "editor": {
             "locale": "en",
-            "theme": "dark"
+            "theme": "dark",
+            "projects_folder": ""
         },
         "window": {
             "width": 1280,

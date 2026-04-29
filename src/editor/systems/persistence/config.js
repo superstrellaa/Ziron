@@ -1,5 +1,5 @@
 import { invoke } from "@tauri-apps/api/core";
-import { logger } from "../../engine/core/logger.js";
+import { logger } from "../../../engine/core/logger.js";
 
 let _config = null;
 

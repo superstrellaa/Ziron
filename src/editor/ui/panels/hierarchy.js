@@ -1,6 +1,6 @@
 import { createIcons, Box } from "lucide";
-import { t } from "../../engine/i18n/i18n";
-import { onKeybind } from "../systems/keybinds.js";
+import { t } from "../../../engine/i18n/i18n.js";
+import { onKeybind } from "../../systems/input/keybinds.js";
 
 export function createHierarchy(container, sceneManager, selection) {
   const panel = document.createElement("div");
@@ -86,6 +86,16 @@ export function createHierarchy(container, sceneManager, selection) {
 
     input.focus();
     input.select();
+
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        commitRename();
+      } else if (e.key === "Escape") {
+        e.preventDefault();
+        cancelRename();
+      }
+    });
 
     function commitRename() {
       if (editingId !== id) return;

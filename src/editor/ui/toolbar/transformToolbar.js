@@ -5,9 +5,9 @@ import {
   Scale3d,
   TextAlignCenter,
 } from "lucide";
-import { t } from "../../engine/i18n/i18n.js";
-import { logger } from "../../engine/core/logger.js";
-import { onKeybind } from "../systems/keybinds.js";
+import { t } from "../../../engine/i18n/i18n.js";
+import { logger } from "../../../engine/core/logger.js";
+import { onKeybind } from "../../systems/input/keybinds.js";
 
 const MODES = [
   { key: "translate", icon: "move" },
