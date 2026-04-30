@@ -94,7 +94,7 @@ export async function createSunEntity(scene, sceneManager, updateSky) {
   const gizmoSprite = new THREE.Sprite(
     new THREE.SpriteMaterial({
       map: gizmoTex,
-      depthTest: false,
+      depthTest: true,
       sizeAttenuation: true,
     }),
   );
@@ -105,7 +105,7 @@ export async function createSunEntity(scene, sceneManager, updateSky) {
   const sunSprite = new THREE.Sprite(
     new THREE.SpriteMaterial({
       map: sunTex,
-      depthTest: false,
+      depthTest: true,
       sizeAttenuation: false,
     }),
   );
@@ -116,7 +116,7 @@ export async function createSunEntity(scene, sceneManager, updateSky) {
   const moonSprite = new THREE.Sprite(
     new THREE.SpriteMaterial({
       map: moonTex,
-      depthTest: false,
+      depthTest: true,
       sizeAttenuation: false,
       opacity: 0,
     }),
