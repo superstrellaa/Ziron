@@ -73,10 +73,19 @@ export async function createViewport(container, projectData) {
 
   viewportEl.addEventListener("viewport:destroy", unsubSave, { once: true });
 
+  const infiniteGrid = scene.children.find((c) => c.userData.isInfiniteGrid);
+
   function animate() {
     requestAnimationFrame(animate);
     flyControls.update();
     sun.update();
+
+    if (infiniteGrid) {
+      infiniteGrid.position.x = camera.position.x;
+      infiniteGrid.position.z = camera.position.z;
+      infiniteGrid.material.uniforms.uCameraPos.value.copy(camera.position);
+    }
+
     renderer.render(scene, camera);
   }
   animate();
