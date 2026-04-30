@@ -18,6 +18,7 @@ export function createFlyCamera(camera, domElement) {
     centerY: 0,
     deltaX: 0,
     deltaY: 0,
+    _centerReady: false,
   };
 
   const LOOK_SPEED = 0.003;
@@ -42,6 +43,9 @@ export function createFlyCamera(camera, domElement) {
       return;
     }
     e.preventDefault();
+
+    state.shift = e.shiftKey;
+
     state.mouseDownValid = true;
     state.mouseDownTime = performance.now();
     state.mouseDownX = e.clientX;
@@ -70,11 +74,12 @@ export function createFlyCamera(camera, domElement) {
       invoke("recenter_cursor").then(([cx, cy]) => {
         state.centerX = cx;
         state.centerY = cy;
+        state._centerReady = true;
       });
       return;
     }
 
-    if (!state.isFlying) return;
+    if (!state.isFlying || !state._centerReady) return;
     state.deltaX += e.screenX - state.centerX;
     state.deltaY += e.screenY - state.centerY;
   }
@@ -82,6 +87,7 @@ export function createFlyCamera(camera, domElement) {
   async function onMouseUp(e) {
     if (e.button !== 2) return;
     state.mouseDownValid = false;
+    state._centerReady = false;
 
     if (!state.flyStarted) {
       state.mouseDownTime = null;
@@ -92,6 +98,7 @@ export function createFlyCamera(camera, domElement) {
     state.flyStarted = false;
     state.deltaX = 0;
     state.deltaY = 0;
+    state.shift = false;
     for (const k in state.keys) state.keys[k] = false;
     document.body.classList.remove("cursor-hidden");
     await invoke("release_cursor");
@@ -138,6 +145,18 @@ export function createFlyCamera(camera, domElement) {
   domElement.addEventListener("contextmenu", onContextMenu);
   window.addEventListener("keydown", onKeyDown);
   window.addEventListener("keyup", onKeyUp);
+
+  window.addEventListener("blur", () => {
+    state.shift = false;
+    state.isFlying = false;
+    state.flyStarted = false;
+    state._centerReady = false;
+    state.deltaX = 0;
+    state.deltaY = 0;
+    for (const k in state.keys) state.keys[k] = false;
+    document.body.classList.remove("cursor-hidden");
+    invoke("release_cursor");
+  });
 
   const _forward = new THREE.Vector3();
   const _right = new THREE.Vector3();
