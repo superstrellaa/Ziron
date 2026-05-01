@@ -26,7 +26,7 @@ export async function createWelcomeScreen(
       <div id="welcome-sidebar">
         <div id="welcome-logo">
           <i data-lucide="box"></i>
-          <span>ZIRON</span>
+          <span>${t("general.title")}</span>
         </div>
         <button class="welcome-action-btn primary" id="btn-new-project">
           <i data-lucide="plus"></i>

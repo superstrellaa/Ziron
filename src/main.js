@@ -32,7 +32,7 @@ document.querySelector("#app").innerHTML = `
   <div id="toolbar">
     <div id="toolbar-left">
       <i data-lucide="box"></i>
-      <span>${t("toolbar.title")}</span>
+      <span>${t("general.title")}</span>
     </div>
     <div id="toolbar-menus"></div>
     <div id="toolbar-window-controls">

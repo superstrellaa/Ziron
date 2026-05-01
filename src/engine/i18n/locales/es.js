@@ -1,6 +1,8 @@
 export default {
-  toolbar: {
+  general: {
     title: "ZIRON",
+  },
+  toolbar: {
     file: "Archivo",
     save: "Guardar",
     load: "Cargar",
