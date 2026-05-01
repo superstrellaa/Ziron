@@ -14,6 +14,7 @@ import { createViewport } from "./editor/viewport.js";
 import { setLocale } from "./engine/i18n/i18n.js";
 import { initTooltipSystem } from "./engine/ui/tooltip.js";
 import { logger } from "./engine/core/logger.js";
+import { initToastSystem } from "./engine/ui/toasts.js";
 
 const appWindow = getCurrentWindow();
 
@@ -22,6 +23,7 @@ await loadConfig();
 applyConfigKeybinds();
 setLocale(get("editor.locale") ?? "en");
 initTooltipSystem();
+initToastSystem();
 
 let _activeViewport = null;
 

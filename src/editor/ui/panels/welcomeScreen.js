@@ -11,6 +11,7 @@ import {
 import { t } from "../../../engine/i18n/i18n.js";
 import { get, set } from "../../systems/persistence/config.js";
 import { logger } from "../../../engine/core/logger.js";
+import { Toast } from "../../../engine/ui/toastTypes.js";
 
 export async function createWelcomeScreen(
   container,
@@ -206,6 +207,7 @@ function renderNewProjectPanel(content, el, onProjectReady, onCancel) {
       onProjectReady(projectData);
     } catch (e) {
       logger.warn("Welcome", `Failed to create project: ${e}`);
+      Toast.createProjectError();
       createBtn.disabled = false;
       createBtn.textContent = t("welcome.newProjectPanel.createBtn");
     }
@@ -225,6 +227,7 @@ async function renderRecents(content, el, onProjectReady) {
     recents = await invoke("get_recent_projects");
   } catch (e) {
     logger.warn("Welcome", `Could not load recents: ${e}`);
+    Toast.loadRecentsError();
   }
 
   if (recents.length === 0) {
@@ -281,6 +284,7 @@ function makeProjectCard(project, el, grid, onProjectReady) {
       onProjectReady(projectData);
     } catch {
       card.style.opacity = "0.4";
+      Toast.projectNotFound();
       card.querySelector(".project-card-path").textContent =
         "⚠ Project not found";
     }

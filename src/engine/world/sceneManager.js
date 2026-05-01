@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { logger } from "../core/logger";
+import { Toast } from "../ui/toastTypes";
 
 // lista chula de geometrías disponibles
 const GEOMETRIES = {
@@ -19,7 +20,8 @@ export function createSceneManager(scene) {
   function add(type, options = {}) {
     const geoFactory = GEOMETRIES[type];
     if (!geoFactory) {
-      console.warn(`SceneManager: tipo desconocido "${type}"`);
+      logger.warn("SceneManager", `Unknown entity type "${type}"`);
+      Toast.generalError();
       return null;
     }
 
@@ -64,6 +66,7 @@ export function createSceneManager(scene) {
     const entity = entities.get(id);
     if (!entity) {
       logger.warn("SceneManager", `Entity id ${id} not found, cannot remove`);
+      Toast.generalError();
       return false;
     }
     scene.remove(entity.mesh);

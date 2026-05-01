@@ -48,4 +48,31 @@ export default {
   hierarchy: {
     header: "Escena",
   },
+  toasts: {
+    generalError: { title: "Error", message: "Algo salió mal." },
+    saveSuccess: {
+      title: "Guardado",
+      message: "Escena guardada exitosamente.",
+    },
+    saveError: {
+      title: "Error al Guardar",
+      message: "No se pudo guardar la escena.",
+    },
+    loadError: {
+      title: "Error al Cargar",
+      message: "No se pudo cargar la escena.",
+    },
+    createProjectError: {
+      title: "Error al Crear Proyecto",
+      message: "No se pudo crear el proyecto.",
+    },
+    loadRecentsError: {
+      title: "Error al Cargar",
+      message: "No se pudieron cargar los proyectos recientes.",
+    },
+    projectNotFound: {
+      title: "Proyecto No Encontrado",
+      message: "No se pudo encontrar el proyecto.",
+    },
+  },
 };

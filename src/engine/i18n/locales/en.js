@@ -48,4 +48,22 @@ export default {
   hierarchy: {
     header: "Scene",
   },
+  toasts: {
+    generalError: { title: "Error", message: "Something went wrong." },
+    saveSuccess: { title: "Saved", message: "Scene saved successfully." },
+    saveError: { title: "Save Failed", message: "Could not save the scene." },
+    loadError: { title: "Load Failed", message: "Could not load the scene." },
+    createProjectError: {
+      title: "Project Creation Failed",
+      message: "Could not create the project.",
+    },
+    loadRecentsError: {
+      title: "Load Failed",
+      message: "Could not load recent projects.",
+    },
+    projectNotFound: {
+      title: "Project Not Found",
+      message: "The selected project could not be found.",
+    },
+  },
 };

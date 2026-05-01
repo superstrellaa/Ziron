@@ -1,5 +1,6 @@
 import { invoke } from "@tauri-apps/api/core";
 import { logger } from "../../../engine/core/logger.js";
+import { Toast } from "../../../engine/ui/toastTypes.js";
 
 export async function saveScene(projectData, sceneManager) {
   const entities = sceneManager.getAll().map((entity) => {
@@ -24,9 +25,11 @@ export async function saveScene(projectData, sceneManager) {
   try {
     await invoke("save_scene", { scenePath, sceneData });
     logger.info("ScenePersistence", `Scene saved → ${scenePath}`);
+    Toast.saveSuccess();
     return true;
   } catch (e) {
     logger.warn("ScenePersistence", `Failed to save scene: ${e}`);
+    Toast.saveError();
     return false;
   }
 }
@@ -39,6 +42,7 @@ export async function loadScene(projectData) {
     return sceneData;
   } catch (e) {
     logger.warn("ScenePersistence", `Failed to load scene: ${e}`);
+    Toast.loadError();
     return null;
   }
 }
