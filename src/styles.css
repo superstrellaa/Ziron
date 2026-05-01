@@ -1015,3 +1015,32 @@ body.cursor-hidden * {
   background: #1e1e30;
   margin: 4px 0;
 }
+
+/* Selection Box */
+@keyframes sel-dash {
+  to {
+    stroke-dashoffset: -20;
+  }
+}
+.sel-box-svg {
+  position: fixed;
+  pointer-events: none;
+  z-index: 999;
+  overflow: visible;
+  display: none;
+}
+.sel-box-svg rect.sel-fill {
+  fill: rgba(109, 77, 202, 0.12);
+}
+.sel-box-svg rect.sel-border {
+  fill: none;
+  stroke: #7c5cbf;
+  stroke-width: 1.5;
+  stroke-dasharray: 6 4;
+  animation: sel-dash 0.5s linear infinite;
+}
+.sel-box-svg rect.sel-border-outer {
+  fill: none;
+  stroke: rgba(109, 77, 202, 0.35);
+  stroke-width: 3;
+}

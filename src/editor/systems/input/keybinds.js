@@ -1,11 +1,3 @@
-/**
- * ZIRON Keybinds
- *
- * Registro central de todos los atajos de teclado del editor.
- * Cada acción tiene un nombre semántico y una definición de tecla.
- * En el futuro, este objeto puede ser reemplazado por uno cargado desde config.
- */
-
 import { getConfig } from "../persistence/config.js";
 
 export const KEYBINDS = {

@@ -1,36 +1,6 @@
 export function createSelectionBox(container) {
   const box = document.createElement("div");
 
-  const style = document.createElement("style");
-  style.textContent = `
-    @keyframes sel-dash {
-      to { stroke-dashoffset: -20; }
-    }
-    .sel-box-svg {
-      position: fixed;
-      pointer-events: none;
-      z-index: 999;
-      overflow: visible;
-      display: none;
-    }
-    .sel-box-svg rect.sel-fill {
-      fill: rgba(109, 77, 202, 0.12);
-    }
-    .sel-box-svg rect.sel-border {
-      fill: none;
-      stroke: #7c5cbf;
-      stroke-width: 1.5; 
-      stroke-dasharray: 6 4;
-      animation: sel-dash 0.5s linear infinite;
-    }
-    .sel-box-svg rect.sel-border-outer {
-      fill: none;
-      stroke: rgba(109, 77, 202, 0.35); 
-      stroke-width: 3;
-    }
-  `;
-  document.head.appendChild(style);
-
   const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
   svg.classList.add("sel-box-svg");
   svg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
@@ -110,7 +80,6 @@ export function createSelectionBox(container) {
 
   function destroy() {
     svg.remove();
-    style.remove();
   }
 
   return { show, update, hide, getRect, destroy };
