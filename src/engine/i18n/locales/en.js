@@ -67,6 +67,10 @@ export default {
       title: "Project Not Found",
       message: "The selected project could not be found.",
     },
+    contentCopied: {
+      title: "Content Copied",
+      message: "The content has been copied to the clipboard.",
+    },
   },
   popups: {
     unsavedScene: {

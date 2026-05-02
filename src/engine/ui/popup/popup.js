@@ -8,6 +8,7 @@ import {
 } from "lucide";
 import { writeText } from "@tauri-apps/plugin-clipboard-manager";
 import { t } from "../../i18n/i18n.js";
+import { Toast } from "../toasts/toastTypes.js";
 
 let overlay = null;
 let currentResolve = null;
@@ -79,6 +80,7 @@ export function openPopup({
         const btnDef = buttons.find((b) => b.id === id);
         if (btnDef?.copyText) {
           await writeText(btnDef.copyText).catch(() => {});
+          Toast.contentCopied();
         }
 
         close(id);

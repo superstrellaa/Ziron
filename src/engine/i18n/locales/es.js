@@ -76,6 +76,10 @@ export default {
       title: "Proyecto No Encontrado",
       message: "No se pudo encontrar el proyecto.",
     },
+    contentCopied: {
+      title: "Contenido Copiado",
+      message: "El contenido ha sido copiado al portapapeles.",
+    },
   },
   popups: {
     unsavedScene: {
