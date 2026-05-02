@@ -300,6 +300,7 @@ function makeProjectCard(project, el, grid, onProjectReady) {
       card.style.transition = "opacity 0.2s, transform 0.2s";
       card.style.opacity = "0";
       card.style.transform = "scale(0.95)";
+      Toast.projectRemovedRecents();
       setTimeout(() => card.remove(), 200);
     });
 

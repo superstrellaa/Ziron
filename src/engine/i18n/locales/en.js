@@ -71,6 +71,10 @@ export default {
       title: "Content Copied",
       message: "The content has been copied to the clipboard.",
     },
+    projectRemovedRecents: {
+      title: "Project Removed",
+      message: "The project has been removed from recent projects.",
+    },
   },
   popups: {
     unsavedScene: {

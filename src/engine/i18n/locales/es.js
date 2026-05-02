@@ -80,6 +80,10 @@ export default {
       title: "Contenido Copiado",
       message: "El contenido ha sido copiado al portapapeles.",
     },
+    projectRemovedRecents: {
+      title: "Proyecto Eliminado",
+      message: "El proyecto ha sido eliminado de los proyectos recientes.",
+    },
   },
   popups: {
     unsavedScene: {

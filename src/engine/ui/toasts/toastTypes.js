@@ -58,7 +58,13 @@ export const Toast = {
       messageKey: "toasts.contentCopied.message",
       ...extra,
     }),
-
+  projectRemovedRecents: (extra) =>
+    pushToast({
+      type: "info",
+      titleKey: "toasts.projectRemovedRecents.title",
+      messageKey: "toasts.projectRemovedRecents.message",
+      ...extra,
+    }),
   info: (title, message, duration) =>
     pushToast({ type: "info", title, message, duration }),
   warning: (title, message, duration) =>
