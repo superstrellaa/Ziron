@@ -12,14 +12,13 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_clipboard_manager::init()) 
         .setup(|app| {
             let args: Vec<String> = std::env::args().collect();
             let project = args.windows(2)
                 .find(|pair| pair[0] == "--project")
                 .map(|pair| pair[1].clone());
-
             app.manage(LaunchProject(project));
-
             let window = app.get_webview_window("main").unwrap();
             let _ = window.maximize();
             Ok(())

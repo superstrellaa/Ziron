@@ -77,4 +77,21 @@ export default {
       message: "No se pudo encontrar el proyecto.",
     },
   },
+  popups: {
+    unsavedScene: {
+      title: "Cambios No Guardados",
+      message: "La escena tiene cambios no guardados. ¿Qué quieres hacer?",
+    },
+    error: {
+      title: "Ocurrió un error",
+    },
+    buttons: {
+      close: "Cerrar",
+      cancel: "Cancelar",
+      confirm: "Confirmar",
+      copyError: "Copiar Error",
+      saveAndContinue: "Guardar y Continuar",
+      discardAndClose: "Descartar y Cerrar",
+    },
+  },
 };

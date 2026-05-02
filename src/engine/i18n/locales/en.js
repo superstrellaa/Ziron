@@ -68,4 +68,21 @@ export default {
       message: "The selected project could not be found.",
     },
   },
+  popups: {
+    unsavedScene: {
+      title: "Unsaved Changes",
+      message: "The scene has unsaved changes. What do you want to do?",
+    },
+    error: {
+      title: "An error occurred",
+    },
+    buttons: {
+      close: "Close",
+      cancel: "Cancel",
+      confirm: "Confirm",
+      copyError: "Copy Error",
+      saveAndContinue: "Save and Continue",
+      discardAndClose: "Discard and Close",
+    },
+  },
 };

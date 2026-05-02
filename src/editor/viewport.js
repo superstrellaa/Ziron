@@ -45,6 +45,15 @@ export async function createViewport(container, projectData) {
 
   const history = setupHistory(gizmo.gizmo, selection, sceneManager);
 
+  async function updateDirtyUI(dirty) {
+    hierarchy.setDirty(dirty);
+  }
+
+  history.onDirtyChange((dirty) => updateDirtyUI(dirty));
+
+  sceneManager.on("onAdd", () => history.isDirty() || updateDirtyUI(true));
+  sceneManager.on("onRemove", () => history.isDirty() || updateDirtyUI(true));
+
   const ctxMenu = createContextMenu(
     viewportEl,
     sceneManager,
@@ -56,7 +65,8 @@ export async function createViewport(container, projectData) {
   hierarchy.setContextMenu(ctxMenu);
 
   async function triggerSave() {
-    await saveScene(projectData, sceneManager);
+    await saveScene(projectData, sceneManager, history);
+    updateDirtyUI(false);
   }
 
   setProjectOpen(true, triggerSave);
@@ -69,6 +79,7 @@ export async function createViewport(container, projectData) {
   function destroy() {
     unsubSave();
     setProjectOpen(false);
+    appWindow.setTitle("ZIRON Engine");
   }
 
   viewportEl.addEventListener("viewport:destroy", unsubSave, { once: true });
@@ -90,7 +101,7 @@ export async function createViewport(container, projectData) {
   }
   animate();
 
-  return { destroy };
-
   logger.info("Viewport", "Renderer ready");
+
+  return { destroy, isDirty: () => history.isDirty(), triggerSave };
 }

@@ -14,7 +14,9 @@ import { createViewport } from "./editor/viewport.js";
 import { setLocale } from "./engine/i18n/i18n.js";
 import { initTooltipSystem } from "./engine/ui/tooltip.js";
 import { logger } from "./engine/core/logger.js";
-import { initToastSystem } from "./engine/ui/toasts.js";
+import { initToastSystem } from "./engine/ui/toasts/toasts.js";
+import { initPopupSystem } from "./engine/ui/popup/popup.js";
+import { Popup } from "./engine/ui/popup/popupTypes.js";
 
 const appWindow = getCurrentWindow();
 
@@ -24,6 +26,7 @@ applyConfigKeybinds();
 setLocale(get("editor.locale") ?? "en");
 initTooltipSystem();
 initToastSystem();
+initPopupSystem();
 
 let _activeViewport = null;
 
@@ -56,9 +59,15 @@ document
 document
   .getElementById("btn-maximize")
   .addEventListener("click", () => appWindow.toggleMaximize());
-document
-  .getElementById("btn-close")
-  .addEventListener("click", () => appWindow.close());
+
+document.getElementById("btn-close").addEventListener("click", async () => {
+  if (_activeViewport?.isDirty()) {
+    const result = await Popup.unsavedScene();
+    if (result === "cancel") return;
+    if (result === "save") await _activeViewport.triggerSave();
+  }
+  appWindow.close();
+});
 
 // ── Bloquear teclas de navegador ──────────────────────────────────────────────
 onKeybind(["_BLOCK_FIND", "_BLOCK_PRINT", "_BLOCK_GOTO"], (e) =>
@@ -85,26 +94,33 @@ function onProjectReady(projectData) {
 }
 
 // ── Menú bar ──────────────────────────────────────────────────────────────────
+async function closeWithDirtyCheck(then) {
+  if (_activeViewport?.isDirty()) {
+    const result = await Popup.unsavedScene();
+    if (result === "cancel") return;
+    if (result === "save") await _activeViewport.triggerSave();
+  }
+  if (_activeViewport) {
+    _activeViewport.destroy();
+    _activeViewport = null;
+  }
+  then();
+}
+
 initMenuBar({
   onLoadProject: (projectData) => onProjectReady(projectData),
 
-  onNewProject: () => {
-    if (_activeViewport) {
-      _activeViewport.destroy();
-      _activeViewport = null;
-    }
-    workspace.innerHTML = "";
-    createWelcomeScreen(workspace, onProjectReady, true);
-  },
+  onNewProject: () =>
+    closeWithDirtyCheck(() => {
+      workspace.innerHTML = "";
+      createWelcomeScreen(workspace, onProjectReady, true);
+    }),
 
-  onCloseProject: () => {
-    if (_activeViewport) {
-      _activeViewport.destroy();
-      _activeViewport = null;
-    }
-    workspace.innerHTML = "";
-    createWelcomeScreen(workspace, onProjectReady);
-  },
+  onCloseProject: () =>
+    closeWithDirtyCheck(() => {
+      workspace.innerHTML = "";
+      createWelcomeScreen(workspace, onProjectReady);
+    }),
 });
 
 // ── Arranque ──────────────────────────────────────────────────────────────────

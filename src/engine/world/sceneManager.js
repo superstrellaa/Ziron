@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { logger } from "../core/logger";
-import { Toast } from "../ui/toastTypes";
+import { Toast } from "../ui/toasts/toastTypes";
 
 // lista chula de geometrías disponibles
 const GEOMETRIES = {

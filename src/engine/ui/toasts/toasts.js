@@ -1,5 +1,5 @@
 import { createIcons, CircleAlert, TriangleAlert, Info, Bug, X } from "lucide";
-import { t } from "../i18n/i18n.js";
+import { t } from "../../i18n/i18n.js";
 
 const VARIANTS = {
   error: { icon: "circle-alert", cssClass: "toast-error" },

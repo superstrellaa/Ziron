@@ -307,6 +307,7 @@ body.cursor-hidden * {
   transition:
     opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1),
     transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
 }
 
 .toast-visible {
@@ -414,6 +415,135 @@ body.cursor-hidden * {
   background: #6b7280;
 }
 
+/* ── Popup overlay ── */
+#popup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  backdrop-filter: blur(2px);
+  user-select: none;
+}
+
+#popup-overlay.popup-visible {
+  opacity: 1;
+  pointer-events: all;
+}
+
+#popup-overlay.popup-hiding {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.popup-box {
+  background: #0e0e1a;
+  border: 1px solid #2a2a3e;
+  border-radius: 12px;
+  padding: 32px 28px 24px;
+  width: 380px;
+  max-width: calc(100vw - 48px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+  transform: scale(0.92) translateY(8px);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
+}
+
+#popup-overlay.popup-visible .popup-box {
+  transform: scale(1) translateY(0);
+}
+
+/* Variantes — color del icono y borde top */
+.popup-error {
+  border-top: 3px solid #f87171;
+}
+.popup-warning {
+  border-top: 3px solid #fbbf24;
+}
+.popup-info {
+  border-top: 3px solid #a78bfa;
+}
+
+.popup-error .popup-icon {
+  color: #f87171;
+}
+.popup-warning .popup-icon {
+  color: #fbbf24;
+}
+.popup-info .popup-icon {
+  color: #a78bfa;
+}
+
+.popup-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #e5e7eb;
+}
+
+.popup-message {
+  font-size: 12px;
+  color: #6b7280;
+  line-height: 1.6;
+  max-width: 300px;
+}
+
+.popup-buttons {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.popup-btn {
+  padding: 7px 16px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid #2a2a3e;
+  background: #1a1a2e;
+  color: #9ca3af;
+  transition:
+    background 0.15s,
+    color 0.15s,
+    border-color 0.15s;
+}
+.popup-btn:hover {
+  background: #2a2a3e;
+  color: #e5e7eb;
+}
+
+.popup-btn-primary {
+  background: #1e1535;
+  border-color: #7c5cbf;
+  color: #a78bfa;
+}
+.popup-btn-primary:hover {
+  background: #2a1f4e;
+  border-color: #a78bfa;
+  color: #c4b5fd;
+}
+
+.popup-btn-danger {
+  background: #1f1212;
+  border-color: #7f1d1d;
+  color: #f87171;
+}
+.popup-btn-danger:hover {
+  background: #2d1515;
+  border-color: #f87171;
+}
+
 /* ── Hierarchy panel ── */
 #hierarchy {
   width: 220px;
@@ -439,6 +569,13 @@ body.cursor-hidden * {
   color: #4b5563;
   border-bottom: 1px solid #1e1e30;
   flex-shrink: 0;
+}
+
+#hierarchy-dirty {
+  color: #a78bfa;
+  font-size: 10px;
+  margin-left: 6px;
+  vertical-align: middle;
 }
 
 #hierarchy-list {

@@ -13,6 +13,7 @@
     "withGlobalTauri": true,
     "windows": [
       {
+        "label": "main",
         "title": "ZIRON Engine",
         "width": 800,
         "height": 600,

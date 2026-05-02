@@ -1,8 +1,8 @@
 import { invoke } from "@tauri-apps/api/core";
 import { logger } from "../../../engine/core/logger.js";
-import { Toast } from "../../../engine/ui/toastTypes.js";
+import { Toast } from "../../../engine/ui/toasts/toastTypes.js";
 
-export async function saveScene(projectData, sceneManager) {
+export async function saveScene(projectData, sceneManager, history = null) {
   const entities = sceneManager.getAll().map((entity) => {
     const { mesh } = entity;
     const base = {
@@ -25,6 +25,7 @@ export async function saveScene(projectData, sceneManager) {
   try {
     await invoke("save_scene", { scenePath, sceneData });
     logger.info("ScenePersistence", `Scene saved → ${scenePath}`);
+    history?.markClean(); // al guardar, limpiamos la marca para que indique eso
     Toast.saveSuccess();
     return true;
   } catch (e) {

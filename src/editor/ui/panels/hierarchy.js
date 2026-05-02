@@ -7,9 +7,13 @@ export function createHierarchy(container, sceneManager, selection) {
   panel.id = "hierarchy";
 
   panel.innerHTML = `
-    <div id="hierarchy-header">${t("hierarchy.header")}</div>
+    <div id="hierarchy-header">
+      <span id="hierarchy-title">${t("hierarchy.header")}</span>
+      <span id="hierarchy-dirty" style="display:none" title="Unsaved changes">●</span>
+    </div>
     <div id="hierarchy-list"></div>
   `;
+
   container.appendChild(panel);
 
   const list = panel.querySelector("#hierarchy-list");
@@ -233,5 +237,10 @@ export function createHierarchy(container, sceneManager, selection) {
   sceneManager.on("onAdd", () => render());
   sceneManager.on("onRemove", () => render());
 
-  return { setSelected, refresh, setContextMenu };
+  function setDirty(dirty) {
+    const dot = panel.querySelector("#hierarchy-dirty");
+    if (dot) dot.style.display = dirty ? "inline" : "none";
+  }
+
+  return { setSelected, refresh, setContextMenu, setDirty };
 }
