@@ -1,3 +1,4 @@
+import { t } from "../../i18n/i18n.js";
 import { openPopup } from "./popup.js";
 
 export const Popup = {
@@ -16,6 +17,27 @@ export const Popup = {
         {
           id: "save",
           labelKey: "popups.buttons.saveAndContinue",
+          variant: "primary",
+        },
+      ],
+    }),
+
+  versionMismatch: (projectVersion, engineVersion) =>
+    openPopup({
+      type: "error",
+      titleKey: "popups.versionMismatch.title",
+      message: t("popups.versionMismatch.message")
+        .replace("{project}", projectVersion)
+        .replace("{engine}", engineVersion),
+      buttons: [
+        {
+          id: "cancel",
+          labelKey: "popups.buttons.closeAndRevert",
+          variant: "danger",
+        },
+        {
+          id: "continue",
+          labelKey: "popups.buttons.continueAndUpdate",
           variant: "primary",
         },
       ],

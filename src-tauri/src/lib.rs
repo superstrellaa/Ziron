@@ -40,6 +40,7 @@ pub fn run() {
             project::pick_folder,
             project::pick_project_file,
             project::get_launch_project,
+            project::update_project_version,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

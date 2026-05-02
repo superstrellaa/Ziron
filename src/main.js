@@ -1,6 +1,7 @@
 import "./styles.css";
 import { createIcons, Box, Minimize, Maximize, X } from "lucide";
 import { getCurrentWindow } from "@tauri-apps/api/window";
+import { getVersion } from "@tauri-apps/api/app";
 import { loadConfig, get } from "./editor/systems/persistence/config.js";
 import {
   applyConfigKeybinds,
@@ -29,6 +30,9 @@ initToastSystem();
 initPopupSystem();
 
 let _activeViewport = null;
+
+const ENGINE_VERSION = await getVersion();
+logger.info("Main", `ZIRON Editor v${ENGINE_VERSION} starting...`);
 
 // ── DOM base ──────────────────────────────────────────────────────────────────
 document.querySelector("#app").innerHTML = `
@@ -93,6 +97,35 @@ function onProjectReady(projectData) {
   });
 }
 
+async function checkVersionAndLoad(projectData, onCancel = null) {
+  const projectVersion = projectData.ziron_version;
+
+  if (projectVersion && projectVersion !== ENGINE_VERSION) {
+    const result = await Popup.versionMismatch(projectVersion, ENGINE_VERSION);
+
+    if (result === "cancel") {
+      if (!_activeViewport) {
+        onCancel?.() ?? createWelcomeScreen(workspace, checkVersionAndLoad);
+      }
+      return;
+    }
+
+    if (result === "continue") {
+      try {
+        await invoke("update_project_version", {
+          projectFile: projectData._project_file,
+          newVersion: ENGINE_VERSION,
+        });
+        logger.info("Main", `Project version updated to ${ENGINE_VERSION}`);
+      } catch (e) {
+        logger.warn("Main", `Could not update project version: ${e}`);
+      }
+    }
+  }
+
+  onProjectReady(projectData);
+}
+
 // ── Menú bar ──────────────────────────────────────────────────────────────────
 async function closeWithDirtyCheck(then) {
   if (_activeViewport?.isDirty()) {
@@ -108,18 +141,18 @@ async function closeWithDirtyCheck(then) {
 }
 
 initMenuBar({
-  onLoadProject: (projectData) => onProjectReady(projectData),
+  onLoadProject: (projectData) => checkVersionAndLoad(projectData),
 
   onNewProject: () =>
     closeWithDirtyCheck(() => {
       workspace.innerHTML = "";
-      createWelcomeScreen(workspace, onProjectReady, true);
+      createWelcomeScreen(workspace, checkVersionAndLoad, true);
     }),
 
   onCloseProject: () =>
     closeWithDirtyCheck(() => {
       workspace.innerHTML = "";
-      createWelcomeScreen(workspace, onProjectReady);
+      createWelcomeScreen(workspace, checkVersionAndLoad);
     }),
 });
 
@@ -131,10 +164,12 @@ if (launchProject) {
     const projectData = await invoke("load_project", {
       projectFile: launchProject,
     });
-    onProjectReady(projectData);
+    await checkVersionAndLoad(projectData, () => {
+      createWelcomeScreen(workspace, checkVersionAndLoad);
+    });
   } catch {
-    createWelcomeScreen(workspace, onProjectReady);
+    createWelcomeScreen(workspace, checkVersionAndLoad);
   }
 } else {
-  createWelcomeScreen(workspace, onProjectReady);
+  createWelcomeScreen(workspace, checkVersionAndLoad);
 }

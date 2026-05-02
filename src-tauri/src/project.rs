@@ -125,6 +125,18 @@ pub fn load_scene(scene_path: String) -> Result<Value, String> {
     Ok(scene)
 }
 
+/// Actualiza la versión de Ziron en el .ziron.project (usado para actualizar proyectos antiguos)
+#[tauri::command]
+pub fn update_project_version(project_file: String, new_version: String) -> Result<(), String> {
+    let path = Path::new(&project_file);
+    let text = read_to_string(path).map_err(|e| e.to_string())?;
+    let mut meta: Value = serde_json::from_str(&text).map_err(|e| e.to_string())?;
+    meta["ziron_version"] = json!(new_version);
+    let updated = serde_json::to_string_pretty(&meta).map_err(|e| e.to_string())?;
+    write(path, updated).map_err(|e| e.to_string())?;
+    Ok(())
+}
+
 /// Revisa los argumentos de lanzamiento para ver si se abrió un proyecto directamente
 #[tauri::command]
 pub fn get_launch_project(state: tauri::State<LaunchProject>) -> Option<String> {

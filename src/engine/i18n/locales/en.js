@@ -73,6 +73,11 @@ export default {
       title: "Unsaved Changes",
       message: "The scene has unsaved changes. What do you want to do?",
     },
+    versionMismatch: {
+      title: "Version Mismatch",
+      message:
+        "This project was created with ZIRON {project}, but you're running ZIRON {engine}. Opening it may cause issues.",
+    },
     error: {
       title: "An error occurred",
     },
@@ -83,6 +88,8 @@ export default {
       copyError: "Copy Error",
       saveAndContinue: "Save and Continue",
       discardAndClose: "Discard and Close",
+      closeAndRevert: "Close",
+      continueAndUpdate: "Continue and Update",
     },
   },
 };

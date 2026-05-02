@@ -82,6 +82,11 @@ export default {
       title: "Cambios No Guardados",
       message: "La escena tiene cambios no guardados. ¿Qué quieres hacer?",
     },
+    versionMismatch: {
+      title: "Incompatibilidad de Versiones",
+      message:
+        "La versión del proyecto no coincide con la versión del motor. Esto puede causar problemas. ¿Qué quieres hacer?",
+    },
     error: {
       title: "Ocurrió un error",
     },
@@ -92,6 +97,8 @@ export default {
       copyError: "Copiar Error",
       saveAndContinue: "Guardar y Continuar",
       discardAndClose: "Descartar y Cerrar",
+      closeAndRevert: "Cerrar",
+      continueAndUpdate: "Continuar y Actualizar",
     },
   },
 };

@@ -79,7 +79,6 @@ export async function createViewport(container, projectData) {
   function destroy() {
     unsubSave();
     setProjectOpen(false);
-    appWindow.setTitle("ZIRON Engine");
   }
 
   viewportEl.addEventListener("viewport:destroy", unsubSave, { once: true });
