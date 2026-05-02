@@ -2,7 +2,7 @@ use std::fs::{create_dir_all, read_to_string, write};
 use serde_json::{Value, json};
 use tauri::Manager;
 
-fn config_path(app: &tauri::AppHandle) -> Result<std::path::PathBuf, String> {
+pub fn config_path(app: &tauri::AppHandle) -> Result<std::path::PathBuf, String> {
     let mut path = app
         .path()
         .app_data_dir()
@@ -22,6 +22,7 @@ fn default_config() -> Value {
             "TOOL_SCALE":     { "key": "r", "ctrl": false, "shift": false, "alt": false },
             "UNDO":           { "key": "z", "ctrl": true,  "shift": false, "alt": false },
             "REDO":           { "key": "y", "ctrl": true,  "shift": false, "alt": false },
+            "SAVE":           { "key": "s", "ctrl": true,  "shift": false, "alt": false },
             "DELETE":         { "key": "Delete", "ctrl": false, "shift": false, "alt": false },
             "DUPLICATE":      { "key": "d", "ctrl": true,  "shift": false, "alt": false },
             "RENAME":         { "key": "F2", "ctrl": false, "shift": false, "alt": false },
@@ -33,12 +34,11 @@ fn default_config() -> Value {
         },
         "editor": {
             "locale": "en",
-            "theme": "dark",
             "projects_folder": ""
         },
         "window": {
-            "width": 1280,
-            "height": 720,
+            "width": 800,
+            "height": 600,
             "maximized": true
         }
     })
@@ -81,4 +81,28 @@ fn merge_defaults(target: &mut Value, defaults: &Value) {
             }
         }
     }
+}
+
+pub fn read_config(app: &tauri::AppHandle) -> Value {
+    let path = match config_path(app) {
+        Ok(p) => p,
+        Err(_) => return default_config(),
+    };
+
+    if !path.exists() {
+        return default_config();
+    }
+
+    let text = match read_to_string(&path) {
+        Ok(t) => t,
+        Err(_) => return default_config(),
+    };
+
+    let mut config: Value = match serde_json::from_str(&text) {
+        Ok(v) => v,
+        Err(_) => return default_config(),
+    };
+
+    merge_defaults(&mut config, &default_config());
+    config
 }
