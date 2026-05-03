@@ -1,3 +1,18 @@
+/* ── Fuentes ── */
+@font-face {
+  font-family: "Geist";
+  src: url("/fonts/Geist-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Geist Mono";
+  src: url("/fonts/GeistMono-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+}
+
 *,
 *::before,
 *::after {
@@ -13,7 +28,7 @@ html,
   height: 100%;
   overflow: hidden;
   background: #080c18;
-  font-family: system-ui, sans-serif;
+  font-family: "Geist Mono", monospace;
 }
 
 #app {
@@ -24,6 +39,20 @@ html,
 body.cursor-hidden,
 body.cursor-hidden * {
   cursor: none !important;
+}
+
+/* Listado de cosas para aplicarle la fuente titulo Geist */
+#toolbar-left span,
+#hierarchy-header,
+#welcome-logo span,
+.popup-title,
+.toast-title,
+.toolbar-menu-btn,
+.welcome-action-btn,
+#welcome-main h2,
+#new-project-panel h3,
+.project-card-name {
+  font-family: "Geist", sans-serif;
 }
 
 /* ── Layout principal ── */
@@ -643,7 +672,7 @@ body.cursor-hidden * {
   border-radius: 3px;
   color: #e5e7eb;
   font-size: 12px;
-  font-family: system-ui, sans-serif;
+  font-family: "Geist Mono", monospace;
   padding: 0 4px;
   height: 20px;
   width: 100%;
@@ -942,7 +971,7 @@ body.cursor-hidden * {
   border-radius: 4px;
   color: #e5e7eb;
   font-size: 12px;
-  font-family: system-ui, sans-serif;
+  font-family: "Geist Mono", monospace;
   padding: 6px 10px;
   outline: none;
   transition:
