@@ -2,14 +2,21 @@ import { createIcons, Box } from "lucide";
 import { t } from "../../../engine/i18n/i18n.js";
 import { onKeybind } from "../../systems/input/keybinds.js";
 
-export function createHierarchy(container, sceneManager, selection) {
+export function createHierarchy(
+  container,
+  sceneManager,
+  selection,
+  sceneName = "",
+) {
   const panel = document.createElement("div");
   panel.id = "hierarchy";
 
+  const sceneLabel = sceneName ? ` — ${sceneName.toUpperCase()}` : "";
+
   panel.innerHTML = `
     <div id="hierarchy-header">
-      <span id="hierarchy-title">${t("hierarchy.header")}</span>
-      <span id="hierarchy-dirty" style="display:none" title="Unsaved changes">●</span>
+      <span id="hierarchy-title">${t("hierarchy.header")}${sceneLabel}</span>
+      <span id="hierarchy-dirty" style="display:none" data-tooltip="Unsaved changes">●</span>
     </div>
     <div id="hierarchy-list"></div>
   `;

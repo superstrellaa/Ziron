@@ -16,10 +16,8 @@ export async function createViewport(container, projectData) {
   const viewportEl = container.querySelector("#viewport");
 
   const { renderer, camera } = createRenderer(viewportEl);
-  const { scene, sceneManager, firstSelected, sun } = await createScene(
-    renderer,
-    projectData,
-  );
+  const { scene, sceneManager, firstSelected, sun, sceneName } =
+    await createScene(renderer, projectData);
   const flyControls = createFlyCamera(camera, viewportEl);
   const gizmo = createGizmo(camera, renderer.domElement, scene, flyControls);
 
@@ -33,7 +31,12 @@ export async function createViewport(container, projectData) {
     gizmo,
     flyControls,
   );
-  const hierarchy = createHierarchy(container, sceneManager, selection);
+  const hierarchy = createHierarchy(
+    container,
+    sceneManager,
+    selection,
+    sceneName,
+  );
   container.insertBefore(container.querySelector("#hierarchy"), viewportEl);
 
   selection.onChange((single, multi) => hierarchy.setSelected(single, multi));

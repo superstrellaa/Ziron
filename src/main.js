@@ -31,7 +31,7 @@ initPopupSystem();
 
 let _activeViewport = null;
 
-const ENGINE_VERSION = await getVersion();
+export const ENGINE_VERSION = await getVersion();
 logger.info("Main", `ZIRON Editor v${ENGINE_VERSION} starting...`);
 
 // ── DOM base ──────────────────────────────────────────────────────────────────
@@ -87,6 +87,8 @@ function onProjectReady(projectData) {
     _activeViewport = null;
   }
 
+  setToolbarProject(projectData.name);
+
   workspace.innerHTML = "";
   const viewportEl = document.createElement("div");
   viewportEl.id = "viewport";
@@ -137,6 +139,7 @@ async function closeWithDirtyCheck(then) {
     _activeViewport.destroy();
     _activeViewport = null;
   }
+  setToolbarProject(null);
   then();
 }
 
@@ -155,6 +158,16 @@ initMenuBar({
       createWelcomeScreen(workspace, checkVersionAndLoad);
     }),
 });
+
+const toolbarTitle = document.querySelector("#toolbar-left span");
+
+function setToolbarProject(projectName = null) {
+  if (projectName) {
+    toolbarTitle.textContent = `${t("general.title")} — ${projectName.toUpperCase()}`;
+  } else {
+    toolbarTitle.textContent = t("general.title");
+  }
+}
 
 // ── Arranque ──────────────────────────────────────────────────────────────────
 const launchProject = await invoke("get_launch_project").catch(() => null);

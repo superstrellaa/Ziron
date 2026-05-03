@@ -155,6 +155,7 @@ export async function createScene(renderer, projectData) {
   const sun = await createSunEntity(scene, sceneManager, updateSky);
 
   let firstSelected = null;
+  let sceneName = "main";
 
   if (projectData) {
     const saved = await loadScene(projectData);
@@ -192,9 +193,17 @@ export async function createScene(renderer, projectData) {
         `Loaded ${saved.entities.length} entities from disk`,
       );
     }
+
+    sceneName = saved?.name ?? "main";
   } else {
     firstSelected = sceneManager.add("cube", { name: "Cube" });
   }
 
-  return { scene, sceneManager, firstSelected, sun };
+  return {
+    scene,
+    sceneManager,
+    firstSelected,
+    sun,
+    sceneName,
+  };
 }

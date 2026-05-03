@@ -12,6 +12,7 @@ import { t } from "../../../engine/i18n/i18n.js";
 import { get, set } from "../../systems/persistence/config.js";
 import { logger } from "../../../engine/core/logger.js";
 import { Toast } from "../../../engine/ui/toasts/toastTypes.js";
+import { ENGINE_VERSION } from "../../../main.js";
 
 export async function createWelcomeScreen(
   container,
@@ -36,7 +37,9 @@ export async function createWelcomeScreen(
           <i data-lucide="folder-open"></i>
           ${t("welcome.openProject")}
         </button>
-        <div id="welcome-sidebar-bottom">${t("welcome.version")}</div>
+        <div id="welcome-sidebar-bottom" data-tooltip="v${ENGINE_VERSION}">
+          ${t("welcome.version")}
+        </div>
       </div>
 
       <div id="welcome-main">
@@ -269,9 +272,9 @@ function makeProjectCard(project, el, grid, onProjectReady) {
       <span class="project-card-icon"><i data-lucide="folder-kanban"></i></span>
       <span class="project-card-name">${project.name}</span>
     </div>
-    <div class="project-card-path" title="${project.path}">${shortPath}</div>
+    <div class="project-card-path" data-tooltip="${project.path}">${shortPath}</div>
     <div class="project-card-date">Last opened: ${date}</div>
-    <button class="project-card-remove" title="Remove from list"><i data-lucide="x"></i></button>
+    <button class="project-card-remove" data-tooltip="Remove from list"><i data-lucide="x"></i></button>
   `;
 
   card.addEventListener("click", async (e) => {
