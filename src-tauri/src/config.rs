@@ -28,6 +28,7 @@ fn default_config() -> Value {
             "RENAME":         { "key": "F2", "ctrl": false, "shift": false, "alt": false },
             "COPY":           { "key": "c", "ctrl": true,  "shift": false, "alt": false },
             "PASTE":          { "key": "v", "ctrl": true,  "shift": false, "alt": false },
+            "SELECT_ADD": { "key": "shift", "ctrl": false, "shift": true, "alt": false },
             "_BLOCK_FIND":    { "key": "f", "ctrl": true,  "shift": false, "alt": false },
             "_BLOCK_PRINT":   { "key": "p", "ctrl": true,  "shift": false, "alt": false },
             "_BLOCK_GOTO":    { "key": "g", "ctrl": true,  "shift": false, "alt": false }

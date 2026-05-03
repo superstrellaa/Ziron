@@ -20,6 +20,9 @@ export const KEYBINDS = {
   COPY: { key: "c", ctrl: true, shift: false, alt: false },
   PASTE: { key: "v", ctrl: true, shift: false, alt: false },
 
+  // ── Selección ──
+  SELECT_ADD: { key: "shift", ctrl: false, shift: true, alt: false },
+
   // ── Navegador (bloqueadas) ──
   _BLOCK_FIND: { key: "f", ctrl: true, shift: false, alt: false },
   _BLOCK_PRINT: { key: "p", ctrl: true, shift: false, alt: false },

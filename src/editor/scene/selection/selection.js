@@ -148,15 +148,50 @@ export function createSelectionSystem(
     const hits2 = raycaster.intersectObjects(meshes, false);
 
     if (hits2.length === 0) {
-      deselect();
+      if (!e.shiftKey) deselect();
       return;
     }
 
     const hitMesh = hits2[0].object;
     const entity = sceneManager.getAll().find((en) => en.mesh === hitMesh);
     if (!entity) return;
-    if (selected?.id === entity.id) return;
 
+    // multi seleccion de click normal
+    if (e.shiftKey) {
+      const allEntities = sceneManager
+        .getAll()
+        .filter((en) => en.type !== "sun");
+
+      let all = new Set();
+      if (selected) all.add(selected.id);
+      multi.getSelected().forEach((en) => all.add(en.id));
+
+      if (all.has(entity.id)) {
+        all.delete(entity.id);
+      } else {
+        all.add(entity.id);
+      }
+
+      const newSelection = allEntities.filter((en) => all.has(en.id));
+
+      if (newSelection.length === 0) {
+        deselect();
+      } else if (newSelection.length === 1) {
+        selectEntity(newSelection[0]);
+      } else {
+        selected = null;
+        multi.setSelected(newSelection);
+        logger.info(
+          "Selection",
+          `Multi-selected ${newSelection.length} entities`,
+        );
+        notifyChange();
+      }
+      return;
+    }
+
+    // click normal vaya
+    if (selected?.id === entity.id && multi.getSelected().length === 0) return;
     selectEntity(entity);
   });
 
