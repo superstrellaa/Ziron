@@ -55,6 +55,10 @@ export default {
     saveSuccess: { title: "Saved", message: "Scene saved successfully." },
     saveError: { title: "Save Failed", message: "Could not save the scene." },
     loadError: { title: "Load Failed", message: "Could not load the scene." },
+    createProjectSuccess: {
+      title: "Project Created",
+      message: "The project has been created successfully.",
+    },
     createProjectError: {
       title: "Project Creation Failed",
       message: "Could not create the project.",

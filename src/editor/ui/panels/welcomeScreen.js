@@ -203,6 +203,7 @@ function renderNewProjectPanel(content, el, onProjectReady, onCancel) {
       const projectData = await invoke("load_project", { projectFile });
       logger.info("Welcome", `Created project "${name}"`);
       document.removeEventListener("keydown", onEsc);
+      Toast.createProjectSuccess();
       el.remove();
       onProjectReady(projectData);
     } catch (e) {

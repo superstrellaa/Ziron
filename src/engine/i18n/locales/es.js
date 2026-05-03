@@ -64,6 +64,10 @@ export default {
       title: "Error al Cargar",
       message: "No se pudo cargar la escena.",
     },
+    createProjectSuccess: {
+      title: "Proyecto Creado",
+      message: "El proyecto ha sido creado exitosamente.",
+    },
     createProjectError: {
       title: "Error al Crear Proyecto",
       message: "No se pudo crear el proyecto.",

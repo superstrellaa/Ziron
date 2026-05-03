@@ -30,6 +30,13 @@ export const Toast = {
       messageKey: "toasts.loadError.message",
       ...extra,
     }),
+  createProjectSuccess: (extra) =>
+    pushToast({
+      type: "info",
+      titleKey: "toasts.createProjectSuccess.title",
+      messageKey: "toasts.createProjectSuccess.message",
+      ...extra,
+    }),
   createProjectError: (extra) =>
     pushToast({
       type: "error",
@@ -65,6 +72,7 @@ export const Toast = {
       messageKey: "toasts.projectRemovedRecents.message",
       ...extra,
     }),
+
   info: (title, message, duration) =>
     pushToast({ type: "info", title, message, duration }),
   warning: (title, message, duration) =>
