@@ -2,7 +2,12 @@ import { invoke } from "@tauri-apps/api/core";
 import { logger } from "../../../engine/core/logger.js";
 import { Toast } from "../../../engine/ui/toasts/toastTypes.js";
 
-export async function saveScene(projectData, sceneManager, history = null) {
+export async function saveScene(
+  projectData,
+  sceneManager,
+  history = null,
+  sceneName = "main",
+) {
   const entities = sceneManager.getAll().map((entity) => {
     const { mesh } = entity;
     const base = {
@@ -19,8 +24,8 @@ export async function saveScene(projectData, sceneManager, history = null) {
     return base;
   });
 
-  const sceneData = { name: projectData.name, entities };
-  const scenePath = `${projectData._folder}/scenes/main.ziron.scene`;
+  const sceneData = { name: sceneName, entities };
+  const scenePath = `${projectData._folder}/scenes/${sceneName}.ziron.scene`;
 
   try {
     await invoke("save_scene", { scenePath, sceneData });
@@ -35,8 +40,8 @@ export async function saveScene(projectData, sceneManager, history = null) {
   }
 }
 
-export async function loadScene(projectData) {
-  const scenePath = `${projectData._folder}/scenes/main.ziron.scene`;
+export async function loadScene(projectData, sceneName = "main") {
+  const scenePath = `${projectData._folder}/scenes/${sceneName}.ziron.scene`;
   try {
     const sceneData = await invoke("load_scene", { scenePath });
     logger.info("ScenePersistence", `Scene loaded ← ${scenePath}`);

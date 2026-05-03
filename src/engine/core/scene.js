@@ -158,7 +158,13 @@ export async function createScene(renderer, projectData) {
   let sceneName = "main";
 
   if (projectData) {
-    const saved = await loadScene(projectData);
+    // cargar nombre de la escena startup qe ya hay configurada en el proyecto
+    const startupScene = projectData.startup_scene ?? "scenes/main.ziron.scene";
+    const sceneName_fromFile = startupScene
+      .replace("scenes/", "")
+      .replace(".ziron.scene", "");
+
+    const saved = await loadScene(projectData, sceneName_fromFile);
 
     const hasEntities = saved?.entities?.some((e) => e.type !== "sun");
     if (!hasEntities) {

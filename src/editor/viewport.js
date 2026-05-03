@@ -68,7 +68,7 @@ export async function createViewport(container, projectData) {
   hierarchy.setContextMenu(ctxMenu);
 
   async function triggerSave() {
-    await saveScene(projectData, sceneManager, history);
+    await saveScene(projectData, sceneManager, history, sceneName);
     updateDirtyUI(false);
   }
 
