@@ -12,7 +12,7 @@ import { t } from "../../../engine/i18n/i18n.js";
 import { get, set } from "../../systems/persistence/config.js";
 import { logger } from "../../../engine/core/logger.js";
 import { Toast } from "../../../engine/ui/toasts/toastTypes.js";
-import { ENGINE_VERSION } from "../../../main.js";
+import { ENGINE_VERSION } from "../../systems/app/versionManager.js";
 
 export async function createWelcomeScreen(
   container,
