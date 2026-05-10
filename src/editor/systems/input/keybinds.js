@@ -27,6 +27,7 @@ export const KEYBINDS = {
   _BLOCK_FIND: { key: "f", ctrl: true, shift: false, alt: false },
   _BLOCK_PRINT: { key: "p", ctrl: true, shift: false, alt: false },
   _BLOCK_GOTO: { key: "g", ctrl: true, shift: false, alt: false },
+  _BLOCK_SELECT_ALL: { key: "a", ctrl: true, shift: false, alt: false },
 };
 
 /**

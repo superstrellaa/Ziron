@@ -26,9 +26,20 @@ export function initWindowManager(getActiveViewport) {
     appWindow.close();
   });
 
+  // Bloquear cosas comunes de navegador que no busco
   onKeybind(["_BLOCK_FIND", "_BLOCK_PRINT", "_BLOCK_GOTO"], (e) =>
     e.preventDefault(),
   );
+
+  // Bloquear CTRL A para evitar seleccionar cosas que no tocan
+  onKeybind(["_BLOCK_SELECT_ALL"], (e) => {
+    const tag = document.activeElement?.tagName;
+    const isEditable =
+      tag === "INPUT" ||
+      tag === "TEXTAREA" ||
+      document.activeElement?.isContentEditable;
+    if (!isEditable) e.preventDefault();
+  });
 
   window.addEventListener("contextmenu", (e) => e.preventDefault()); // Helper general para quitar el menu nativo horrible
 }
