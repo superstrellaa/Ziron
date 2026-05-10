@@ -100,8 +100,6 @@ export async function createWelcomeScreen(
   else showRecents();
 }
 
-// ── Panel de nuevo proyecto ────────────────────────────────────────────────────
-
 function renderNewProjectPanel(content, el, onProjectReady, onCancel) {
   const savedFolder = get("editor.projects_folder") ?? "";
 
@@ -220,8 +218,6 @@ function renderNewProjectPanel(content, el, onProjectReady, onCancel) {
   setTimeout(() => nameInput.focus(), 50);
 }
 
-// ── Recientes ──────────────────────────────────────────────────────────────────
-
 async function renderRecents(content, el, onProjectReady) {
   content.innerHTML = `<div id="welcome-projects-grid"></div>`;
   const grid = content.querySelector("#welcome-projects-grid");
@@ -273,7 +269,10 @@ function makeProjectCard(project, el, grid, onProjectReady) {
       <span class="project-card-name">${project.name}</span>
     </div>
     <div class="project-card-path" data-tooltip="${project.path}">${shortPath}</div>
-    <div class="project-card-date">Last opened: ${date}</div>
+    <div class="project-card-date"
+      data-tooltip="${formatDateFull(project.last_opened)}">
+      ${t("welcome.lastOpened")}: ${formatDate(project.last_opened)}
+    </div>
     <button class="project-card-remove" data-tooltip="Remove from list"><i data-lucide="x"></i></button>
   `;
 
@@ -322,4 +321,36 @@ function formatDate(isoString) {
   } catch {
     return "Unknown";
   }
+}
+
+function formatDateFull(isoString) {
+  if (!isoString) return "";
+  try {
+    const date = new Date(isoString);
+    const dateStr = date.toLocaleDateString(undefined, {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+    const timeStr = date.toLocaleTimeString(undefined, {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+    const relative = formatRelative(date);
+    return `${dateStr} - ${timeStr} (${relative})`;
+  } catch {
+    return "";
+  }
+}
+
+function formatRelative(date) {
+  const diff = Date.now() - date.getTime();
+  const mins = Math.floor(diff / 60000);
+  const hours = Math.floor(diff / 3600000);
+  const days = Math.floor(diff / 86400000);
+
+  if (mins < 1) return t("welcome.justNow");
+  if (mins < 60) return t("welcome.minutesAgo").replace("{n}", mins);
+  if (hours < 24) return t("welcome.hoursAgo").replace("{n}", hours);
+  return t("welcome.daysAgo").replace("{n}", days);
 }

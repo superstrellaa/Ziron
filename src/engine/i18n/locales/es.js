@@ -14,6 +14,12 @@ export default {
     newProject: "Nuevo Proyecto",
     openProject: "Abrir Proyecto",
     noRecents: "No hay proyectos recientes",
+    lastOpened: "Último acceso",
+    justNow: "Ahora mismo",
+    minutesAgo: "Hace {n} minutos",
+    hoursAgo: "Hace {n} horas",
+    daysAgo: "Hace {n} días",
+
     version: "ZIRON Engine — Desarrollo Temprano",
     newProjectPanel: {
       title: "Nuevo Proyecto",
