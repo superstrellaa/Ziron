@@ -36,6 +36,10 @@ export async function checkVersionAndLoad(projectData, onCancel = null) {
   const projectVersion = projectData.ziron_version;
 
   if (projectVersion && projectVersion !== ENGINE_VERSION) {
+    logger.warn(
+      "ProjectManager",
+      `Project version (${projectVersion}) does not match engine version (${ENGINE_VERSION})`,
+    );
     const result = await Popup.versionMismatch(projectVersion, ENGINE_VERSION);
 
     if (result === "cancel") {
@@ -52,9 +56,12 @@ export async function checkVersionAndLoad(projectData, onCancel = null) {
           projectFile: projectData._project_file,
           newVersion: ENGINE_VERSION,
         });
-        logger.info("Main", `Project version updated to ${ENGINE_VERSION}`);
+        logger.info(
+          "ProjectManager",
+          `Project version updated to ${ENGINE_VERSION}`,
+        );
       } catch (e) {
-        logger.warn("Main", `Could not update project version: ${e}`);
+        logger.warn("ProjectManager", `Could not update project version: ${e}`);
       }
     }
   }
