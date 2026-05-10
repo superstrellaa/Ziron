@@ -13,7 +13,7 @@ const GEOMETRIES = {
 };
 
 export function createSceneManager(scene) {
-  const listeners = { onAdd: [], onRemove: [] };
+  const listeners = { onAdd: [], onRemove: [], onUpdate: [] };
   const entities = new Map();
   let nextId = 1;
 
@@ -40,7 +40,14 @@ export function createSceneManager(scene) {
 
     scene.add(mesh);
 
-    const entity = { id: nextId++, name, type, mesh };
+    const entity = {
+      id: nextId++,
+      name,
+      type,
+      mesh,
+      active: options.active ?? true,
+    };
+    if (!entity.active) mesh.visible = false;
     entities.set(entity.id, entity);
 
     listeners.onAdd.forEach((cb) => cb(entity));
@@ -54,6 +61,7 @@ export function createSceneManager(scene) {
 
   // para entidades especiales como el sol, que no siguen las geometries esas raras
   function addRaw(entity) {
+    entity.active = entity.active ?? true;
     entities.set(entity.id, entity);
     listeners.onAdd.forEach((cb) => cb(entity));
     logger.info(
@@ -90,6 +98,10 @@ export function createSceneManager(scene) {
 
   function on(event, callback) {
     listeners[event]?.push(callback);
+    return () => {
+      const arr = listeners[event];
+      if (arr) listeners[event] = arr.filter((cb) => cb !== callback);
+    };
   }
 
   function rename(id, newName) {
@@ -97,9 +109,19 @@ export function createSceneManager(scene) {
     if (!entity) return false;
     const old = entity.name;
     entity.name = newName;
+    listeners.onUpdate.forEach((cb) => cb(entity)); // disparar evento de update para refrescar paranoias
     logger.info("SceneManager", `Renamed "${old}" → "${newName}" (id: ${id})`);
     return true;
   }
 
-  return { add, remove, getAll, getById, on, addRaw, rename };
+  function setActive(id, value) {
+    const entity = entities.get(id);
+    if (!entity) return false;
+    entity.active = value;
+    entity.mesh.visible = value;
+    listeners.onUpdate.forEach((cb) => cb(entity));
+    return true;
+  }
+
+  return { add, remove, getAll, getById, on, addRaw, rename, setActive };
 }

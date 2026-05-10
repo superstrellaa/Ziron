@@ -17,6 +17,7 @@ export async function saveScene(
       position: mesh.position.toArray(),
       rotation: mesh.rotation.toArray().slice(0, 3),
       scale: mesh.scale.toArray(),
+      active: entity.active ?? true,
     };
     if (entity.type !== "sun" && mesh.material?.color) {
       base.color = "#" + mesh.material.color.getHexString();

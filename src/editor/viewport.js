@@ -11,6 +11,7 @@ import { createHierarchy } from "./ui/panels/hierarchy.js";
 import { onKeybind } from "./systems/input/keybinds.js";
 import { saveScene } from "./systems/persistence/scenePersistence.js";
 import { setProjectOpen } from "./ui/toolbar/menuBar.js";
+import { createProperties } from "./ui/panels/properties.js";
 
 export async function createViewport(container, projectData) {
   const viewportEl = container.querySelector("#viewport");
@@ -31,13 +32,25 @@ export async function createViewport(container, projectData) {
     gizmo,
     flyControls,
   );
+
   const hierarchy = createHierarchy(
     container,
     sceneManager,
     selection,
     sceneName,
+    () => history,
   );
   container.insertBefore(container.querySelector("#hierarchy"), viewportEl);
+
+  const history = setupHistory(gizmo.gizmo, selection, sceneManager); // inicializar history antes de requerir en propiedades
+
+  const properties = createProperties(
+    container,
+    selection,
+    sceneManager,
+    () => history,
+  );
+  container.appendChild(container.querySelector("#properties"));
 
   selection.onChange((single, multi) => hierarchy.setSelected(single, multi));
   if (firstSelected) selection.selectEntity(firstSelected);
@@ -45,8 +58,6 @@ export async function createViewport(container, projectData) {
   sceneManager.on("onAdd", (entity) => {
     if (entity.type !== "sun") selection.selectEntity(entity);
   });
-
-  const history = setupHistory(gizmo.gizmo, selection, sceneManager);
 
   async function updateDirtyUI(dirty) {
     hierarchy.setDirty(dirty);

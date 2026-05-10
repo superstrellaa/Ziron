@@ -50,6 +50,17 @@ export default {
   hierarchy: {
     header: "Escena",
   },
+  properties: {
+    header: "Propiedades",
+    empty: "No hay entidad seleccionada",
+    name: "Nombre",
+    nameTip: "Nombre de la entidad",
+    active: "Activo",
+    activeTip: "Alternar visibilidad de la entidad",
+    position: "Posición",
+    rotation: "Rotación (grados)",
+    scale: "Escala",
+  },
   toasts: {
     generalError: { title: "Error", message: "Algo salió mal." },
     saveSuccess: {

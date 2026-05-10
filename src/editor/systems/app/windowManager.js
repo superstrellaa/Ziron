@@ -1,5 +1,6 @@
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { Popup } from "../../../engine/ui/popup/popupTypes.js";
+import { onKeybind } from "../input/keybinds.js";
 
 const appWindow = getCurrentWindow();
 
@@ -24,4 +25,10 @@ export function initWindowManager(getActiveViewport) {
     }
     appWindow.close();
   });
+
+  onKeybind(["_BLOCK_FIND", "_BLOCK_PRINT", "_BLOCK_GOTO"], (e) =>
+    e.preventDefault(),
+  );
+
+  window.addEventListener("contextmenu", (e) => e.preventDefault()); // Helper general para quitar el menu nativo horrible
 }

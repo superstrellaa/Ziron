@@ -181,6 +181,8 @@ export async function createScene(renderer, projectData) {
         entity.mesh.position.fromArray(e.position);
         entity.mesh.rotation.set(e.rotation[0], e.rotation[1], e.rotation[2]);
         entity.mesh.scale.fromArray(e.scale);
+        entity.mesh.visible = e.active ?? true;
+        sceneManager.setActive(entity.id, e.active ?? true);
         if (firstSelected === null) firstSelected = entity;
       }
 

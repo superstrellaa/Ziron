@@ -1,12 +1,14 @@
 import { createIcons, Box } from "lucide";
 import { t } from "../../../engine/i18n/i18n.js";
 import { onKeybind } from "../../systems/input/keybinds.js";
+import { RenameCommand } from "../../../engine/history/commands.js";
 
 export function createHierarchy(
   container,
   sceneManager,
   selection,
   sceneName = "",
+  getHistory,
 ) {
   const panel = document.createElement("div");
   panel.id = "hierarchy";
@@ -22,6 +24,8 @@ export function createHierarchy(
   `;
 
   container.appendChild(panel);
+
+  sceneManager.on("onUpdate", () => render()); // listener para actualizar cuando se actualiza
 
   const list = panel.querySelector("#hierarchy-list");
 
@@ -64,6 +68,7 @@ export function createHierarchy(
       }
 
       row.classList.toggle("h-selected", selectedIds.has(entity.id));
+      row.classList.toggle("h-inactive", entity.active === false);
     });
 
     if (dirty) {
@@ -111,12 +116,15 @@ export function createHierarchy(
     function commitRename() {
       if (editingId !== id) return;
       const newName = input.value.trim();
-      if (newName && newName !== entity.name) {
-        sceneManager.rename(id, newName);
-      }
       editingId = null;
       row.innerHTML = "";
-      render();
+      if (newName && newName !== entity.name) {
+        const cmd = RenameCommand(sceneManager, entity, newName);
+        cmd.execute();
+        getHistory().push(cmd);
+      } else {
+        render();
+      }
     }
 
     function cancelRename() {

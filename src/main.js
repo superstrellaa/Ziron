@@ -1,10 +1,7 @@
 import "./styles.css";
 import { createIcons, Box, Minimize, Maximize, X } from "lucide";
 import { loadConfig, get } from "./editor/systems/persistence/config.js";
-import {
-  applyConfigKeybinds,
-  onKeybind,
-} from "./editor/systems/input/keybinds.js";
+import { applyConfigKeybinds } from "./editor/systems/input/keybinds.js";
 import { setLocale } from "./engine/i18n/i18n.js";
 import { t } from "./engine/i18n/i18n.js";
 import { logger } from "./engine/core/logger.js";
@@ -60,11 +57,6 @@ createIcons({
 initWorkspaceManager();
 initWindowManager(getActiveViewport);
 initProjectMenuBar();
-
-// ── Bloquear teclas de navegador ──────────────────────────────────────────────
-onKeybind(["_BLOCK_FIND", "_BLOCK_PRINT", "_BLOCK_GOTO"], (e) =>
-  e.preventDefault(),
-);
 
 // ── Arranque ──────────────────────────────────────────────────────────────────
 const launchProject = await invoke("get_launch_project").catch(() => null);

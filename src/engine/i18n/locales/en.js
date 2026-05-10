@@ -50,6 +50,17 @@ export default {
   hierarchy: {
     header: "Scene",
   },
+  properties: {
+    header: "Properties",
+    empty: "No entity selected",
+    name: "Name",
+    nameTip: "Entity name",
+    active: "Active",
+    activeTip: "Toggle entity visibility",
+    position: "Position",
+    rotation: "Rotation (deg)",
+    scale: "Scale",
+  },
   toasts: {
     generalError: { title: "Error", message: "Something went wrong." },
     saveSuccess: { title: "Saved", message: "Scene saved successfully." },

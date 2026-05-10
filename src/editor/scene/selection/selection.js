@@ -144,7 +144,10 @@ export function createSelectionSystem(
     mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
 
     raycaster.setFromCamera(mouse, camera);
-    const meshes = sceneManager.getAll().map((en) => en.mesh);
+    const meshes = sceneManager
+      .getAll()
+      .filter((en) => en.active !== false)
+      .map((en) => en.mesh);
     const hits2 = raycaster.intersectObjects(meshes, false);
 
     if (hits2.length === 0) {
