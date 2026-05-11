@@ -73,8 +73,8 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             logger::log,
             logger::init_logger,
-            cursor::grab_cursor,
-            cursor::release_cursor,
+            cursor::start_fly,
+            cursor::stop_fly,
             cursor::recenter_cursor,
             config::load_config,
             config::save_config,

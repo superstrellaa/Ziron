@@ -14,20 +14,33 @@ export function createFlyCamera(camera, domElement) {
     yaw: 0,
     pitch: 0,
     keys: { w: false, a: false, s: false, d: false, q: false, e: false },
-    centerX: 0,
-    centerY: 0,
     deltaX: 0,
     deltaY: 0,
-    _centerReady: false,
+    lastX: 0,
+    lastY: 0,
+    recentering: false,
   };
 
   const LOOK_SPEED = 0.003;
   const FLY_SPEED = 0.08;
   const FLY_SPEED_FAST = 0.28;
+  const RECENTER_MARGIN = 80;
 
   const euler = new THREE.Euler().setFromQuaternion(camera.quaternion, "YXZ");
   state.yaw = euler.y;
   state.pitch = euler.x;
+
+  function stopFlying() {
+    state.isFlying = false;
+    state.flyStarted = false;
+    state.deltaX = 0;
+    state.deltaY = 0;
+    state.shift = false;
+    state.recentering = false;
+    for (const k in state.keys) state.keys[k] = false;
+    domElement.classList.remove("cursor-none");
+    invoke("stop_fly");
+  }
 
   async function onMouseDown(e) {
     if (e.button !== 2) return;
@@ -42,10 +55,9 @@ export function createFlyCamera(camera, domElement) {
       state.mouseDownValid = false;
       return;
     }
+
     e.preventDefault();
-
     state.shift = e.shiftKey;
-
     state.mouseDownValid = true;
     state.mouseDownTime = performance.now();
     state.mouseDownX = e.clientX;
@@ -61,47 +73,55 @@ export function createFlyCamera(camera, domElement) {
       const elapsed = performance.now() - (state.mouseDownTime ?? 0);
       const dx = Math.abs(e.clientX - state.mouseDownX);
       const dy = Math.abs(e.clientY - state.mouseDownY);
-      const moved = dx > 4 || dy > 4;
-
-      if (elapsed < 150 && !moved) return;
+      if (elapsed < 150 && !(dx > 4 || dy > 4)) return;
 
       state.flyStarted = true;
       state.isFlying = true;
       state.deltaX = 0;
       state.deltaY = 0;
-      document.body.classList.add("cursor-hidden");
-      invoke("grab_cursor");
-      invoke("recenter_cursor").then(([cx, cy]) => {
-        state.centerX = cx;
-        state.centerY = cy;
-        state._centerReady = true;
-      });
+      state.lastX = e.clientX;
+      state.lastY = e.clientY;
+      state.recentering = true;
+      domElement.classList.add("cursor-none");
+      invoke("start_fly");
       return;
     }
 
-    if (!state.isFlying || !state._centerReady) return;
-    state.deltaX += e.screenX - state.centerX;
-    state.deltaY += e.screenY - state.centerY;
+    if (!state.isFlying) return;
+
+    if (state.recentering) {
+      state.recentering = false;
+      state.lastX = e.clientX;
+      state.lastY = e.clientY;
+      return;
+    }
+
+    state.deltaX += e.clientX - state.lastX;
+    state.deltaY += e.clientY - state.lastY;
+    state.lastX = e.clientX;
+    state.lastY = e.clientY;
+
+    const rect = domElement.getBoundingClientRect();
+    const nearEdge =
+      e.clientX < rect.left + RECENTER_MARGIN ||
+      e.clientX > rect.right - RECENTER_MARGIN ||
+      e.clientY < rect.top + RECENTER_MARGIN ||
+      e.clientY > rect.bottom - RECENTER_MARGIN;
+
+    if (nearEdge) {
+      state.recentering = true;
+      invoke("recenter_cursor");
+    }
   }
 
   async function onMouseUp(e) {
     if (e.button !== 2) return;
     state.mouseDownValid = false;
-    state._centerReady = false;
-
     if (!state.flyStarted) {
       state.mouseDownTime = null;
       return;
     }
-
-    state.isFlying = false;
-    state.flyStarted = false;
-    state.deltaX = 0;
-    state.deltaY = 0;
-    state.shift = false;
-    for (const k in state.keys) state.keys[k] = false;
-    document.body.classList.remove("cursor-hidden");
-    await invoke("release_cursor");
+    stopFlying();
   }
 
   function onWheel(e) {
@@ -145,35 +165,20 @@ export function createFlyCamera(camera, domElement) {
   domElement.addEventListener("contextmenu", onContextMenu);
   window.addEventListener("keydown", onKeyDown);
   window.addEventListener("keyup", onKeyUp);
-
-  window.addEventListener("blur", () => {
-    state.shift = false;
-    state.isFlying = false;
-    state.flyStarted = false;
-    state._centerReady = false;
-    state.deltaX = 0;
-    state.deltaY = 0;
-    for (const k in state.keys) state.keys[k] = false;
-    document.body.classList.remove("cursor-hidden");
-    invoke("release_cursor");
-  });
+  window.addEventListener("blur", stopFlying);
 
   const _forward = new THREE.Vector3();
   const _right = new THREE.Vector3();
   const _up = new THREE.Vector3();
   const _move = new THREE.Vector3();
 
-  async function update() {
+  function update() {
     if (state.isFlying) {
       state.yaw -= state.deltaX * LOOK_SPEED;
       state.pitch -= state.deltaY * LOOK_SPEED;
       state.pitch = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, state.pitch));
       state.deltaX = 0;
       state.deltaY = 0;
-
-      const [cx, cy] = await invoke("recenter_cursor");
-      state.centerX = cx;
-      state.centerY = cy;
     }
 
     const qYaw = new THREE.Quaternion().setFromAxisAngle(
@@ -205,8 +210,20 @@ export function createFlyCamera(camera, domElement) {
     }
   }
 
+  function dispose() {
+    window.removeEventListener("mousedown", onMouseDown);
+    window.removeEventListener("mousemove", onMouseMove);
+    window.removeEventListener("mouseup", onMouseUp);
+    domElement.removeEventListener("wheel", onWheel);
+    domElement.removeEventListener("contextmenu", onContextMenu);
+    window.removeEventListener("keydown", onKeyDown);
+    window.removeEventListener("keyup", onKeyUp);
+    window.removeEventListener("blur", stopFlying);
+  }
+
   return {
     update,
+    dispose,
     set enabled(v) {
       state.enabled = v;
     },

@@ -38,7 +38,7 @@ export function createHierarchy(
   const rowMap = new Map();
 
   function render() {
-    const entities = sceneManager.getAll().filter((e) => e.type !== "sun");
+    const entities = sceneManager.getAll();
 
     for (const [id, row] of rowMap) {
       if (!entities.find((e) => e.id === id)) {
@@ -166,7 +166,7 @@ export function createHierarchy(
     const entity = sceneManager.getById(id);
     if (!entity) return;
 
-    const entities = sceneManager.getAll().filter((en) => en.type !== "sun");
+    const entities = sceneManager.getAll();
 
     if (e.shiftKey && lastClickedId !== null) {
       const ids = entities.map((en) => en.id);

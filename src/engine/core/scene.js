@@ -193,6 +193,13 @@ export async function createScene(renderer, projectData) {
           savedSun.rotation[1],
           savedSun.rotation[2],
         );
+        sun.entity.mesh.position.fromArray(savedSun.position);
+        console.log(
+          "Sun position loaded:",
+          sun.entity.mesh.position,
+          "position in file:",
+          savedSun.position,
+        );
         sun.update();
       }
 

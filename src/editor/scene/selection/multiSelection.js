@@ -112,9 +112,7 @@ export function createMultiSelection(
   }
 
   function queryRect(rectPx, containerRect) {
-    const entities = sceneManager
-      .getAll()
-      .filter((e) => e.type !== "sun" && e.active !== false);
+    const entities = sceneManager.getAll().filter((e) => e.active !== false);
     const result = [];
     const _ndc = new THREE.Vector3();
 

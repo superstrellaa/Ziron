@@ -141,7 +141,7 @@ export function createProperties(container, selection, sceneManager, history) {
           <label class="prop-label">${t("properties.name")}</label>
           <label class="prop-active-label" data-tooltip="${t("properties.activeTip")}">
             <input type="checkbox" id="prop-active" ${allActive ? "checked" : ""} />
-            <span>${t("properties.active")}</span>
+            <span id="prop-active-label">${t("properties.active")}</span>
           </label>
         </div>
         <input
@@ -158,23 +158,23 @@ export function createProperties(container, selection, sceneManager, history) {
 
       <div class="prop-section-label">${t("properties.position")}</div>
       <div class="prop-grid">
-        <div class="prop-field"><span class="prop-axis prop-axis-x">X</span><input class="prop-input" id="prop-px" type="number" step="0.1" /></div>
-        <div class="prop-field"><span class="prop-axis prop-axis-y">Y</span><input class="prop-input" id="prop-py" type="number" step="0.1" /></div>
-        <div class="prop-field"><span class="prop-axis prop-axis-z">Z</span><input class="prop-input" id="prop-pz" type="number" step="0.1" /></div>
+        <div class="prop-field"><span class="prop-axis prop-axis-x">X</span><input class="prop-input" id="prop-px" type="number" step="0.1" autocomplete="off" spellcheck="false" /></div>
+        <div class="prop-field"><span class="prop-axis prop-axis-y">Y</span><input class="prop-input" id="prop-py" type="number" step="0.1" autocomplete="off" spellcheck="false" /></div>
+        <div class="prop-field"><span class="prop-axis prop-axis-z">Z</span><input class="prop-input" id="prop-pz" type="number" step="0.1" autocomplete="off" spellcheck="false" /></div>
       </div>
 
       <div class="prop-section-label">${t("properties.rotation")}</div>
       <div class="prop-grid">
-        <div class="prop-field"><span class="prop-axis prop-axis-x">X</span><input class="prop-input" id="prop-rx" type="number" step="1" /></div>
-        <div class="prop-field"><span class="prop-axis prop-axis-y">Y</span><input class="prop-input" id="prop-ry" type="number" step="1" /></div>
-        <div class="prop-field"><span class="prop-axis prop-axis-z">Z</span><input class="prop-input" id="prop-rz" type="number" step="1" /></div>
+        <div class="prop-field"><span class="prop-axis prop-axis-x">X</span><input class="prop-input" id="prop-rx" type="number" step="1" autocomplete="off" spellcheck="false" /></div>
+        <div class="prop-field"><span class="prop-axis prop-axis-y">Y</span><input class="prop-input" id="prop-ry" type="number" step="1" autocomplete="off" spellcheck="false" /></div>
+        <div class="prop-field"><span class="prop-axis prop-axis-z">Z</span><input class="prop-input" id="prop-rz" type="number" step="1" autocomplete="off" spellcheck="false" /></div>
       </div>
 
       <div class="prop-section-label">${t("properties.scale")}</div>
       <div class="prop-grid">
-        <div class="prop-field"><span class="prop-axis prop-axis-x">X</span><input class="prop-input" id="prop-sx" type="number" step="0.1" /></div>
-        <div class="prop-field"><span class="prop-axis prop-axis-y">Y</span><input class="prop-input" id="prop-sy" type="number" step="0.1" /></div>
-        <div class="prop-field"><span class="prop-axis prop-axis-z">Z</span><input class="prop-input" id="prop-sz" type="number" step="0.1" /></div>
+        <div class="prop-field"><span class="prop-axis prop-axis-x">X</span><input class="prop-input" id="prop-sx" type="number" step="0.1" autocomplete="off" spellcheck="false" /></div>
+        <div class="prop-field"><span class="prop-axis prop-axis-y">Y</span><input class="prop-input" id="prop-sy" type="number" step="0.1" autocomplete="off" spellcheck="false" /></div>
+        <div class="prop-field"><span class="prop-axis prop-axis-z">Z</span><input class="prop-input" id="prop-sz" type="number" step="0.1" autocomplete="off" spellcheck="false" /></div>
       </div>
     `;
 
@@ -193,7 +193,23 @@ export function createProperties(container, selection, sceneManager, history) {
     };
     sceneManager.on("onUpdate", unsubUpdate);
 
+    // cuando intente desactivar el sol indicar visualmente que no se puede el espabilado
+    checkbox.addEventListener("mouseenter", () => {
+      if (entities.some((e) => e.type === "sun")) {
+        checkbox.style.cursor = "not-allowed";
+        body.querySelector("#prop-active-label").style.cursor = "not-allowed";
+      }
+    });
+
     checkbox.addEventListener("change", () => {
+      // seguridad para cuando algun espabilado intente desactivar el sol
+      if (entities.some((e) => e.type === "sun")) {
+        const sun = entities.find((e) => e.type === "sun");
+        checkbox.checked = true;
+        checkbox.indeterminate = false;
+        if (sun.active === false) sceneManager.setActive(sun.id, true);
+      }
+
       const newValue = checkbox.checked;
       checkbox.indeterminate = false;
       const cmd = MultiSetActiveCommand(sceneManager, entities, newValue);

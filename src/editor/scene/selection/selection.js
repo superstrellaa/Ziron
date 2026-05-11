@@ -161,9 +161,7 @@ export function createSelectionSystem(
 
     // multi seleccion de click normal
     if (e.shiftKey) {
-      const allEntities = sceneManager
-        .getAll()
-        .filter((en) => en.type !== "sun");
+      const allEntities = sceneManager.getAll();
 
       let all = new Set();
       if (selected) all.add(selected.id);
