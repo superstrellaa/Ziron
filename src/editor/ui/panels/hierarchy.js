@@ -1,4 +1,4 @@
-import { createIcons, Box } from "lucide";
+import { createIcons, Box, Container } from "lucide";
 import { t } from "../../../engine/i18n/i18n.js";
 import { onKeybind } from "../../systems/input/keybinds.js";
 import { RenameCommand } from "../../../engine/history/commands.js";
@@ -17,6 +17,7 @@ export function createHierarchy(
 
   panel.innerHTML = `
     <div id="hierarchy-header">
+      <i data-lucide="container"></i>
       <span id="hierarchy-title">${t("hierarchy.header")}${sceneLabel}</span>
       <span id="hierarchy-dirty" style="display:none" data-tooltip="Unsaved changes">●</span>
     </div>
@@ -24,6 +25,11 @@ export function createHierarchy(
   `;
 
   container.appendChild(panel);
+
+  createIcons({
+    icons: { Container },
+    attrs: { width: 14, height: 14, stroke: "#cccccc" },
+  });
 
   sceneManager.on("onUpdate", () => render()); // listener para actualizar cuando se actualiza
 

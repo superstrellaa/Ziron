@@ -7,6 +7,9 @@ import {
   X,
   Box,
   PackageOpen,
+  FolderRoot,
+  ClockFading,
+  FilePlusCorner,
 } from "lucide";
 import { t } from "../../../engine/i18n/i18n.js";
 import { get, set } from "../../systems/persistence/config.js";
@@ -52,7 +55,14 @@ export async function createWelcomeScreen(
   container.appendChild(el);
 
   createIcons({
-    icons: { Plus, FolderKanban, FolderOpen, X, Box, PackageOpen },
+    icons: {
+      Plus,
+      FolderKanban,
+      FolderOpen,
+      X,
+      Box,
+      PackageOpen,
+    },
     attrs: { width: 14, height: 14, stroke: "#cccccc" },
     root: el,
   });
@@ -136,6 +146,7 @@ function renderNewProjectPanel(content, el, onProjectReady, onCancel) {
       </div>
 
       <button class="np-create-btn" id="np-create" disabled>
+        <i data-lucide="file-plus-corner"></i>
         ${t("welcome.newProjectPanel.createBtn")}
       </button>
     </div>
@@ -145,6 +156,12 @@ function renderNewProjectPanel(content, el, onProjectReady, onCancel) {
     icons: { X },
     attrs: { width: 12, height: 12, stroke: "#6b7280" },
     root: content,
+  });
+
+  createIcons({
+    icons: { FilePlusCorner },
+    attrs: { width: 18, height: 18, stroke: "#cccccc" },
+    root: content.querySelector("#np-create"),
   });
 
   const nameInput = content.querySelector("#np-name");
@@ -249,7 +266,7 @@ async function renderRecents(content, el, onProjectReady) {
   }
 
   createIcons({
-    icons: { FolderKanban, X },
+    icons: { FolderKanban, X, FolderRoot, ClockFading },
     attrs: { width: 14, height: 14, stroke: "#cccccc" },
     root: grid,
   });
@@ -264,17 +281,21 @@ function makeProjectCard(project, el, grid, onProjectReady) {
     project.path.length > 50 ? "..." + project.path.slice(-47) : project.path;
 
   card.innerHTML = `
-    <div class="project-card-header">
-      <span class="project-card-icon"><i data-lucide="folder-kanban"></i></span>
-      <span class="project-card-name">${project.name}</span>
-    </div>
-    <div class="project-card-path" data-tooltip="${project.path}">${shortPath}</div>
-    <div class="project-card-date"
-      data-tooltip="${formatDateFull(project.last_opened)}">
-      ${t("welcome.lastOpened")}: ${formatDate(project.last_opened)}
-    </div>
-    <button class="project-card-remove" data-tooltip="Remove from list"><i data-lucide="x"></i></button>
-  `;
+  <div class="project-card-header">
+    <span class="project-card-icon"><i data-lucide="folder-kanban"></i></span>
+    <span class="project-card-name">${project.name}</span>
+  </div>
+  <div class="project-card-path"
+    data-tooltip='<i data-lucide="folder-root"></i>${project.path}'>
+    ${shortPath}
+  </div>
+  <div class="project-card-date"
+    data-tooltip='<i data-lucide="clock-fading"></i>${formatDateFull(project.last_opened)}'>
+    <i data-lucide="clock-fading"></i>
+    ${t("welcome.lastOpened")}: ${formatDate(project.last_opened)}
+  </div>
+  <button class="project-card-remove" data-tooltip="Remove from list"><i data-lucide="x"></i></button>
+`;
 
   card.addEventListener("click", async (e) => {
     if (e.target.closest(".project-card-remove")) return;

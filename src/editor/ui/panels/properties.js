@@ -6,6 +6,7 @@ import {
   MultiRenameCommand,
   MultiSetActiveCommand,
 } from "../../../engine/history/commands.js";
+import { createIcons, TableProperties } from "lucide";
 
 export function createProperties(container, selection, sceneManager, history) {
   const panel = document.createElement("div");
@@ -13,6 +14,7 @@ export function createProperties(container, selection, sceneManager, history) {
 
   panel.innerHTML = `
     <div id="properties-header">
+      <i data-lucide="table-properties"></i>
       <span id="properties-title">${t("properties.header")}</span>
     </div>
     <div id="properties-body">
@@ -21,6 +23,11 @@ export function createProperties(container, selection, sceneManager, history) {
   `;
 
   container.appendChild(panel);
+
+  createIcons({
+    icons: { TableProperties },
+    attrs: { width: 14, height: 14, stroke: "#cccccc" },
+  });
 
   const body = panel.querySelector("#properties-body");
   let _currentEntity = null;

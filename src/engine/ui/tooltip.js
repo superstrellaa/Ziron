@@ -1,3 +1,5 @@
+import { createIcons, FolderRoot, ClockFading } from "lucide";
+
 let tooltipEl = null;
 let activeTarget = null;
 
@@ -20,7 +22,13 @@ function onMouseOver(e) {
   const target = e.target.closest("[data-tooltip]");
   if (!target) return;
   activeTarget = target;
-  tooltipEl.textContent = target.dataset.tooltip;
+  const content = target.dataset.tooltip;
+  if (content.startsWith("<")) {
+    tooltipEl.innerHTML = content;
+    createInIcons();
+  } else {
+    tooltipEl.textContent = content;
+  }
   tooltipEl.style.opacity = "1";
 }
 
@@ -54,4 +62,13 @@ function onMouseMove(e) {
 
   tooltipEl.style.left = x + "px";
   tooltipEl.style.top = y + "px";
+}
+
+// funcion para separar la parte de lucide con otra cosa, no le hagas caso al nombre de la funcion (:
+function createInIcons() {
+  createIcons({
+    icons: { FolderRoot, ClockFading },
+    attrs: { width: 11, height: 11, stroke: "#cccccc" },
+    root: tooltipEl,
+  });
 }
