@@ -26,18 +26,18 @@ export function createHistoryManager() {
     setDirty(true);
   }
 
-  function undo() {
+  async function undo() {
     const cmd = stack.pop();
     if (!cmd) return;
-    cmd.undo();
+    await cmd.undo();
     redoStack.push(cmd);
     setDirty(true);
   }
 
-  function redo() {
+  async function redo() {
     const cmd = redoStack.pop();
     if (!cmd) return;
-    cmd.execute();
+    await cmd.execute();
     stack.push(cmd);
     setDirty(true);
   }

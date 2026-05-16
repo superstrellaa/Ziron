@@ -8,6 +8,8 @@ export async function saveScene(
   history = null,
   sceneName = "main",
 ) {
+  sceneManager.reindexIds(); // al guardar, cambiar todos los IDs a algo organizado para facilitar lecturas visuales y carga
+
   const entities = sceneManager.getAll().map((entity) => {
     const { mesh } = entity;
     const base = {

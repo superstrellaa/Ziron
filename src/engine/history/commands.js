@@ -137,14 +137,14 @@ export function MultiDeleteCommand(sceneManager, entities) {
 
   return {
     type: EventType.DeleteObject,
-    execute() {
-      sceneManager.removeBatch(snapshots.map((s) => s.entity.id));
+    async execute() {
+      await sceneManager.removeBatch(snapshots.map((s) => s.entity.id));
     },
-    undo() {
+    async undo() {
       const items = snapshots.map((s) => ({
         type: s.type,
         options: {
-          id: s.id, // restaurar con el ID original
+          id: s.id,
           name: s.name,
           color: s.color,
           position: s.position,
@@ -153,7 +153,7 @@ export function MultiDeleteCommand(sceneManager, entities) {
         index: s.index,
         _source: s,
       }));
-      sceneManager.addBatch(items, (entity, item) => {
+      await sceneManager.addBatch(items, (entity, item) => {
         entity.mesh.quaternion.copy(item._source.quaternion);
         entity.mesh.scale.copy(item._source.scale);
         if (!item._source.active) sceneManager.setActive(entity.id, false);
@@ -166,7 +166,7 @@ export function MultiDuplicateCommand(sceneManager, entities, onCreated) {
   let created = [];
   return {
     type: EventType.CreateObject,
-    execute() {
+    async execute() {
       const items = entities.map((e) => ({
         type: e.type,
         options: {
@@ -177,14 +177,14 @@ export function MultiDuplicateCommand(sceneManager, entities, onCreated) {
         _source: e,
       }));
 
-      created = sceneManager.addBatch(items, (entity, item) => {
+      created = await sceneManager.addBatch(items, (entity, item) => {
         entity.mesh.quaternion.copy(item._source.mesh.quaternion);
         entity.mesh.scale.copy(item._source.mesh.scale);
       });
 
       onCreated?.(created);
     },
-    undo() {
+    async undo() {
       for (const e of created) sceneManager.remove(e.id);
       created = [];
     },

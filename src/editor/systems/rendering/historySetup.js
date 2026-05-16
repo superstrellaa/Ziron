@@ -20,15 +20,15 @@ export function setupHistory(tc, selection, sceneManager) {
 
   onKeybind(
     ["DELETE", "UNDO", "REDO", "DUPLICATE", "COPY", "PASTE"],
-    (e, action) => {
+    async (e, action) => {
       if (action === "UNDO") {
         e.preventDefault();
-        history.undo();
+        await history.undo();
         return;
       }
       if (action === "REDO") {
         e.preventDefault();
-        history.redo();
+        await history.redo();
         return;
       }
 
@@ -59,7 +59,7 @@ export function setupHistory(tc, selection, sceneManager) {
             multiSelected,
             (created) => selection.selectMultiple(created),
           );
-          cmd.execute();
+          await cmd.execute();
           history.push(cmd);
           return;
         }
