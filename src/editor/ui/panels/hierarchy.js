@@ -31,7 +31,15 @@ export function createHierarchy(
     attrs: { width: 14, height: 14, stroke: "#cccccc" },
   });
 
-  sceneManager.on("onUpdate", () => render()); // listener para actualizar cuando se actualiza
+  // ------ Escuchadores de eventos ------
+  sceneManager.on("onAddBatch", () => render());
+  sceneManager.on("onRemoveBatch", () => render());
+
+  sceneManager.on("onAdd", () => render());
+  sceneManager.on("onRemove", () => render());
+
+  sceneManager.on("onUpdate", () => render());
+  // -------------------------------------
 
   const list = panel.querySelector("#hierarchy-list");
 
@@ -55,17 +63,18 @@ export function createHierarchy(
 
     let dirty = false;
 
-    entities.forEach((entity) => {
-      let row = rowMap.get(entity.id);
-
-      if (!row) {
-        row = document.createElement("div");
+    for (const entity of entities) {
+      if (!rowMap.has(entity.id)) {
+        const row = document.createElement("div");
         row.className = "h-row";
         row.dataset.id = entity.id;
-        list.appendChild(row);
         rowMap.set(entity.id, row);
         dirty = true;
       }
+    }
+
+    for (const entity of entities) {
+      const row = rowMap.get(entity.id);
 
       const desired = `<span class="h-icon"><i data-lucide="box"></i></span><span class="h-name">${entity.name}</span>`;
       if (row.innerHTML !== desired) {
@@ -75,7 +84,9 @@ export function createHierarchy(
 
       row.classList.toggle("h-selected", selectedIds.has(entity.id));
       row.classList.toggle("h-inactive", entity.active === false);
-    });
+
+      list.appendChild(row);
+    }
 
     if (dirty) {
       createIcons({
@@ -254,9 +265,6 @@ export function createHierarchy(
   function setContextMenu(ctxMenu) {
     _ctxMenu = ctxMenu;
   }
-
-  sceneManager.on("onAdd", () => render());
-  sceneManager.on("onRemove", () => render());
 
   function setDirty(dirty) {
     const dot = panel.querySelector("#hierarchy-dirty");

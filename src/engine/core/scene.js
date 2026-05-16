@@ -137,7 +137,7 @@ export function createProceduralSky() {
   return { skyMesh, updateSky };
 }
 
-export async function createScene(renderer, projectData) {
+export async function createScene(renderer, projectData, onProgress = null) {
   const scene = new THREE.Scene();
 
   const pmrem = new THREE.PMREMGenerator(renderer);
@@ -151,42 +151,59 @@ export async function createScene(renderer, projectData) {
   scene.add(new THREE.AmbientLight(0xffffff, 0.15));
 
   const sceneManager = createSceneManager(scene);
-
   const sun = await createSunEntity(scene, sceneManager, updateSky);
 
   let firstSelected = null;
   let sceneName = "main";
 
   if (projectData) {
-    // cargar nombre de la escena startup qe ya hay configurada en el proyecto
     const startupScene = projectData.startup_scene ?? "scenes/main.ziron.scene";
     const sceneName_fromFile = startupScene
       .replace("scenes/", "")
       .replace(".ziron.scene", "");
 
     const saved = await loadScene(projectData, sceneName_fromFile);
+    sceneName = saved?.name ?? "main";
 
     const hasEntities = saved?.entities?.some((e) => e.type !== "sun");
+
     if (!hasEntities) {
       firstSelected = sceneManager.add("cube", { name: "Cube" });
       logger.info("Scene", "New scene — default cube added");
     } else {
-      for (const e of saved.entities) {
-        if (e.type === "sun") continue;
-        const entity = sceneManager.add(e.type, {
+      const regularEntities = saved.entities.filter((e) => e.type !== "sun");
+      const savedSun = saved.entities.find((e) => e.type === "sun");
+
+      const items = regularEntities.map((e) => ({
+        type: e.type,
+        options: {
           name: e.name,
           color: e.color ? parseInt(e.color.replace("#", ""), 16) : undefined,
-        });
-        if (!entity) continue;
-        entity.mesh.position.fromArray(e.position);
-        entity.mesh.rotation.set(e.rotation[0], e.rotation[1], e.rotation[2]);
-        entity.mesh.scale.fromArray(e.scale);
-        entity.mesh.visible = e.active ?? true;
-        sceneManager.setActive(entity.id, e.active ?? true);
-        if (firstSelected === null) firstSelected = entity;
-      }
+          active: e.active ?? true,
+        },
+        _savedTransform: {
+          position: e.position,
+          rotation: e.rotation,
+          scale: e.scale,
+          active: e.active ?? true,
+        },
+      }));
 
-      const savedSun = saved.entities.find((e) => e.type === "sun");
+      const added = await sceneManager.addBatch(
+        items,
+        (entity, item) => {
+          const t = item._savedTransform;
+          entity.mesh.position.fromArray(t.position);
+          entity.mesh.rotation.set(t.rotation[0], t.rotation[1], t.rotation[2]);
+          entity.mesh.scale.fromArray(t.scale);
+          entity.mesh.visible = t.active;
+          if (!t.active) sceneManager.setActive(entity.id, false);
+        },
+        onProgress,
+      );
+
+      firstSelected = added[0] ?? null;
+
       if (savedSun) {
         sun.entity.mesh.rotation.set(
           savedSun.rotation[0],
@@ -194,12 +211,6 @@ export async function createScene(renderer, projectData) {
           savedSun.rotation[2],
         );
         sun.entity.mesh.position.fromArray(savedSun.position);
-        console.log(
-          "Sun position loaded:",
-          sun.entity.mesh.position,
-          "position in file:",
-          savedSun.position,
-        );
         sun.update();
       }
 
@@ -208,17 +219,9 @@ export async function createScene(renderer, projectData) {
         `Loaded ${saved.entities.length} entities from disk`,
       );
     }
-
-    sceneName = saved?.name ?? "main";
   } else {
     firstSelected = sceneManager.add("cube", { name: "Cube" });
   }
 
-  return {
-    scene,
-    sceneManager,
-    firstSelected,
-    sun,
-    sceneName,
-  };
+  return { scene, sceneManager, firstSelected, sun, sceneName };
 }

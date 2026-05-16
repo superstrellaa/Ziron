@@ -89,6 +89,7 @@ export function DuplicateCommand(sceneManager, sourceEntity, onCreated) {
 
 export function DeleteCommand(sceneManager, entity) {
   const snapshot = {
+    id: entity.id, // guardar ID original
     type: entity.type,
     name: entity.name,
     active: entity.active ?? true,
@@ -96,6 +97,7 @@ export function DeleteCommand(sceneManager, entity) {
     quaternion: entity.mesh.quaternion.clone(),
     scale: entity.mesh.scale.clone(),
     color: entity.mesh.material.color.getHex(),
+    index: sceneManager.indexOf(entity.id),
   };
   let restoredEntity = null;
 
@@ -105,7 +107,8 @@ export function DeleteCommand(sceneManager, entity) {
       sceneManager.remove(entity.id);
     },
     undo() {
-      restoredEntity = sceneManager.add(snapshot.type, {
+      restoredEntity = sceneManager.addAt(snapshot.index, snapshot.type, {
+        id: snapshot.id, // restaurar con el ID original
         name: snapshot.name,
         color: snapshot.color,
         position: snapshot.position,
@@ -120,6 +123,7 @@ export function DeleteCommand(sceneManager, entity) {
 
 export function MultiDeleteCommand(sceneManager, entities) {
   const snapshots = entities.map((e) => ({
+    id: e.id, // guardar ID original
     entity: e,
     type: e.type,
     name: e.name,
@@ -128,25 +132,32 @@ export function MultiDeleteCommand(sceneManager, entities) {
     quaternion: e.mesh.quaternion.clone(),
     scale: e.mesh.scale.clone(),
     color: e.mesh.material.color.getHex(),
+    index: sceneManager.indexOf(e.id),
   }));
 
   return {
     type: EventType.DeleteObject,
     execute() {
-      for (const s of snapshots) sceneManager.remove(s.entity.id);
+      sceneManager.removeBatch(snapshots.map((s) => s.entity.id));
     },
-    uundo() {
-      for (const s of snapshots) {
-        const restored = sceneManager.add(s.type, {
+    undo() {
+      const items = snapshots.map((s) => ({
+        type: s.type,
+        options: {
+          id: s.id, // restaurar con el ID original
           name: s.name,
           color: s.color,
           position: s.position,
           active: s.active,
-        });
-        restored.mesh.quaternion.copy(s.quaternion);
-        restored.mesh.scale.copy(s.scale);
-        if (!s.active) sceneManager.setActive(restored.id, false);
-      }
+        },
+        index: s.index,
+        _source: s,
+      }));
+      sceneManager.addBatch(items, (entity, item) => {
+        entity.mesh.quaternion.copy(item._source.quaternion);
+        entity.mesh.scale.copy(item._source.scale);
+        if (!item._source.active) sceneManager.setActive(entity.id, false);
+      });
     },
   };
 }
@@ -156,16 +167,21 @@ export function MultiDuplicateCommand(sceneManager, entities, onCreated) {
   return {
     type: EventType.CreateObject,
     execute() {
-      created = entities.map((e) => {
-        const dup = sceneManager.add(e.type, {
+      const items = entities.map((e) => ({
+        type: e.type,
+        options: {
           name: e.name + " (copy)",
           color: e.mesh.material.color.getHex(),
           position: e.mesh.position.clone().add(new THREE.Vector3(1, 0, 0)),
-        });
-        dup.mesh.quaternion.copy(e.mesh.quaternion);
-        dup.mesh.scale.copy(e.mesh.scale);
-        return dup;
+        },
+        _source: e,
+      }));
+
+      created = sceneManager.addBatch(items, (entity, item) => {
+        entity.mesh.quaternion.copy(item._source.mesh.quaternion);
+        entity.mesh.scale.copy(item._source.mesh.scale);
       });
+
       onCreated?.(created);
     },
     undo() {
