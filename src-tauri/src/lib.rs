@@ -15,9 +15,21 @@ pub fn run() {
         .plugin(tauri_plugin_clipboard_manager::init())
         .setup(|app| {
             let args: Vec<String> = std::env::args().collect();
+            fn is_project_file(s: &str) -> bool {
+                let lower = s.to_lowercase();
+                lower.ends_with(".ziron.project") || lower.ends_with(".ziron.scene")
+            }
+
+
             let project = args.windows(2)
-                .find(|pair| pair[0] == "--project")
-                .map(|pair| pair[1].clone());
+                .find(|pair| pair[0] == "--project" && is_project_file(&pair[1]))
+                .map(|pair| pair[1].clone())
+                .or_else(|| {
+                    args.iter().skip(1)
+                        .find(|a| is_project_file(a))
+                        .cloned()
+                });
+
             app.manage(LaunchProject(project));
 
             let window = app.get_webview_window("main").unwrap();

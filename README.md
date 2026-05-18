@@ -78,6 +78,7 @@ No Electron. No browser tab. Just a lean, native binary with a WebGL renderer in
 - **Recent projects** — list of the last 10 opened projects with last-opened timestamps
 - **Version mismatch detection** — warns when opening a project created with a different engine version
 - **Unsaved changes guard** — blocks window close and shows a confirmation popup if there are unsaved changes
+- **Project Load System** — load projects as parameter(`ziron-engine.exe --project C://project/project.ziron.project`) or with double-click in the file
 
 ### Editor shell
 
