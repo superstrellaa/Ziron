@@ -104,6 +104,24 @@ export function createHierarchy(
     }
   }
 
+  // registrar paranoias para que el rename funcione
+  onKeybind("RENAME", (e) => {
+    if (selectedIds.size !== 1) return;
+    if (editingId !== null) return;
+    e.preventDefault();
+    startRename([...selectedIds][0]);
+  });
+
+  window.addEventListener("ziron:rename", (e) => {
+    const id = e.detail?.id;
+    if (!id) return;
+    if (!selectedIds.has(id)) {
+      const entity = sceneManager.getById(id);
+      if (entity) selection.selectEntity(entity);
+    }
+    startRename(id);
+  });
+
   function startRename(id) {
     if (editingId !== null) commitRename();
 
@@ -150,23 +168,6 @@ export function createHierarchy(
       row.innerHTML = "";
       render();
     }
-
-    onKeybind("RENAME", (e) => {
-      if (selectedIds.size !== 1) return;
-      if (editingId !== null) return;
-      e.preventDefault();
-      startRename([...selectedIds][0]);
-    });
-
-    window.addEventListener("ziron:rename", (e) => {
-      const id = e.detail?.id;
-      if (!id) return;
-      if (!selectedIds.has(id)) {
-        const entity = sceneManager.getById(id);
-        if (entity) selection.selectEntity(entity);
-      }
-      startRename(id);
-    });
 
     input.addEventListener("blur", () => commitRename());
   }
