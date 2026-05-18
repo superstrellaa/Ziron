@@ -186,6 +186,16 @@ export function createHierarchy(
 
     const entities = sceneManager.getAll();
 
+    // al hacer doble click hacer rename, algo de UX por favor
+    list.addEventListener("dblclick", (e) => {
+      const row = e.target.closest(".h-row");
+      if (!row) return;
+      const id = Number(row.dataset.id);
+      if (!sceneManager.getById(id)) return;
+      if (editingId !== null) return;
+      startRename(id);
+    });
+
     if (e.shiftKey && lastClickedId !== null) {
       const ids = entities.map((en) => en.id);
       const a = ids.indexOf(lastClickedId);
