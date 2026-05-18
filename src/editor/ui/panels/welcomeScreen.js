@@ -248,15 +248,7 @@ async function renderRecents(content, el, onProjectReady) {
   }
 
   if (recents.length === 0) {
-    grid.innerHTML = `
-      <div id="welcome-empty">
-        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24"
-          fill="none" stroke="#4b5563" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
-        </svg>
-        <span>${t("welcome.noRecents")}</span>
-      </div>
-    `;
+    renderEmptyRecents(grid);
     return;
   }
 
@@ -324,7 +316,12 @@ function makeProjectCard(project, el, grid, onProjectReady) {
       card.style.transition = "opacity 0.2s, transform 0.2s";
       card.style.opacity = "0";
       card.style.transform = "scale(0.95)";
+
       Toast.projectRemovedRecents();
+
+      // renderizar el mensaje que no hay recientes
+      if (grid.children.length === 1) renderEmptyRecents(grid);
+
       setTimeout(() => card.remove(), 200);
     });
 
@@ -374,4 +371,16 @@ function formatRelative(date) {
   if (mins < 60) return t("welcome.minutesAgo").replace("{n}", mins);
   if (hours < 24) return t("welcome.hoursAgo").replace("{n}", hours);
   return t("welcome.daysAgo").replace("{n}", days);
+}
+
+function renderEmptyRecents(grid) {
+  grid.innerHTML = `
+      <div id="welcome-empty">
+        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24"
+          fill="none" stroke="#4b5563" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+        </svg>
+        <span>${t("welcome.noRecents")}</span>
+      </div>
+    `;
 }
