@@ -7,6 +7,7 @@ export async function saveScene(
   sceneManager,
   history = null,
   sceneName = "main",
+  toast = true,
 ) {
   sceneManager.reindexIds(); // al guardar, cambiar todos los IDs a algo organizado para facilitar lecturas visuales y carga
 
@@ -34,7 +35,7 @@ export async function saveScene(
     await invoke("save_scene", { scenePath, sceneData });
     logger.info("ScenePersistence", `Scene saved → ${scenePath}`);
     history?.markClean(); // al guardar, limpiamos la marca para que indique eso
-    Toast.saveSuccess();
+    if (toast) Toast.saveSuccess();
     return true;
   } catch (e) {
     logger.warn("ScenePersistence", `Failed to save scene: ${e}`);

@@ -20,6 +20,7 @@ import { Popup } from "../../../engine/ui/popup/popupTypes.js";
 import { relaunch } from "@tauri-apps/plugin-process";
 import { invoke } from "@tauri-apps/api/core";
 import { Toast } from "../../../engine/ui/toasts/toastTypes.js";
+import { getActiveViewport } from "../../systems/app/projectManager.js";
 
 let _activePanel = null;
 
@@ -127,15 +128,21 @@ function _setupActions(overlay) {
   overlay
     .querySelector("#settings-save")
     .addEventListener("click", async () => {
-      const elements = overlay.querySelectorAll("[data-config-key]");
+      // ── ANTES del guardado — capturar estado previo ───────────────────────────
       const previousLocale = get("editor.locale");
+      const prevAutoSave = get("editor.auto_save");
+      const prevInterval = get("editor.auto_save_interval");
 
+      // ── Recoger todos los valores de los controles ────────────────────────────
+      const elements = overlay.querySelectorAll("[data-config-key]");
       for (const el of elements) {
         const key = el.dataset.configKey;
         let value;
 
         if (el.classList.contains("settings-dropdown")) {
-          value = el.dataset.value;
+          value = Number.isNaN(Number(el.dataset.value))
+            ? el.dataset.value
+            : Number(el.dataset.value);
         } else if (el.type === "checkbox") {
           value = el.checked;
         } else {
@@ -145,15 +152,26 @@ function _setupActions(overlay) {
         setNoSave(key, value);
       }
 
+      // Folder pendiente
       const generalSection = overlay.querySelector("#settings-section-general");
       const pendingFolder = generalSection?._getPendingFolder?.();
-      if (pendingFolder !== null && pendingFolder !== undefined) {
+      if (pendingFolder != null)
         setNoSave("editor.projects_folder", pendingFolder);
-      }
 
+      // ── GUARDAR ───────────────────────────────────────────────────────────────
       await saveConfig();
       Toast.settingsSaved();
 
+      // ── DESPUÉS del guardado — reaccionar a cambios ───────────────────────────
+
+      // Autosave: reiniciar si cambió el toggle o el intervalo
+      const newAutoSave = getConfig()?.editor?.auto_save;
+      const newInterval = getConfig()?.editor?.auto_save_interval;
+      if (newAutoSave !== prevAutoSave || newInterval !== prevInterval) {
+        getActiveViewport()?.restartAutoSave?.();
+      }
+
+      // Locale: pedir reinicio si cambió
       const newLocale = getConfig()?.editor?.locale;
       const localeChanged = newLocale && newLocale !== previousLocale;
 
@@ -251,6 +269,36 @@ function _renderGeneral(container) {
           <span class="settings-toggle-track"></span>
         </label>
       </div>
+
+      <div class="settings-row" id="settings-autosave-interval-row"
+        style="${get("editor.auto_save") ? "" : "opacity:0.4; pointer-events:none;"}">
+  <div class="settings-row-info">
+    <span class="settings-row-label">${t("settings.autosaveInterval")}</span>
+    <span class="settings-row-desc">${t("settings.autosaveIntervalDesc")}</span>
+  </div>
+  <div class="settings-dropdown" data-config-key="editor.auto_save_interval"
+    data-value="${get("editor.auto_save_interval") ?? 5}">
+    <button class="settings-dropdown-btn" type="button">
+      <span class="settings-dropdown-label">
+        ${get("editor.auto_save_interval") ?? 5} min
+      </span>
+      <i data-lucide="chevron-down"></i>
+    </button>
+    <div class="settings-dropdown-list">
+      ${[1, 2, 5, 10, 15, 30]
+        .map(
+          (n) => `
+        <div class="settings-dropdown-item ${(get("editor.auto_save_interval") ?? 5) === n ? "active" : ""}"
+          data-value="${n}">
+          <span class="settings-dropdown-item-check">${(get("editor.auto_save_interval") ?? 5) === n ? "✓" : ""}</span>
+          ${n} min
+        </div>
+      `,
+        )
+        .join("")}
+    </div>
+  </div>
+</div>
     </div>
   `;
 
@@ -260,6 +308,19 @@ function _renderGeneral(container) {
     root: container,
   });
   _initDropdowns(container);
+
+  const autoSaveToggle = container.querySelector(
+    "[data-config-key='editor.auto_save']",
+  );
+  const intervalRow = container.querySelector(
+    "#settings-autosave-interval-row",
+  );
+
+  autoSaveToggle?.addEventListener("change", () => {
+    const enabled = autoSaveToggle.checked;
+    intervalRow.style.opacity = enabled ? "" : "0.4";
+    intervalRow.style.pointerEvents = enabled ? "" : "none";
+  });
 
   container
     .querySelector("#settings-browse-folder")

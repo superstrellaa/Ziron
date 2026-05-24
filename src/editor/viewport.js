@@ -14,6 +14,7 @@ import { onKeybind } from "./systems/input/keybinds.js";
 import { saveScene } from "./systems/persistence/scenePersistence.js";
 import { setProjectOpen } from "./ui/toolbar/menuBar.js";
 import { createProperties } from "./ui/panels/properties.js";
+import { createAutoSave } from "./systems/persistence/autoSave.js";
 
 export async function createViewport(container, projectData) {
   const viewportEl = container.querySelector("#viewport");
@@ -71,10 +72,14 @@ export async function createViewport(container, projectData) {
   );
   hierarchy.setContextMenu(ctxMenu);
 
-  async function triggerSave() {
-    await saveScene(projectData, sceneManager, history, sceneName);
+  async function triggerSave(toast = true) {
+    await saveScene(projectData, sceneManager, history, sceneName, toast);
     hierarchy.setDirty(false);
   }
+
+  // ── Auto-save ─────────────────────────────────────────────────────────────
+  const autoSave = createAutoSave(triggerSave);
+  autoSave.start();
 
   // ── Eventos y render loop ─────────────────────────────────────────────────
   const { destroy: destroyEvents } = connectViewportEvents({
@@ -101,10 +106,12 @@ export async function createViewport(container, projectData) {
 
   return {
     destroy() {
+      autoSave.stop();
       renderLoop.stop();
       destroyEvents();
     },
     isDirty: () => history.isDirty(),
     triggerSave,
+    restartAutoSave: () => autoSave.restart(), // exponer el restart de auto save para que al cambiar config
   };
 }

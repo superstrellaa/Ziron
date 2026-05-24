@@ -13,7 +13,7 @@ export function getActiveViewport() {
   return _activeViewport;
 }
 
-export function onProjectReady(projectData) {
+export async function onProjectReady(projectData) {
   if (_activeViewport) {
     _activeViewport.destroy();
     _activeViewport = null;
@@ -27,9 +27,7 @@ export function onProjectReady(projectData) {
   viewportEl.id = "viewport";
   workspace.appendChild(viewportEl);
 
-  createViewport(workspace, projectData).then((vp) => {
-    _activeViewport = vp;
-  });
+  _activeViewport = await createViewport(workspace, projectData);
 }
 
 export async function checkVersionAndLoad(projectData, onCancel = null) {

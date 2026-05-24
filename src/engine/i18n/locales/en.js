@@ -50,6 +50,8 @@ export default {
     defaultFolderNone: "No folder selected",
     autosave: "Autosave",
     autosaveDesc: "Automatically save every N minutes",
+    autosaveInterval: "Autosave interval",
+    autosaveIntervalDesc: "How often to auto-save the scene",
     browse: "Browse",
   },
   keybind: {
@@ -130,6 +132,10 @@ export default {
     settingsSaved: {
       title: "Settings Saved",
       message: "Your settings have been saved.",
+    },
+    autoSaveProject: {
+      title: "Project Autosaved",
+      message: "Your project has been autosaved.",
     },
   },
   popups: {

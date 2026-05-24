@@ -50,6 +50,9 @@ export default {
     defaultFolderNone: "No se ha seleccionado carpeta",
     autosave: "Guardado automático",
     autosaveDesc: "Guardar automáticamente cada N minutos",
+    autosaveInterval: "Intervalo de guardado automático",
+    autosaveIntervalDesc:
+      "Con qué frecuencia guardar la escena automáticamente",
     browse: "Examinar",
   },
   keybind: {
@@ -139,6 +142,10 @@ export default {
     settingsSaved: {
       title: "Ajustes Guardados",
       message: "Tus ajustes han sido guardados.",
+    },
+    autoSaveProject: {
+      title: "Proyecto Guardado Automáticamente",
+      message: "Tu proyecto ha sido guardado automáticamente.",
     },
   },
   popups: {

@@ -36,7 +36,6 @@ export function initWindowManager(getActiveViewport) {
   window.addEventListener("contextmenu", (e) => e.preventDefault());
 }
 
-// Exportada para que settingsPanel y otros puedan usarla
 export async function checkDirtyAndThen(fn) {
   const vp = _getActiveViewport?.();
   if (vp?.isDirty()) {
