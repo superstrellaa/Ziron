@@ -72,6 +72,13 @@ export const Toast = {
       messageKey: "toasts.projectRemovedRecents.message",
       ...extra,
     }),
+  settingsSaved: (extra) =>
+    pushToast({
+      type: "info",
+      titleKey: "toasts.settingsSaved.title",
+      messageKey: "toasts.settingsSaved.message",
+      ...extra,
+    }),
 
   info: (title, message, duration) =>
     pushToast({ type: "info", title, message, duration }),

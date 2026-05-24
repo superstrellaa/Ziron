@@ -40,7 +40,7 @@ export async function createWelcomeScreen(
           <i data-lucide="folder-open"></i>
           ${t("welcome.openProject")}
         </button>
-        <div id="welcome-sidebar-bottom" data-tooltip="v${ENGINE_VERSION}">
+        <div id="welcome-sidebar-bottom" data-tooltip='<i data-lucide="rocket"></i> v${ENGINE_VERSION}'>
           ${t("welcome.version")}
         </div>
       </div>

@@ -1,4 +1,4 @@
-import { createIcons, FolderRoot, ClockFading } from "lucide";
+import { createIcons, FolderRoot, ClockFading, Rocket } from "lucide";
 
 let tooltipEl = null;
 let activeTarget = null;
@@ -67,7 +67,7 @@ function onMouseMove(e) {
 // funcion para separar la parte de lucide con otra cosa, no le hagas caso al nombre de la funcion (:
 function createInIcons() {
   createIcons({
-    icons: { FolderRoot, ClockFading },
+    icons: { FolderRoot, ClockFading, Rocket },
     attrs: { width: 11, height: 11, stroke: "#cccccc" },
     root: tooltipEl,
   });

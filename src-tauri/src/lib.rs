@@ -13,6 +13,8 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_clipboard_manager::init())
+        .plugin(tauri_plugin_process::init())
+        .plugin(tauri_plugin_drpc::init())
         .setup(|app| {
             let args: Vec<String> = std::env::args().collect();
             fn is_project_file(s: &str) -> bool {
@@ -83,6 +85,7 @@ pub fn run() {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
+            save_window_state,
             logger::log,
             logger::init_logger,
             cursor::start_fly,
@@ -103,4 +106,32 @@ pub fn run() {
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
+}
+
+/// Comando para guardar manualmente el estado de la ventana
+#[tauri::command]
+async fn save_window_state(app: tauri::AppHandle) -> Result<(), String> {
+    let window = app.get_webview_window("main")
+        .ok_or("Window not found")?;
+    
+    let is_maximized = window.is_maximized().map_err(|e| e.to_string())?;
+    
+    let (w, h) = if is_maximized {
+        (800.0, 600.0)
+    } else {
+        let size = window.inner_size().map_err(|e| e.to_string())?;
+        let scale = window.scale_factor().map_err(|e| e.to_string())?;
+        (size.width as f64 / scale, size.height as f64 / scale)
+    };
+
+    let mut current = config::read_config(&app);
+    current["window"]["maximized"] = serde_json::json!(is_maximized);
+    current["window"]["width"]     = serde_json::json!(w);
+    current["window"]["height"]    = serde_json::json!(h);
+
+    let path = config::config_path(&app)?;
+    let text = serde_json::to_string_pretty(&current).map_err(|e| e.to_string())?;
+    std::fs::write(&path, text).map_err(|e| e.to_string())?;
+    
+    Ok(())
 }

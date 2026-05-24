@@ -17,21 +17,13 @@ export function initWindowManager(getActiveViewport) {
     .addEventListener("click", () => appWindow.toggleMaximize());
 
   document.getElementById("btn-close").addEventListener("click", async () => {
-    const vp = _getActiveViewport?.();
-    if (vp?.isDirty()) {
-      const result = await Popup.unsavedScene();
-      if (result === "cancel") return;
-      if (result === "save") await vp.triggerSave();
-    }
-    appWindow.close();
+    await checkDirtyAndThen(() => appWindow.close());
   });
 
-  // Bloquear cosas comunes de navegador que no busco
   onKeybind(["_BLOCK_FIND", "_BLOCK_PRINT", "_BLOCK_GOTO"], (e) =>
     e.preventDefault(),
   );
 
-  // Bloquear CTRL A para evitar seleccionar cosas que no tocan
   onKeybind(["_BLOCK_SELECT_ALL"], (e) => {
     const tag = document.activeElement?.tagName;
     const isEditable =
@@ -41,5 +33,16 @@ export function initWindowManager(getActiveViewport) {
     if (!isEditable) e.preventDefault();
   });
 
-  window.addEventListener("contextmenu", (e) => e.preventDefault()); // Helper general para quitar el menu nativo horrible
+  window.addEventListener("contextmenu", (e) => e.preventDefault());
+}
+
+// Exportada para que settingsPanel y otros puedan usarla
+export async function checkDirtyAndThen(fn) {
+  const vp = _getActiveViewport?.();
+  if (vp?.isDirty()) {
+    const result = await Popup.unsavedScene();
+    if (result === "cancel") return;
+    if (result === "save") await vp.triggerSave();
+  }
+  await fn();
 }

@@ -8,6 +8,7 @@ export default {
     load: "Open Project",
     newProject: "New Project",
     closeProject: "Close Project",
+    settings: "Settings",
   },
   welcome: {
     recentProjects: "Recent Projects",
@@ -30,6 +31,37 @@ export default {
       createBtn: "Create Project",
       preview: "Will be created at:",
     },
+  },
+  settings: {
+    title: "Settings",
+    categoryEditor: "Editor",
+    general: "General",
+    keybinds: "Keybinds",
+    cancel: "Cancel",
+    save: "Save changes",
+    groupInterface: "Interface",
+    groupProjects: "Projects",
+    groupKeybinds: "Keybinds",
+    language: "Language",
+    languageDesc: "Editor display language",
+    discordRpc: "Discord Rich Presence",
+    discordRpcDesc: "Show activity in Discord",
+    defaultFolder: "Default projects folder",
+    defaultFolderNone: "No folder selected",
+    autosave: "Autosave",
+    autosaveDesc: "Automatically save every N minutes",
+    browse: "Browse",
+  },
+  keybind: {
+    save: "Save",
+    undo: "Undo",
+    redo: "Redo",
+    duplicate: "Duplicate",
+    delete: "Delete",
+    copy: "Copy",
+    paste: "Paste",
+    rename: "Rename",
+    settings: "Open Settings",
   },
   contextMenu: {
     add: "Add",
@@ -95,6 +127,10 @@ export default {
       title: "Project Removed",
       message: "The project has been removed from recent projects.",
     },
+    settingsSaved: {
+      title: "Settings Saved",
+      message: "Your settings have been saved.",
+    },
   },
   popups: {
     unsavedScene: {
@@ -105,6 +141,10 @@ export default {
       title: "Version Mismatch",
       message:
         "This project was created with ZIRON {project}, but you're running ZIRON {engine}. Opening it may cause issues.",
+    },
+    restartRequired: {
+      title: "Restart Required",
+      message: "Some changes require restarting ZIRON Engine to take effect.",
     },
     error: {
       title: "An error occurred",
@@ -118,6 +158,8 @@ export default {
       discardAndClose: "Discard and Close",
       closeAndRevert: "Close",
       continueAndUpdate: "Continue and Update",
+      later: "Later",
+      restart: "Restart",
     },
   },
 };

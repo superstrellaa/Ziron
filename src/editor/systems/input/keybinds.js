@@ -12,6 +12,7 @@ export const KEYBINDS = {
 
   // ── General ──
   SAVE: { key: "s", ctrl: true, shift: false, alt: false },
+  OPEN_SETTINGS: { key: ",", ctrl: true, shift: false, alt: false },
 
   // ── Entidades ──
   DELETE: { key: "Delete", ctrl: false, shift: false, alt: false },

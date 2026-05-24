@@ -43,6 +43,21 @@ export const Popup = {
       ],
     }),
 
+  restartRequired: () =>
+    openPopup({
+      type: "warning",
+      titleKey: "popups.restartRequired.title",
+      messageKey: "popups.restartRequired.message",
+      buttons: [
+        { id: "later", labelKey: "popups.buttons.later", variant: "default" },
+        {
+          id: "restart",
+          labelKey: "popups.buttons.restart",
+          variant: "primary",
+        },
+      ],
+    }),
+
   /**
    * Error genérico con opción de copiar el mensaje
    * Resuelve con: "close"

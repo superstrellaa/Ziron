@@ -28,7 +28,8 @@ fn default_config() -> Value {
             "RENAME":         { "key": "F2", "ctrl": false, "shift": false, "alt": false },
             "COPY":           { "key": "c", "ctrl": true,  "shift": false, "alt": false },
             "PASTE":          { "key": "v", "ctrl": true,  "shift": false, "alt": false },
-            "SELECT_ADD": { "key": "shift", "ctrl": false, "shift": true, "alt": false },
+            "SELECT_ADD":     { "key": "shift", "ctrl": false, "shift": true, "alt": false },
+            "OPEN_SETTINGS":  { "key": ",", "ctrl": true,  "shift": false, "alt": false },
             "_BLOCK_FIND":    { "key": "f", "ctrl": true,  "shift": false, "alt": false },
             "_BLOCK_PRINT":   { "key": "p", "ctrl": true,  "shift": false, "alt": false },
             "_BLOCK_GOTO":    { "key": "g", "ctrl": true,  "shift": false, "alt": false },
@@ -36,7 +37,10 @@ fn default_config() -> Value {
         },
         "editor": {
             "locale": "en",
-            "projects_folder": ""
+            "projects_folder": "",
+            "discord_rpc": true,
+            "auto_save": false,
+            "auto_save_interval": 5
         },
         "window": {
             "width": 800,

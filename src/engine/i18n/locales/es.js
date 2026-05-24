@@ -8,6 +8,7 @@ export default {
     load: "Cargar",
     newProject: "Nuevo Proyecto",
     closeProject: "Cerrar Proyecto",
+    settings: "Ajustes",
   },
   welcome: {
     recentProjects: "Proyectos Recientes",
@@ -19,7 +20,6 @@ export default {
     minutesAgo: "Hace {n} minutos",
     hoursAgo: "Hace {n} horas",
     daysAgo: "Hace {n} días",
-
     version: "ZIRON Engine — Desarrollo Temprano",
     newProjectPanel: {
       title: "Nuevo Proyecto",
@@ -31,6 +31,37 @@ export default {
       createBtn: "Crear Proyecto",
       preview: "Se creará en:",
     },
+  },
+  settings: {
+    title: "Ajustes",
+    categoryEditor: "Editor",
+    general: "General",
+    keybinds: "Atajos de Teclado",
+    cancel: "Cancelar",
+    save: "Guardar cambios",
+    groupInterface: "Interfaz",
+    groupProjects: "Proyectos",
+    groupKeybinds: "Atajos de Teclado",
+    language: "Idioma",
+    languageDesc: "Idioma de la interfaz del editor",
+    discordRpc: "Discord Rich Presence",
+    discordRpcDesc: "Mostrar actividad en Discord",
+    defaultFolder: "Carpeta predeterminada de proyectos",
+    defaultFolderNone: "No se ha seleccionado carpeta",
+    autosave: "Guardado automático",
+    autosaveDesc: "Guardar automáticamente cada N minutos",
+    browse: "Examinar",
+  },
+  keybind: {
+    save: "Guardar",
+    undo: "Deshacer",
+    redo: "Rehacer",
+    duplicate: "Duplicar",
+    delete: "Eliminar",
+    copy: "Copiar",
+    paste: "Pegar",
+    rename: "Renombrar",
+    settings: "Abrir Ajustes",
   },
   contextMenu: {
     add: "Añadir",
@@ -105,6 +136,10 @@ export default {
       title: "Proyecto Eliminado",
       message: "El proyecto ha sido eliminado de los proyectos recientes.",
     },
+    settingsSaved: {
+      title: "Ajustes Guardados",
+      message: "Tus ajustes han sido guardados.",
+    },
   },
   popups: {
     unsavedScene: {
@@ -114,7 +149,12 @@ export default {
     versionMismatch: {
       title: "Incompatibilidad de Versiones",
       message:
-        "La versión del proyecto no coincide con la versión del motor. Esto puede causar problemas. ¿Qué quieres hacer?",
+        "Este proyecto fue creado con ZIRON {project}, pero estás usando ZIRON {engine}. Abrirlo puede causar problemas.",
+    },
+    restartRequired: {
+      title: "Reinicio Requerido",
+      message:
+        "Algunos cambios requieren reiniciar ZIRON Engine para que surtan efecto.",
     },
     error: {
       title: "Ocurrió un error",
@@ -128,6 +168,8 @@ export default {
       discardAndClose: "Descartar y Cerrar",
       closeAndRevert: "Cerrar",
       continueAndUpdate: "Continuar y Actualizar",
+      later: "Más tarde",
+      restart: "Reiniciar",
     },
   },
 };

@@ -43,3 +43,14 @@ export async function set(path, value) {
   obj[keys.at(-1)] = value;
   await saveConfig();
 }
+
+export function setNoSave(path, value) {
+  if (!_config) return;
+  const keys = path.split(".");
+  let obj = _config;
+  for (let i = 0; i < keys.length - 1; i++) {
+    if (!obj[keys[i]]) obj[keys[i]] = {};
+    obj = obj[keys[i]];
+  }
+  obj[keys.at(-1)] = value;
+}

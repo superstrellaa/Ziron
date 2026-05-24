@@ -1,7 +1,17 @@
 import { invoke } from "@tauri-apps/api/core";
-import { createIcons, File, Save, FileUp, Plus, CornerDownLeft } from "lucide";
+import {
+  createIcons,
+  File,
+  Save,
+  FileUp,
+  Plus,
+  CornerDownLeft,
+  Settings,
+} from "lucide";
 import { t } from "../../../engine/i18n/i18n.js";
 import { logger } from "../../../engine/core/logger.js";
+import { openSettings } from "../panels/settingsPanel.js";
+import { onKeybind } from "../../systems/input/keybinds.js";
 
 let _onLoadProject = null;
 let _onNewProject = null;
@@ -16,36 +26,40 @@ export function initMenuBar({ onLoadProject, onNewProject, onCloseProject }) {
 
   const menusEl = document.getElementById("toolbar-menus");
   menusEl.innerHTML = `
-    <div class="toolbar-menu" id="menu-file">
-      <button class="toolbar-menu-btn" id="menu-file-btn">
-        <i data-lucide="file"></i>
-        ${t("toolbar.file")}
+  <div class="toolbar-menu" id="menu-file">
+    <button class="toolbar-menu-btn" id="menu-file-btn">
+      <i data-lucide="file"></i>
+      ${t("toolbar.file")}
+    </button>
+    <div class="toolbar-dropdown" id="menu-file-dropdown">
+      <button class="toolbar-dropdown-item" id="menu-new-project">
+        <i data-lucide="plus"></i>
+        ${t("toolbar.newProject")}
       </button>
-      <div class="toolbar-dropdown" id="menu-file-dropdown">
-        <button class="toolbar-dropdown-item" id="menu-new-project">
-          <i data-lucide="plus"></i>
-          ${t("toolbar.newProject")}
-        </button>
-        <button class="toolbar-dropdown-item" id="menu-load">
-          <i data-lucide="file-up"></i>
-          ${t("toolbar.load")}
-        </button>
-        <div class="toolbar-dropdown-separator"></div>
-        <button class="toolbar-dropdown-item" id="menu-save" disabled>
-          <i data-lucide="save"></i>
-          ${t("toolbar.save")}
-        </button>
-        <div class="toolbar-dropdown-separator"></div>
-        <button class="toolbar-dropdown-item" id="menu-close-project" disabled>
-          <i data-lucide="corner-down-left"></i>
-          ${t("toolbar.closeProject")}
-        </button>
-      </div>
+      <button class="toolbar-dropdown-item" id="menu-load">
+        <i data-lucide="file-up"></i>
+        ${t("toolbar.load")}
+      </button>
+      <div class="toolbar-dropdown-separator"></div>
+      <button class="toolbar-dropdown-item" id="menu-save" disabled>
+        <i data-lucide="save"></i>
+        ${t("toolbar.save")}
+      </button>
+      <button class="toolbar-dropdown-item" id="menu-close-project" disabled>
+        <i data-lucide="corner-down-left"></i>
+        ${t("toolbar.closeProject")}
+      </button>
+      <div class="toolbar-dropdown-separator"></div>
+      <button class="toolbar-dropdown-item" id="menu-settings">
+        <i data-lucide="settings"></i>
+        ${t("toolbar.settings")}
+      </button>
     </div>
-  `;
+  </div>
+`;
 
   createIcons({
-    icons: { File, Save, FileUp, Plus, CornerDownLeft },
+    icons: { File, Save, FileUp, Plus, CornerDownLeft, Settings },
     attrs: { width: 14, height: 14, stroke: "#cccccc" },
     root: menusEl,
   });
@@ -97,6 +111,15 @@ export function initMenuBar({ onLoadProject, onNewProject, onCloseProject }) {
       closeMenu();
       _onCloseProject?.();
     });
+
+  document.getElementById("menu-settings").addEventListener("click", () => {
+    closeMenu();
+    openSettings();
+  });
+
+  onKeybind("OPEN_SETTINGS", () => {
+    openSettings();
+  });
 }
 
 export function setProjectOpen(open, onSave = null) {
