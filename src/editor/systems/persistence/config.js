@@ -34,17 +34,16 @@ export function get(path) {
 }
 
 export async function set(path, value) {
-  if (!_config) return;
-  const keys = path.split(".");
-  let obj = _config;
-  for (let i = 0; i < keys.length - 1; i++) {
-    obj = obj[keys[i]];
-  }
-  obj[keys.at(-1)] = value;
+  setValue(path, value);
   await saveConfig();
 }
 
 export function setNoSave(path, value) {
+  setValue(path, value);
+}
+
+// funcion para reemplazar codigo repetido en set y setNoSave
+function setValue(path, value) {
   if (!_config) return;
   const keys = path.split(".");
   let obj = _config;

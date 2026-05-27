@@ -132,7 +132,7 @@ export function createHierarchy(
 
     editingId = id;
 
-    row.innerHTML = `<input class="h-rename-input" type="text" value="${entity.name}" spellcheck="false" />`;
+    row.innerHTML = `<input class="h-rename-input" type="text" value="${entity.name}" spellcheck="false" autocomplete="off" />`;
     const input = row.querySelector("input");
 
     input.focus();

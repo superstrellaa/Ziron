@@ -14,7 +14,7 @@ export function createAutoSave(triggerSave) {
 
     const enabled = get("editor.auto_save");
     if (!enabled) {
-      logger.info("AutoSave", "Disabled — not starting");
+      logger.info("AutoSave", "Config Disabled — not starting");
       return;
     }
 
