@@ -39,7 +39,7 @@ fn default_config() -> Value {
             "locale": "en",
             "projects_folder": "",
             "discord_rpc": true,
-            "auto_save": false,
+            "auto_save": true,
             "auto_save_interval": 5
         },
         "window": {

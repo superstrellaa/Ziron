@@ -15,7 +15,7 @@ import { t } from "../../../engine/i18n/i18n.js";
 import { get, set } from "../../systems/persistence/config.js";
 import { logger } from "../../../engine/core/logger.js";
 import { Toast } from "../../../engine/ui/toasts/toastTypes.js";
-import { ENGINE_VERSION } from "../../systems/app/versionManager.js";
+import { EDITOR_VERSION } from "../../systems/app/versionManager.js";
 
 export async function createWelcomeScreen(
   container,
@@ -40,7 +40,7 @@ export async function createWelcomeScreen(
           <i data-lucide="folder-open"></i>
           ${t("welcome.openProject")}
         </button>
-        <div id="welcome-sidebar-bottom" data-tooltip='<i data-lucide="rocket"></i> v${ENGINE_VERSION}'>
+        <div id="welcome-sidebar-bottom" data-tooltip='<i data-lucide="rocket"></i> v${EDITOR_VERSION}'>
           ${t("welcome.version")}
         </div>
       </div>
