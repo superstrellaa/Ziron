@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "ZIRON Engine",
-  "version": "0.2.0",
-  "identifier": "com.ziron.ziron-engine",
+  "productName": "ZIRON Studio",
+  "version": "1.0.0",
+  "identifier": "com.ziron.ziron-studio",
   "build": {
     "beforeDevCommand": "npm run dev",
     "beforeBuildCommand": "npm run build",
@@ -14,7 +14,7 @@
     "windows": [
       {
         "label": "main",
-        "title": "ZIRON Engine",
+        "title": "ZIRON Studio",
         "width": 800,
         "height": 600,
         "decorations": false

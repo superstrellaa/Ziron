@@ -20,7 +20,7 @@ export default {
     minutesAgo: "{n} minutes ago",
     hoursAgo: "{n} hours ago",
     daysAgo: "{n} days ago",
-    version: "ZIRON Engine — Early Dev",
+    version: "ZIRON Studio — Early Dev",
     newProjectPanel: {
       title: "New Project",
       nameLabel: "Project Name",
@@ -150,7 +150,7 @@ export default {
     },
     restartRequired: {
       title: "Restart Required",
-      message: "Some changes require restarting ZIRON Engine to take effect.",
+      message: "Some changes require restarting ZIRON Studio to take effect.",
     },
     error: {
       title: "An error occurred",

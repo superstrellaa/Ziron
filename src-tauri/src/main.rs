@@ -2,5 +2,5 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 fn main() {
-    ziron_engine_lib::run()
+    ziron_studio_lib::run()
 }

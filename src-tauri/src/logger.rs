@@ -34,7 +34,7 @@ pub fn init_logger(app: tauri::AppHandle) -> Result<String, String> {
     create_dir_all(&logs_dir).map_err(|e| e.to_string())?;
 
     let date = Utc::now().format("%Y-%m-%d");
-    let filename = format!("ziron-engine_{}_{}.log", date, *RUN_ID);
+    let filename = format!("ziron-studio_{}_{}.log", date, *RUN_ID);
     logs_dir.push(filename);
 
     let file = OpenOptions::new()
