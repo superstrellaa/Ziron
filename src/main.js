@@ -69,8 +69,11 @@ if (launchProject) {
     await checkVersionAndLoad(projectData, () => {
       createWelcomeScreen(getWorkspace(), checkVersionAndLoad);
     });
-  } catch {
+  } catch (err) {
     createWelcomeScreen(getWorkspace(), checkVersionAndLoad);
+    logger.error(
+      `Failed to load launch project from argument: ${launchProject} | Error: ${err}`,
+    );
   }
 } else {
   createWelcomeScreen(getWorkspace(), checkVersionAndLoad);
