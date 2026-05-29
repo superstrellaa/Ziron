@@ -101,6 +101,10 @@ export default {
     rotation: "Rotación (grados)",
     scale: "Escala",
   },
+  assets: {
+    header: "Assets",
+    empty: "No hay assets en este proyecto",
+  },
   toasts: {
     generalError: { title: "Error", message: "Algo salió mal." },
     saveSuccess: {

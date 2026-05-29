@@ -23,9 +23,6 @@ export async function onProjectReady(projectData) {
 
   const workspace = getWorkspace();
   workspace.innerHTML = "";
-  const viewportEl = document.createElement("div");
-  viewportEl.id = "viewport";
-  workspace.appendChild(viewportEl);
 
   _activeViewport = await createViewport(workspace, projectData);
 }

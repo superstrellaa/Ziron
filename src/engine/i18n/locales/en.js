@@ -100,6 +100,10 @@ export default {
     rotation: "Rotation (deg)",
     scale: "Scale",
   },
+  assets: {
+    header: "Assets",
+    empty: "No assets in this project",
+  },
   toasts: {
     generalError: { title: "Error", message: "Something went wrong." },
     saveSuccess: { title: "Saved", message: "Scene saved successfully." },

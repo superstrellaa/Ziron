@@ -14,10 +14,18 @@ import { onKeybind } from "./systems/input/keybinds.js";
 import { saveScene } from "./systems/persistence/scenePersistence.js";
 import { setProjectOpen } from "./ui/toolbar/menuBar.js";
 import { createProperties } from "./ui/panels/properties.js";
+import { createAssetsPanel } from "./ui/panels/assetsPanel.js";
 import { createAutoSave } from "./systems/persistence/autoSave.js";
 
 export async function createViewport(container, projectData) {
-  const viewportEl = container.querySelector("#viewport");
+  // Creación de DOM
+  const topArea = document.createElement("div");
+  topArea.id = "workspace-top";
+  container.appendChild(topArea);
+
+  const viewportEl = document.createElement("div");
+  viewportEl.id = "viewport";
+  topArea.appendChild(viewportEl);
 
   // ── Sistemas core ─────────────────────────────────────────────────────────
   const { renderer, camera } = createRenderer(viewportEl);
@@ -47,7 +55,7 @@ export async function createViewport(container, projectData) {
     sceneName,
     () => history,
   );
-  container.insertBefore(container.querySelector("#hierarchy"), viewportEl);
+  topArea.insertBefore(container.querySelector("#hierarchy"), viewportEl);
 
   const history = setupHistory(gizmo.gizmo, selection, sceneManager);
 
@@ -57,7 +65,9 @@ export async function createViewport(container, projectData) {
     sceneManager,
     () => history,
   );
-  container.appendChild(container.querySelector("#properties"));
+  topArea.appendChild(container.querySelector("#properties"));
+
+  const assets = createAssetsPanel(container, projectData);
 
   if (firstSelected) selection.selectEntity(firstSelected);
 
