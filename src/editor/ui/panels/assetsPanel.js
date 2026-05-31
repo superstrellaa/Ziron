@@ -59,7 +59,7 @@ export async function createAssetsPanel(container, projectData) {
     }
   }
 
-  function buildAssetFolderNode(name) {
+  function buildAssetFolderNode(name, diskPath = null) {
     return {
       label: name,
       icon: "folder",
@@ -67,6 +67,7 @@ export async function createAssetsPanel(container, projectData) {
       expanded: false,
       type: "asset-folder",
       _diskName: name,
+      _diskPath: diskPath ?? name,
       children: [],
     };
   }
@@ -107,6 +108,7 @@ export async function createAssetsPanel(container, projectData) {
 
   let _selectedNode = null;
   let _lastClickedItem = null;
+  let _currentFolderNode = treeData[0];
   let _selectedNodes = new Set();
   let _contextMenu = null;
 
@@ -122,6 +124,25 @@ export async function createAssetsPanel(container, projectData) {
       .querySelectorAll(".assets-tree-row.selected")
       .forEach((r) => r.classList.remove("selected"));
   });
+
+  function getNodePath(node) {
+    const parts = [];
+    let current = node;
+    while (current && current.type !== "root") {
+      if (current._diskName) parts.unshift(current._diskName);
+      current = findParent(treeData, current);
+    }
+    return parts.join("/");
+  }
+
+  function updateChildPaths(node, basePath) {
+    for (const child of node.children ?? []) {
+      if (child._diskName) {
+        child._diskPath = `${basePath}/${child._diskName}`;
+        updateChildPaths(child, child._diskPath);
+      }
+    }
+  }
 
   function findParent(nodes, target, parent = null) {
     for (const node of nodes) {
@@ -272,18 +293,29 @@ export async function createAssetsPanel(container, projectData) {
   async function createFolder() {
     const name = await promptFolderName(t("assets.newFolderName"));
     if (!name) return;
+
+    const parentPath = getNodePath(_currentFolderNode);
+    const folderPath = parentPath ? `${parentPath}/${name}` : name;
+
+    const targetNode =
+      _currentFolderNode.type === "asset-folder" ||
+      _currentFolderNode.type === "root"
+        ? _currentFolderNode
+        : treeData[0];
+
     try {
       await invoke("create_asset_folder", {
         projectFolder: projectData._folder,
-        folderName: name,
+        folderPath,
       });
-      logger.info("Assets", `Created folder "${name}"`);
-      const node = buildAssetFolderNode(name);
-      treeData[0].children.push(node);
+      logger.info("Assets", `Created folder "${folderPath}"`);
+
+      const node = buildAssetFolderNode(name, folderPath);
+      targetNode.children.push(node);
       rebuildTree();
-      renderGrid(treeData[0]);
+      renderGrid(targetNode);
     } catch (e) {
-      logger.warn("Assets", `Failed to create folder "${name}": ${e}`);
+      logger.warn("Assets", `Failed to create folder "${folderPath}": ${e}`);
     }
   }
 
@@ -293,13 +325,17 @@ export async function createAssetsPanel(container, projectData) {
     try {
       await invoke("delete_asset_folder", {
         projectFolder: projectData._folder,
-        folderName: node._diskName,
+        folderName: node._diskPath ?? node._diskName,
       });
       logger.info("Assets", `Deleted folder "${node.label}"`);
       const parent = findParent(treeData, node);
       if (parent) parent.children = parent.children.filter((c) => c !== node);
       rebuildTree();
-      renderGrid(treeData[0]);
+      renderGrid(
+        _currentFolderNode === node
+          ? (findParent(treeData, node) ?? treeData[0])
+          : _currentFolderNode,
+      );
     } catch (e) {
       logger.warn("Assets", `Failed to delete folder "${node.label}": ${e}`);
     }
@@ -307,13 +343,16 @@ export async function createAssetsPanel(container, projectData) {
 
   async function duplicateFolder(node) {
     const newName = node._diskName + " (copy)";
+    const parentPath = getNodePath(findParent(treeData, node) ?? treeData[0]);
+    const newPath = parentPath ? `${parentPath}/${newName}` : newName;
+
     try {
       await invoke("create_asset_folder", {
         projectFolder: projectData._folder,
-        folderName: newName,
+        folderPath: newPath,
       });
       logger.info("Assets", `Duplicated folder "${node.label}" → "${newName}"`);
-      const newNode = buildAssetFolderNode(newName);
+      const newNode = buildAssetFolderNode(newName, newPath);
       const parent = findParent(treeData, node) ?? treeData[0];
       parent.children.push(newNode);
       rebuildTree();
@@ -351,15 +390,22 @@ export async function createAssetsPanel(container, projectData) {
         rebuildTree();
         return;
       }
+
+      const parentPath = getNodePath(findParent(treeData, node) ?? treeData[0]);
+      const newPath = parentPath ? `${parentPath}/${newName}` : newName;
+      const oldPath = node._diskPath ?? node._diskName;
+
       try {
         await invoke("rename_asset_folder", {
           projectFolder: projectData._folder,
-          oldName: node._diskName,
-          newName,
+          oldName: oldPath,
+          newName: newPath,
         });
         logger.info("Assets", `Renamed folder "${oldName}" → "${newName}"`);
         node.label = newName;
         node._diskName = newName;
+        node._diskPath = newPath;
+        updateChildPaths(node, newPath);
         rebuildTree();
         renderGrid(findParent(treeData, node) ?? treeData[0]);
       } catch (e) {
@@ -525,6 +571,7 @@ export async function createAssetsPanel(container, projectData) {
 
   // ── Grid ──────────────────────────────────────────────────────────────────
   function renderGrid(node) {
+    _currentFolderNode = node;
     gridEl.innerHTML = "";
 
     const items = node.type === "scene" ? [node] : (node.children ?? []);
