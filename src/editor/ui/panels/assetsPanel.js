@@ -374,10 +374,10 @@ export async function createAssetsPanel(container, projectData) {
       const promptEl = document.createElement("div");
       promptEl.className = "assets-folder-prompt";
       promptEl.innerHTML = `
-        <i data-lucide="folder" style="color:#6b7280; flex-shrink:0;"></i>
-        <input class="assets-folder-prompt-input" type="text"
-          placeholder="${placeholder}" spellcheck="false" autocomplete="off" />
-      `;
+      <i data-lucide="folder" style="color:#6b7280; flex-shrink:0;"></i>
+      <input class="assets-folder-prompt-input" type="text"
+        placeholder="${placeholder}" spellcheck="false" autocomplete="off" />
+    `;
       gridEl.prepend(promptEl);
 
       createIcons({
@@ -389,7 +389,11 @@ export async function createAssetsPanel(container, projectData) {
       const input = promptEl.querySelector("input");
       input.focus();
 
+      let _done = false;
+
       function finish() {
+        if (_done) return;
+        _done = true;
         const val = input.value.trim();
         promptEl.remove();
         resolve(val || null);
@@ -401,6 +405,8 @@ export async function createAssetsPanel(container, projectData) {
           finish();
         }
         if (e.key === "Escape") {
+          if (_done) return;
+          _done = true;
           promptEl.remove();
           resolve(null);
         }

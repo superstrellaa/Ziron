@@ -102,6 +102,7 @@ export async function createViewport(container, projectData) {
     setProjectOpen,
   });
 
+  // esto esta aquí para que todas las demas paranoias tengan su evento, lo de arriba básicamente
   if (firstSelected) {
     activateScene();
     selection.selectEntity(firstSelected);
