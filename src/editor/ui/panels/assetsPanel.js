@@ -8,6 +8,11 @@ import {
 } from "lucide";
 import { invoke } from "@tauri-apps/api/core";
 import { t } from "../../../engine/i18n/i18n.js";
+import {
+  activateAssets,
+  onClearAssets,
+  getContext,
+} from "../../systems/app/selectionContext.js";
 
 export async function createAssetsPanel(container, projectData) {
   const panel = document.createElement("div");
@@ -94,9 +99,21 @@ export async function createAssetsPanel(container, projectData) {
   ];
 
   let _selectedNode = null;
+  let _selectedNodes = new Set();
   let _contextMenu = null;
 
   // ── Helpers ───────────────────────────────────────────────────────────────
+  onClearAssets(() => {
+    _selectedNodes.clear();
+    _selectedNode = null;
+    gridEl
+      .querySelectorAll(".assets-grid-card.active")
+      .forEach((c) => c.classList.remove("active"));
+    treeEl
+      .querySelectorAll(".assets-tree-row.selected")
+      .forEach((r) => r.classList.remove("selected"));
+  });
+
   function findParent(nodes, target, parent = null) {
     for (const node of nodes) {
       if (node === target) return parent;
@@ -118,6 +135,30 @@ export async function createAssetsPanel(container, projectData) {
     }
     return null;
   }
+
+  // KEYBINDS
+  window.addEventListener("keydown", (e) => {
+    if (getContext() !== "assets") return;
+
+    if (e.key === "F2") {
+      e.preventDefault();
+      if (_selectedNode?.type === "asset-folder") {
+        startRenameFolder(_selectedNode);
+      }
+    }
+
+    if (e.key === "Delete") {
+      e.preventDefault();
+      if (_selectedNodes.size > 0) {
+        for (const node of _selectedNodes) {
+          if (node.type === "asset-folder") deleteFolder(node);
+        }
+        _selectedNodes.clear();
+      } else if (_selectedNode?.type === "asset-folder") {
+        deleteFolder(_selectedNode);
+      }
+    }
+  });
 
   // ── Context menu ──────────────────────────────────────────────────────────
   function closeContextMenu() {
@@ -391,6 +432,7 @@ export async function createAssetsPanel(container, projectData) {
       `;
 
       row.addEventListener("click", () => {
+        activateAssets();
         treeEl
           .querySelectorAll(".assets-tree-row.selected")
           .forEach((r) => r.classList.remove("selected"));
@@ -504,11 +546,27 @@ export async function createAssetsPanel(container, projectData) {
         });
       }
 
-      card.addEventListener("click", () => {
-        gridEl
-          .querySelectorAll(".assets-grid-card.active")
-          .forEach((c) => c.classList.remove("active"));
-        card.classList.add("active");
+      card.addEventListener("click", (e) => {
+        activateAssets();
+
+        if (e.ctrlKey || e.metaKey) {
+          if (_selectedNodes.has(item)) {
+            _selectedNodes.delete(item);
+            card.classList.remove("active");
+          } else {
+            _selectedNodes.add(item);
+            card.classList.add("active");
+          }
+          _selectedNode = item;
+        } else {
+          _selectedNodes.clear();
+          _selectedNode = item;
+          _selectedNodes.add(item);
+          gridEl
+            .querySelectorAll(".assets-grid-card.active")
+            .forEach((c) => c.classList.remove("active"));
+          card.classList.add("active");
+        }
       });
 
       card.addEventListener("contextmenu", (e) => {

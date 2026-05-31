@@ -2,6 +2,10 @@ import * as THREE from "three";
 import { logger } from "../../../engine/core/logger.js";
 import { createSelectionBox } from "./selectionBox.js";
 import { createMultiSelection } from "./multiSelection.js";
+import {
+  activateScene,
+  onClearScene,
+} from "../../systems/app/selectionContext.js";
 
 export function createSelectionSystem(
   camera,
@@ -20,6 +24,14 @@ export function createSelectionSystem(
   let mouseDownInCanvas = false;
   const changeListeners = [];
   const domElement = renderer.domElement;
+
+  // crear el listener de al limpiar
+  onClearScene(() => {
+    selected = null;
+    multi.clear();
+    gizmo.detach();
+    notifyChange();
+  });
 
   const selBox = createSelectionBox(domElement.parentElement);
   const multi = createMultiSelection(
@@ -41,6 +53,7 @@ export function createSelectionSystem(
   }
 
   function selectEntity(entity) {
+    activateScene();
     multi.clear();
     selected = entity;
     gizmo.attach(entity.mesh);
@@ -205,6 +218,7 @@ export function createSelectionSystem(
   });
 
   function selectMultiple(entities) {
+    activateScene();
     selected = null;
     multi.setSelected(entities);
     notifyChange();

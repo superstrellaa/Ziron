@@ -16,6 +16,7 @@ import { setProjectOpen } from "./ui/toolbar/menuBar.js";
 import { createProperties } from "./ui/panels/properties.js";
 import { createAssetsPanel } from "./ui/panels/assetsPanel.js";
 import { createAutoSave } from "./systems/persistence/autoSave.js";
+import { activateScene } from "./systems/app/selectionContext.js";
 
 export async function createViewport(container, projectData) {
   // Creación de DOM
@@ -69,7 +70,10 @@ export async function createViewport(container, projectData) {
 
   const assets = await createAssetsPanel(container, projectData);
 
-  if (firstSelected) selection.selectEntity(firstSelected);
+  if (firstSelected) {
+    activateScene();
+    selection.selectEntity(firstSelected);
+  }
 
   // ── Context menu y save ───────────────────────────────────────────────────
   const ctxMenu = createContextMenu(

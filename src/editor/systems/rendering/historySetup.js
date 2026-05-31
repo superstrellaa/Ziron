@@ -12,6 +12,7 @@ import {
 } from "../../../engine/history/commands.js";
 import { onKeybind } from "../input/keybinds.js";
 import { getClipboard, setClipboard } from "../../scene/contextMenu.js";
+import { getContext } from "../app/selectionContext.js";
 
 export function setupHistory(tc, selection, sceneManager) {
   const history = createHistoryManager();
@@ -33,6 +34,7 @@ export function setupHistory(tc, selection, sceneManager) {
       }
 
       if (action === "DELETE") {
+        if (getContext() !== "scene") return;
         const multiSelected = selection.getMultiSelected();
         if (multiSelected.length > 0) {
           const cmd = MultiDeleteCommand(sceneManager, multiSelected);

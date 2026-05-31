@@ -2,6 +2,7 @@ import { createIcons, Box, Container } from "lucide";
 import { t } from "../../../engine/i18n/i18n.js";
 import { onKeybind } from "../../systems/input/keybinds.js";
 import { RenameCommand } from "../../../engine/history/commands.js";
+import { getContext } from "../../systems/app/selectionContext.js";
 
 export function createHierarchy(
   container,
@@ -106,6 +107,7 @@ export function createHierarchy(
 
   // registrar paranoias para que el rename funcione
   onKeybind("RENAME", (e) => {
+    if (getContext() !== "scene") return;
     if (selectedIds.size !== 1) return;
     if (editingId !== null) return;
     e.preventDefault();
@@ -236,6 +238,7 @@ export function createHierarchy(
 
   window.addEventListener("keydown", (e) => {
     if (e.key !== "F2") return;
+    if (getContext() !== "scene") return;
     if (selectedIds.size !== 1) return;
     if (editingId !== null) return;
     e.preventDefault();
