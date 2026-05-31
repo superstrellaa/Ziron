@@ -70,11 +70,6 @@ export async function createViewport(container, projectData) {
 
   const assets = await createAssetsPanel(container, projectData);
 
-  if (firstSelected) {
-    activateScene();
-    selection.selectEntity(firstSelected);
-  }
-
   // ── Context menu y save ───────────────────────────────────────────────────
   const ctxMenu = createContextMenu(
     viewportEl,
@@ -106,6 +101,11 @@ export async function createViewport(container, projectData) {
     onKeybind,
     setProjectOpen,
   });
+
+  if (firstSelected) {
+    activateScene();
+    selection.selectEntity(firstSelected);
+  }
 
   const renderLoop = createRenderLoop(
     renderer,
