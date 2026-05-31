@@ -99,6 +99,7 @@ export async function createAssetsPanel(container, projectData) {
   ];
 
   let _selectedNode = null;
+  let _lastClickedItem = null;
   let _selectedNodes = new Set();
   let _contextMenu = null;
 
@@ -106,6 +107,7 @@ export async function createAssetsPanel(container, projectData) {
   onClearAssets(() => {
     _selectedNodes.clear();
     _selectedNode = null;
+    _lastClickedItem = null;
     gridEl
       .querySelectorAll(".assets-grid-card.active")
       .forEach((c) => c.classList.remove("active"));
@@ -520,6 +522,7 @@ export async function createAssetsPanel(container, projectData) {
     for (const item of items) {
       const card = document.createElement("div");
       card.className = "assets-grid-card";
+      card._item = item;
 
       card.innerHTML = `
         <i data-lucide="${item.icon}" class="assets-grid-icon" style="color:${item.iconColor ?? "#a78bfa"}"></i>
@@ -555,7 +558,34 @@ export async function createAssetsPanel(container, projectData) {
       card.addEventListener("click", (e) => {
         activateAssets();
 
-        if (e.ctrlKey || e.metaKey) {
+        const allCards = [...gridEl.querySelectorAll(".assets-grid-card")];
+        const allItems = allCards.map((c) => c._item);
+
+        if (
+          e.shiftKey &&
+          _lastClickedItem &&
+          allItems.includes(_lastClickedItem)
+        ) {
+          // Rango entre lastClicked y el actual
+          const lastIdx = allItems.indexOf(_lastClickedItem);
+          const currIdx = allItems.indexOf(item);
+          const [from, to] =
+            lastIdx < currIdx ? [lastIdx, currIdx] : [currIdx, lastIdx];
+
+          // Limpiar selección anterior si no hay ctrl
+          if (!e.ctrlKey && !e.metaKey) {
+            _selectedNodes.clear();
+            gridEl
+              .querySelectorAll(".assets-grid-card.active")
+              .forEach((c) => c.classList.remove("active"));
+          }
+
+          for (let i = from; i <= to; i++) {
+            _selectedNodes.add(allItems[i]);
+            allCards[i].classList.add("active");
+          }
+          _selectedNode = item;
+        } else if (e.ctrlKey || e.metaKey) {
           if (_selectedNodes.has(item)) {
             _selectedNodes.delete(item);
             card.classList.remove("active");
@@ -564,10 +594,12 @@ export async function createAssetsPanel(container, projectData) {
             card.classList.add("active");
           }
           _selectedNode = item;
+          _lastClickedItem = item;
         } else {
           _selectedNodes.clear();
           _selectedNode = item;
           _selectedNodes.add(item);
+          _lastClickedItem = item;
           gridEl
             .querySelectorAll(".assets-grid-card.active")
             .forEach((c) => c.classList.remove("active"));
