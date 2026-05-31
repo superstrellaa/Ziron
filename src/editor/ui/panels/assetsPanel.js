@@ -14,6 +14,7 @@ import {
   getContext,
 } from "../../systems/app/selectionContext.js";
 import { Popup } from "../../../engine/ui/popup/popupTypes.js";
+import { logger } from "../../../engine/core/logger.js";
 
 export async function createAssetsPanel(container, projectData) {
   const panel = document.createElement("div");
@@ -47,8 +48,13 @@ export async function createAssetsPanel(container, projectData) {
       const folders = await invoke("list_asset_folders", {
         projectFolder: projectData._folder,
       });
+      logger.info(
+        "Assets",
+        `Loaded ${folders.length} asset folder(s) from disk`,
+      );
       return folders;
-    } catch {
+    } catch (e) {
+      logger.warn("Assets", `Failed to load asset folders: ${e}`);
       return [];
     }
   }
@@ -266,38 +272,36 @@ export async function createAssetsPanel(container, projectData) {
   async function createFolder() {
     const name = await promptFolderName(t("assets.newFolderName"));
     if (!name) return;
-
     try {
       await invoke("create_asset_folder", {
         projectFolder: projectData._folder,
         folderName: name,
       });
+      logger.info("Assets", `Created folder "${name}"`);
       const node = buildAssetFolderNode(name);
       treeData[0].children.push(node);
       rebuildTree();
       renderGrid(treeData[0]);
     } catch (e) {
-      console.error("Failed to create folder:", e);
+      logger.warn("Assets", `Failed to create folder "${name}": ${e}`);
     }
   }
 
   async function deleteFolder(node) {
     const result = await Popup.deleteFolderConfirm(node.label);
     if (result !== "delete") return;
-
     try {
       await invoke("delete_asset_folder", {
         projectFolder: projectData._folder,
         folderName: node._diskName,
       });
+      logger.info("Assets", `Deleted folder "${node.label}"`);
       const parent = findParent(treeData, node);
-      if (parent) {
-        parent.children = parent.children.filter((c) => c !== node);
-      }
+      if (parent) parent.children = parent.children.filter((c) => c !== node);
       rebuildTree();
       renderGrid(treeData[0]);
     } catch (e) {
-      console.error("Failed to delete folder:", e);
+      logger.warn("Assets", `Failed to delete folder "${node.label}": ${e}`);
     }
   }
 
@@ -308,13 +312,14 @@ export async function createAssetsPanel(container, projectData) {
         projectFolder: projectData._folder,
         folderName: newName,
       });
+      logger.info("Assets", `Duplicated folder "${node.label}" → "${newName}"`);
       const newNode = buildAssetFolderNode(newName);
       const parent = findParent(treeData, node) ?? treeData[0];
       parent.children.push(newNode);
       rebuildTree();
       renderGrid(parent);
     } catch (e) {
-      console.error("Failed to duplicate folder:", e);
+      logger.warn("Assets", `Failed to duplicate folder "${node.label}": ${e}`);
     }
   }
 
@@ -352,12 +357,13 @@ export async function createAssetsPanel(container, projectData) {
           oldName: node._diskName,
           newName,
         });
+        logger.info("Assets", `Renamed folder "${oldName}" → "${newName}"`);
         node.label = newName;
         node._diskName = newName;
         rebuildTree();
         renderGrid(findParent(treeData, node) ?? treeData[0]);
       } catch (e) {
-        console.error("Failed to rename folder:", e);
+        logger.warn("Assets", `Failed to rename folder "${oldName}": ${e}`);
         rebuildTree();
       }
     }
@@ -480,6 +486,11 @@ export async function createAssetsPanel(container, projectData) {
             }, 0);
           }
         }
+
+        logger.info(
+          "Assets",
+          `Selected node "${node.label}" (type: ${node.type})`,
+        );
       });
 
       row.addEventListener("contextmenu", (e) => {

@@ -254,8 +254,8 @@ pub fn list_asset_folders(project_folder: String) -> Result<Vec<String>, String>
 }
 
 #[tauri::command]
-pub fn create_asset_folder(project_folder: String, folder_name: String) -> Result<(), String> {
-    let path = Path::new(&project_folder).join("assets").join(&folder_name);
+pub fn create_asset_folder(project_folder: String, folder_path: String) -> Result<(), String> {
+    let path = Path::new(&project_folder).join("assets").join(&folder_path);
     create_dir_all(&path).map_err(|e| e.to_string())?;
     Ok(())
 }
