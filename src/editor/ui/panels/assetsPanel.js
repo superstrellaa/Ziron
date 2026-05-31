@@ -13,6 +13,7 @@ import {
   onClearAssets,
   getContext,
 } from "../../systems/app/selectionContext.js";
+import { Popup } from "../../../engine/ui/popup/popupTypes.js";
 
 export async function createAssetsPanel(container, projectData) {
   const panel = document.createElement("div");
@@ -281,6 +282,9 @@ export async function createAssetsPanel(container, projectData) {
   }
 
   async function deleteFolder(node) {
+    const result = await Popup.deleteFolderConfirm(node.label);
+    if (result !== "delete") return;
+
     try {
       await invoke("delete_asset_folder", {
         projectFolder: projectData._folder,

@@ -160,6 +160,11 @@ export default {
       title: "Restart Required",
       message: "Some changes require restarting ZIRON Studio to take effect.",
     },
+    deleteFolder: {
+      title: "Delete Folder",
+      message:
+        'Are you sure you want to delete "{folder}"? This action is permanent and cannot be undone.',
+    },
     error: {
       title: "An error occurred",
     },
@@ -174,6 +179,7 @@ export default {
       continueAndUpdate: "Continue and Update",
       later: "Later",
       restart: "Restart",
+      delete: "Delete",
     },
   },
 };

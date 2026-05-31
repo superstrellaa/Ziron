@@ -58,6 +58,21 @@ export const Popup = {
       ],
     }),
 
+  deleteFolderConfirm: (folderName) =>
+    openPopup({
+      type: "warning",
+      titleKey: "popups.deleteFolder.title",
+      message: t("popups.deleteFolder.message").replace("{folder}", folderName),
+      buttons: [
+        { id: "cancel", labelKey: "popups.buttons.cancel", variant: "default" },
+        {
+          id: "delete",
+          labelKey: "popups.buttons.delete",
+          variant: "danger",
+        },
+      ],
+    }),
+
   /**
    * Error genérico con opción de copiar el mensaje
    * Resuelve con: "close"

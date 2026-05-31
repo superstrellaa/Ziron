@@ -171,6 +171,11 @@ export default {
       message:
         "Algunos cambios requieren reiniciar ZIRON Studio para que surtan efecto.",
     },
+    deleteFolder: {
+      title: "Eliminar Carpeta",
+      message:
+        '¿Seguro que quieres eliminar "{folder}"? Esta acción es permanente y no se puede deshacer.',
+    },
     error: {
       title: "Ocurrió un error",
     },
@@ -185,6 +190,7 @@ export default {
       continueAndUpdate: "Continuar y Actualizar",
       later: "Más tarde",
       restart: "Reiniciar",
+      delete: "Eliminar",
     },
   },
 };
