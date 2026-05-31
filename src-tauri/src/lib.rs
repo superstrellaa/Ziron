@@ -103,6 +103,10 @@ pub fn run() {
             project::pick_project_file,
             project::get_launch_project,
             project::update_project_version,
+            project::list_asset_folders,
+            project::create_asset_folder,
+            project::delete_asset_folder,
+            project::rename_asset_folder,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

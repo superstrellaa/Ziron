@@ -102,7 +102,11 @@ export default {
   },
   assets: {
     header: "Assets",
-    empty: "No assets in this project",
+    project: "Project",
+    scenes: "Scenes",
+    empty: "No assets",
+    addFolder: "Add Folder",
+    newFolderName: "Folder name",
   },
   toasts: {
     generalError: { title: "Error", message: "Something went wrong." },

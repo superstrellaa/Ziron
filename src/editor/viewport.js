@@ -67,7 +67,7 @@ export async function createViewport(container, projectData) {
   );
   topArea.appendChild(container.querySelector("#properties"));
 
-  const assets = createAssetsPanel(container, projectData);
+  const assets = await createAssetsPanel(container, projectData);
 
   if (firstSelected) selection.selectEntity(firstSelected);
 

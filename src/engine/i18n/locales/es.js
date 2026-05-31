@@ -103,7 +103,11 @@ export default {
   },
   assets: {
     header: "Assets",
-    empty: "No hay assets en este proyecto",
+    project: "Proyecto",
+    scenes: "Escenas",
+    empty: "Sin assets",
+    addFolder: "Añadir Carpeta",
+    newFolderName: "Nombre de carpeta",
   },
   toasts: {
     generalError: { title: "Error", message: "Algo salió mal." },

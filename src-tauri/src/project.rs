@@ -1,4 +1,4 @@
-use std::fs::{create_dir_all, read_to_string, write};
+use std::fs::{create_dir_all, read_to_string, write, remove_dir_all, rename, read_dir};
 use std::path::{Path, PathBuf};
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
@@ -234,5 +234,46 @@ fn add_recent(app: &tauri::AppHandle, project: RecentProject) -> Result<(), Stri
 
     let text = serde_json::to_string_pretty(&list).map_err(|e| e.to_string())?;
     write(&path, text).map_err(|e| e.to_string())?;
+    Ok(())
+}
+
+/// SISTEMA PARA VENTANA ASSETS
+#[tauri::command]
+pub fn list_asset_folders(project_folder: String) -> Result<Vec<String>, String> {
+    let assets_path = Path::new(&project_folder).join("assets");
+    create_dir_all(&assets_path).map_err(|e| e.to_string())?;
+
+    let mut folders = vec![];
+    for entry in read_dir(&assets_path).map_err(|e| e.to_string())? {
+        let entry = entry.map_err(|e| e.to_string())?;
+        if entry.file_type().map_err(|e| e.to_string())?.is_dir() {
+            folders.push(entry.file_name().to_string_lossy().to_string());
+        }
+    }
+    Ok(folders)
+}
+
+#[tauri::command]
+pub fn create_asset_folder(project_folder: String, folder_name: String) -> Result<(), String> {
+    let path = Path::new(&project_folder).join("assets").join(&folder_name);
+    create_dir_all(&path).map_err(|e| e.to_string())?;
+    Ok(())
+}
+
+#[tauri::command]
+pub fn delete_asset_folder(project_folder: String, folder_name: String) -> Result<(), String> {
+    let path = Path::new(&project_folder).join("assets").join(&folder_name);
+    remove_dir_all(&path).map_err(|e| e.to_string())?;
+    Ok(())
+}
+
+#[tauri::command]
+pub fn rename_asset_folder(
+    project_folder: String,
+    old_name: String,
+    new_name: String,
+) -> Result<(), String> {
+    let base = Path::new(&project_folder).join("assets");
+    rename(base.join(&old_name), base.join(&new_name)).map_err(|e| e.to_string())?;
     Ok(())
 }
