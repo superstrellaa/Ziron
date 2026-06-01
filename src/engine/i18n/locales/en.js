@@ -24,7 +24,7 @@ export default {
     newProjectPanel: {
       title: "New Project",
       nameLabel: "Project Name",
-      namePlaceholder: "MyGame",
+      namePlaceholder: "My Epic Scene",
       folderLabel: "Projects Folder",
       folderPlaceholder: "No folder selected",
       browseBtn: "Browse",

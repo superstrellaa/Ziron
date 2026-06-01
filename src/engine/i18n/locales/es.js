@@ -24,7 +24,7 @@ export default {
     newProjectPanel: {
       title: "Nuevo Proyecto",
       nameLabel: "Nombre del Proyecto",
-      namePlaceholder: "MiJuego",
+      namePlaceholder: "Mi Escene Épica",
       folderLabel: "Carpeta de Proyectos",
       folderPlaceholder: "No se ha seleccionado carpeta",
       browseBtn: "Examinar",
