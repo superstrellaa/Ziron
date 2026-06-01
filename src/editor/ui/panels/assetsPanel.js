@@ -330,12 +330,18 @@ export async function createAssetsPanel(container, projectData) {
       logger.info("Assets", `Deleted folder "${node.label}"`);
       const parent = findParent(treeData, node);
       if (parent) parent.children = parent.children.filter((c) => c !== node);
-      rebuildTree();
-      renderGrid(
+
+      if (_selectedNode === node) _selectedNode = null;
+      _selectedNodes.delete(node);
+      _lastClickedItem = _lastClickedItem === node ? null : _lastClickedItem;
+
+      const nextFolder =
         _currentFolderNode === node
           ? (findParent(treeData, node) ?? treeData[0])
-          : _currentFolderNode,
-      );
+          : _currentFolderNode;
+
+      rebuildTree();
+      renderGrid(nextFolder);
     } catch (e) {
       logger.warn("Assets", `Failed to delete folder "${node.label}": ${e}`);
     }
@@ -690,9 +696,18 @@ export async function createAssetsPanel(container, projectData) {
   }
 
   gridEl.addEventListener("contextmenu", (e) => {
-    if (e.target === gridEl || e.target.id === "assets-grid-empty") {
+    if (
+      e.target === gridEl ||
+      e.target.classList.contains("assets-grid-empty")
+    ) {
       e.preventDefault();
-      showContextMenu(e.clientX, e.clientY, _selectedNode ?? treeData[0]);
+
+      const validNode =
+        _selectedNode && findParent(treeData, _selectedNode) !== undefined
+          ? _selectedNode
+          : _currentFolderNode;
+
+      showContextMenu(e.clientX, e.clientY, validNode);
     }
   });
 
