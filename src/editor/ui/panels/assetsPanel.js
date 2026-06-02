@@ -634,13 +634,11 @@ export async function createAssetsPanel(container, projectData) {
           _lastClickedItem &&
           allItems.includes(_lastClickedItem)
         ) {
-          // Rango entre lastClicked y el actual
           const lastIdx = allItems.indexOf(_lastClickedItem);
           const currIdx = allItems.indexOf(item);
           const [from, to] =
             lastIdx < currIdx ? [lastIdx, currIdx] : [currIdx, lastIdx];
 
-          // Limpiar selección anterior si no hay ctrl
           if (!e.ctrlKey && !e.metaKey) {
             _selectedNodes.clear();
             gridEl
@@ -708,6 +706,34 @@ export async function createAssetsPanel(container, projectData) {
           : _currentFolderNode;
 
       showContextMenu(e.clientX, e.clientY, validNode);
+    }
+  });
+
+  // ── Deselect al clickar en vacío ──────────────────────────────────────────
+  function clearAssetSelection() {
+    _selectedNodes.clear();
+    _selectedNode = null;
+    _lastClickedItem = null;
+    gridEl
+      .querySelectorAll(".assets-grid-card.active")
+      .forEach((c) => c.classList.remove("active"));
+    treeEl
+      .querySelectorAll(".assets-tree-row.selected")
+      .forEach((r) => r.classList.remove("selected"));
+  }
+
+  gridEl.addEventListener("mousedown", (e) => {
+    if (
+      e.target === gridEl ||
+      e.target.classList.contains("assets-grid-empty")
+    ) {
+      clearAssetSelection();
+    }
+  });
+
+  treeEl.addEventListener("mousedown", (e) => {
+    if (e.target === treeEl) {
+      clearAssetSelection();
     }
   });
 
