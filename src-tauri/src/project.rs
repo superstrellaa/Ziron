@@ -238,7 +238,9 @@ fn add_recent(app: &tauri::AppHandle, project: RecentProject) -> Result<(), Stri
 }
 
 /// SISTEMA PARA VENTANA ASSETS
-#[tauri::command]
+
+/// Esta función se queda comentada debido a que solo lee la primera entrada, no hace el sistema chulo de abajo
+/* #[tauri::command]
 pub fn list_asset_folders(project_folder: String) -> Result<Vec<String>, String> {
     let assets_path = Path::new(&project_folder).join("assets");
     create_dir_all(&assets_path).map_err(|e| e.to_string())?;
@@ -251,6 +253,32 @@ pub fn list_asset_folders(project_folder: String) -> Result<Vec<String>, String>
         }
     }
     Ok(folders)
+} */
+
+#[derive(Serialize)]
+pub struct FolderNode {
+    pub name: String,
+    pub children: Vec<FolderNode>,
+}
+
+fn read_folder_tree(path: &Path) -> Result<Vec<FolderNode>, String> {
+    let mut nodes = vec![];
+    for entry in read_dir(path).map_err(|e| e.to_string())? {
+        let entry = entry.map_err(|e| e.to_string())?;
+        if entry.file_type().map_err(|e| e.to_string())?.is_dir() {
+            let name = entry.file_name().to_string_lossy().to_string();
+            let children = read_folder_tree(&entry.path())?;
+            nodes.push(FolderNode { name, children });
+        }
+    }
+    Ok(nodes)
+}
+
+#[tauri::command]
+pub fn list_asset_tree(project_folder: String) -> Result<Vec<FolderNode>, String> {
+    let assets_path = Path::new(&project_folder).join("assets");
+    create_dir_all(&assets_path).map_err(|e| e.to_string())?;
+    read_folder_tree(&assets_path)
 }
 
 #[tauri::command]
@@ -276,4 +304,35 @@ pub fn rename_asset_folder(
     let base = Path::new(&project_folder).join("assets");
     rename(base.join(&old_name), base.join(&new_name)).map_err(|e| e.to_string())?;
     Ok(())
+}
+
+fn copy_dir_recursive_renamed(src: &Path, dst: &Path) -> Result<(), String> {
+    create_dir_all(dst).map_err(|e| e.to_string())?;
+
+    for entry in read_dir(src).map_err(|e| e.to_string())? {
+        let entry = entry.map_err(|e| e.to_string())?;
+        let ft = entry.file_type().map_err(|e| e.to_string())?;
+        let src_path = entry.path();
+
+        if ft.is_dir() {
+            let name = entry.file_name().to_string_lossy().to_string();
+            let new_name = format!("{} Copy", name);
+            copy_dir_recursive_renamed(&src_path, &dst.join(&new_name))?;
+        } else {
+            // Cuando haya assets reales, los archivos se copian tal cual
+            let file_name = entry.file_name();
+            std::fs::copy(&src_path, dst.join(&file_name)).map_err(|e| e.to_string())?;
+        }
+    }
+    Ok(())
+}
+
+#[tauri::command]
+pub fn copy_asset_folder(
+    project_folder: String,
+    source_path: String,
+    dest_path: String,
+) -> Result<(), String> {
+    let base = Path::new(&project_folder).join("assets");
+    copy_dir_recursive_renamed(&base.join(&source_path), &base.join(&dest_path))
 }

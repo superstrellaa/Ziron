@@ -94,7 +94,7 @@ pub fn run() {
             config::load_config,
             config::save_config,
             project::create_project,
-            project::load_project,
+            project::load_project, 
             project::save_scene,
             project::load_scene,
             project::get_recent_projects,
@@ -103,10 +103,11 @@ pub fn run() {
             project::pick_project_file,
             project::get_launch_project,
             project::update_project_version,
-            project::list_asset_folders,
+            project::list_asset_tree,
             project::create_asset_folder,
             project::delete_asset_folder,
             project::rename_asset_folder,
+            project::copy_asset_folder,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

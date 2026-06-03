@@ -43,18 +43,29 @@ export async function createAssetsPanel(container, projectData) {
   const gridEl = panel.querySelector("#assets-grid");
 
   // ── Cargar carpetas de assets desde disco ────────────────────────────────
+  function buildAssetFolderNodeRecursive(folderNode, parentPath = "") {
+    const diskPath = parentPath
+      ? `${parentPath}/${folderNode.name}`
+      : folderNode.name;
+    const node = buildAssetFolderNode(folderNode.name, diskPath);
+    node.children = folderNode.children.map((child) =>
+      buildAssetFolderNodeRecursive(child, diskPath),
+    );
+    return node;
+  }
+
   async function loadAssetFolders() {
     try {
-      const folders = await invoke("list_asset_folders", {
+      const tree = await invoke("list_asset_tree", {
         projectFolder: projectData._folder,
       });
       logger.info(
         "Assets",
-        `Loaded ${folders.length} asset folder(s) from disk`,
+        `Loaded asset tree from disk (${tree.length} root folders)`,
       );
-      return folders;
+      return tree;
     } catch (e) {
-      logger.warn("Assets", `Failed to load asset folders: ${e}`);
+      logger.warn("Assets", `Failed to load asset tree: ${e}`);
       return [];
     }
   }
@@ -93,7 +104,9 @@ export async function createAssetsPanel(container, projectData) {
   };
 
   const assetFolderNames = await loadAssetFolders();
-  const assetFolderNodes = assetFolderNames.map(buildAssetFolderNode);
+  const assetFolderNodes = assetFolderNames.map((node) =>
+    buildAssetFolderNodeRecursive(node),
+  );
 
   const treeData = [
     {
@@ -347,19 +360,35 @@ export async function createAssetsPanel(container, projectData) {
     }
   }
 
-  async function duplicateFolder(node) {
-    const newName = node._diskName + " (copy)";
-    const parentPath = getNodePath(findParent(treeData, node) ?? treeData[0]);
+  function buildCopiedNode(node, parentPath) {
+    const newName = node._diskName + " Copy";
     const newPath = parentPath ? `${parentPath}/${newName}` : newName;
+    const newNode = buildAssetFolderNode(newName, newPath);
+
+    for (const child of node.children ?? []) {
+      if (child.type === "asset-folder") {
+        newNode.children.push(buildCopiedNode(child, newPath));
+      }
+    }
+    return newNode;
+  }
+
+  async function duplicateFolder(node) {
+    const parent = findParent(treeData, node) ?? treeData[0];
+    const parentPath = getNodePath(parent);
+    const sourcePath = node._diskPath ?? node._diskName;
+    const newName = node._diskName + " Copy";
+    const destPath = parentPath ? `${parentPath}/${newName}` : newName;
 
     try {
-      await invoke("create_asset_folder", {
+      await invoke("copy_asset_folder", {
         projectFolder: projectData._folder,
-        folderPath: newPath,
+        sourcePath,
+        destPath,
       });
       logger.info("Assets", `Duplicated folder "${node.label}" → "${newName}"`);
-      const newNode = buildAssetFolderNode(newName, newPath);
-      const parent = findParent(treeData, node) ?? treeData[0];
+
+      const newNode = buildCopiedNode(node, parentPath);
       parent.children.push(newNode);
       rebuildTree();
       renderGrid(parent);
