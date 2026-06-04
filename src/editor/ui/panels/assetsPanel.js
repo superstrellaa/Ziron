@@ -216,7 +216,7 @@ export async function createAssetsPanel(container, projectData) {
     if (e.key === "Escape") closeContextMenu();
   });
 
-  function showContextMenu(x, y, targetNode) {
+  function showContextMenu(x, y, targetNode, isBackground = false) {
     closeContextMenu();
 
     const menu = document.createElement("div");
@@ -228,6 +228,7 @@ export async function createAssetsPanel(container, projectData) {
     ul.className = "ctx-menu";
 
     if (
+      isBackground ||
       !targetNode ||
       targetNode.type === "root" ||
       targetNode.type === "folder-scenes"
@@ -240,7 +241,7 @@ export async function createAssetsPanel(container, projectData) {
       );
     }
 
-    if (targetNode?.type === "asset-folder") {
+    if (!isBackground && targetNode?.type === "asset-folder") {
       ul.appendChild(
         makeCtxItem(t("assets.addFolder"), async () => {
           closeContextMenu();
@@ -728,13 +729,7 @@ export async function createAssetsPanel(container, projectData) {
       e.target.classList.contains("assets-grid-empty")
     ) {
       e.preventDefault();
-
-      const validNode =
-        _selectedNode && findParent(treeData, _selectedNode) !== undefined
-          ? _selectedNode
-          : _currentFolderNode;
-
-      showContextMenu(e.clientX, e.clientY, validNode);
+      showContextMenu(e.clientX, e.clientY, _currentFolderNode, true); // ← isBackground
     }
   });
 
