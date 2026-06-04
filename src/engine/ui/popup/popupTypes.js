@@ -65,12 +65,9 @@ export const Popup = {
       message: t("popups.deleteFolder.message").replace("{folder}", folderName),
       buttons: [
         { id: "cancel", labelKey: "popups.buttons.cancel", variant: "default" },
-        {
-          id: "delete",
-          labelKey: "popups.buttons.delete",
-          variant: "danger",
-        },
+        { id: "delete", labelKey: "popups.buttons.delete", variant: "danger" },
       ],
+      keybinds: { Escape: "cancel", Enter: "delete" },
     }),
 
   /**

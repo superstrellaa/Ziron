@@ -13,6 +13,8 @@ import { Toast } from "../toasts/toastTypes.js";
 let overlay = null;
 let currentResolve = null;
 
+let _keybindHandler = null;
+
 const VARIANTS = {
   error: { icon: "circle-alert", cssClass: "popup-error" },
   warning: { icon: "triangle-alert", cssClass: "popup-warning" },
@@ -33,6 +35,7 @@ export function openPopup({
   message,
   messageKey,
   buttons = [],
+  keybinds = null,
 }) {
   return new Promise((resolve) => {
     if (currentResolve) {
@@ -87,6 +90,19 @@ export function openPopup({
       });
     });
 
+    if (keybinds) {
+      _keybindHandler = (e) => {
+        const buttonId = keybinds[e.key];
+        if (!buttonId) return;
+        e.preventDefault();
+        e.stopPropagation();
+        if (buttons.some((b) => b.id === buttonId)) {
+          close(buttonId);
+        }
+      };
+      window.addEventListener("keydown", _keybindHandler, { capture: true });
+    }
+
     requestAnimationFrame(() => {
       requestAnimationFrame(() => overlay.classList.add("popup-visible"));
     });
@@ -94,6 +110,11 @@ export function openPopup({
 }
 
 function close(resultId) {
+  if (_keybindHandler) {
+    window.removeEventListener("keydown", _keybindHandler, { capture: true });
+    _keybindHandler = null;
+  }
+
   overlay.classList.remove("popup-visible");
   overlay.classList.add("popup-hiding");
 
