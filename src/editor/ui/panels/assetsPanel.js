@@ -550,7 +550,7 @@ export async function createAssetsPanel(container, projectData) {
           node.children !== undefined;
 
         if (isFolder) {
-          renderGrid(node);
+          navigateTo(node);
         } else {
           const parentNode = findParent(treeData, node);
           if (parentNode) {
@@ -648,7 +648,7 @@ export async function createAssetsPanel(container, projectData) {
               }
             });
           }, 0);
-          renderGrid(item);
+          navigateTo(item);
         });
       }
 
@@ -763,6 +763,49 @@ export async function createAssetsPanel(container, projectData) {
   treeEl.addEventListener("mousedown", (e) => {
     if (e.target === treeEl) {
       clearAssetSelection();
+    }
+  });
+
+  // ── Historial de navegación ───────────────────────────────────────────────
+  const _navHistory = [treeData[0]];
+  let _navIndex = 0;
+
+  function navigateTo(node, pushHistory = true) {
+    if (pushHistory) {
+      _navHistory.splice(_navIndex + 1);
+      _navHistory.push(node);
+      _navIndex = _navHistory.length - 1;
+    }
+
+    _selectedNode = node;
+    node.expanded = true;
+    rebuildTree();
+
+    treeEl.querySelectorAll(".assets-tree-row").forEach((row) => {
+      if (row.querySelector(".assets-tree-label")?.textContent === node.label) {
+        treeEl
+          .querySelectorAll(".assets-tree-row.selected")
+          .forEach((r) => r.classList.remove("selected"));
+        row.classList.add("selected");
+      }
+    });
+
+    renderGrid(node);
+  }
+
+  panel.addEventListener("mousedown", (e) => {
+    if (e.button === 3) {
+      e.preventDefault();
+      if (_navIndex > 0) {
+        _navIndex--;
+        navigateTo(_navHistory[_navIndex], false);
+      }
+    } else if (e.button === 4) {
+      e.preventDefault();
+      if (_navIndex < _navHistory.length - 1) {
+        _navIndex++;
+        navigateTo(_navHistory[_navIndex], false);
+      }
     }
   });
 
