@@ -1,6 +1,8 @@
 import {
   createIcons,
   Folder,
+  FolderOpen,
+  FolderClosed,
   ChevronDown,
   ChevronRight,
   Box,
@@ -527,7 +529,7 @@ export async function createAssetsPanel(container, projectData) {
               : ""
           }
         </span>
-        <i data-lucide="${node.icon}" class="assets-tree-icon" style="color:${node.iconColor ?? "#6b7280"}"></i>
+        <i data-lucide="${node.children !== undefined ? (node.expanded ? "folder-open" : "folder-closed") : node.icon}" class="assets-tree-icon" style="color:${node.iconColor ?? "#6b7280"}"></i>
         <span class="assets-tree-label">${node.label}</span>
       `;
 
@@ -593,7 +595,15 @@ export async function createAssetsPanel(container, projectData) {
     }
 
     createIcons({
-      icons: { Folder, ChevronDown, ChevronRight, Box, Container },
+      icons: {
+        Folder,
+        FolderOpen,
+        FolderClosed,
+        ChevronDown,
+        ChevronRight,
+        Box,
+        Container,
+      },
       attrs: { width: 13, height: 13 },
       root: parent,
     });
