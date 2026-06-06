@@ -36,7 +36,15 @@ export async function createAssetsPanel(container, projectData) {
   container.appendChild(panel);
 
   createIcons({
-    icons: { Folder, ChevronDown, ChevronRight, Box, Container },
+    icons: {
+      Folder,
+      FolderOpen,
+      FolderClosed,
+      ChevronDown,
+      ChevronRight,
+      Box,
+      Container,
+    },
     attrs: { width: 13, height: 13, stroke: "#cccccc" },
     root: panel,
   });
