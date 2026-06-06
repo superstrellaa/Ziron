@@ -541,7 +541,6 @@ export async function createAssetsPanel(container, projectData) {
 
         if (hasChildren) {
           node.expanded = !node.expanded;
-          rebuildTree();
         }
 
         const isFolder =
@@ -773,7 +772,6 @@ export async function createAssetsPanel(container, projectData) {
     }
 
     _selectedNode = node;
-    node.expanded = true;
     rebuildTree();
 
     treeEl.querySelectorAll(".assets-tree-row").forEach((row) => {
