@@ -107,6 +107,7 @@ export default {
     empty: "No assets",
     addFolder: "Add Folder",
     newFolderName: "Folder name",
+    importModel: "Import Model",
   },
   toasts: {
     generalError: { title: "Error", message: "Something went wrong." },

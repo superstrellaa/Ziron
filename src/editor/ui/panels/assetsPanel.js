@@ -7,6 +7,7 @@ import {
   ChevronRight,
   Box,
   Container,
+  Package,
 } from "lucide";
 import { invoke } from "@tauri-apps/api/core";
 import { t } from "../../../engine/i18n/i18n.js";
@@ -44,6 +45,7 @@ export async function createAssetsPanel(container, projectData) {
       ChevronRight,
       Box,
       Container,
+      Package,
     },
     attrs: { width: 13, height: 13, stroke: "#cccccc" },
     root: panel,
@@ -53,14 +55,30 @@ export async function createAssetsPanel(container, projectData) {
   const gridEl = panel.querySelector("#assets-grid");
 
   // ── Cargar carpetas de assets desde disco ────────────────────────────────
+  function buildModelNode(name, diskPath) {
+    return {
+      label: name,
+      icon: "package",
+      iconColor: "#60a5fa",
+      type: "asset-model",
+      _diskName: name,
+      _diskPath: diskPath,
+    };
+  }
+
   function buildAssetFolderNodeRecursive(folderNode, parentPath = "") {
     const diskPath = parentPath
       ? `${parentPath}/${folderNode.name}`
       : folderNode.name;
     const node = buildAssetFolderNode(folderNode.name, diskPath);
-    node.children = folderNode.children.map((child) =>
-      buildAssetFolderNodeRecursive(child, diskPath),
-    );
+    node.children = [
+      ...folderNode.children.map((child) =>
+        buildAssetFolderNodeRecursive(child, diskPath),
+      ),
+      ...(folderNode.files ?? []).map((f) =>
+        buildModelNode(f.name, `${diskPath}/${f.name}`),
+      ),
+    ];
     return node;
   }
 
@@ -69,14 +87,11 @@ export async function createAssetsPanel(container, projectData) {
       const tree = await invoke("list_asset_tree", {
         projectFolder: projectData._folder,
       });
-      logger.info(
-        "Assets",
-        `Loaded asset tree from disk (${tree.length} root folders)`,
-      );
-      return tree;
+      logger.info("Assets", `Loaded asset tree from disk`);
+      return tree; // { folders, files }
     } catch (e) {
       logger.warn("Assets", `Failed to load asset tree: ${e}`);
-      return [];
+      return { folders: [], files: [] };
     }
   }
 
@@ -113,9 +128,12 @@ export async function createAssetsPanel(container, projectData) {
     ],
   };
 
-  const assetFolderNames = await loadAssetFolders();
-  const assetFolderNodes = assetFolderNames.map((node) =>
+  const assetTree = await loadAssetFolders();
+  const assetFolderNodes = assetTree.folders.map((node) =>
     buildAssetFolderNodeRecursive(node),
+  );
+  const assetRootFileNodes = (assetTree.files ?? []).map((f) =>
+    buildModelNode(f.name, f.name),
   );
 
   const treeData = [
@@ -125,7 +143,7 @@ export async function createAssetsPanel(container, projectData) {
       iconColor: "#7c5cbf",
       expanded: true,
       type: "root",
-      children: [scenesNode, ...assetFolderNodes],
+      children: [scenesNode, ...assetFolderNodes, ...assetRootFileNodes],
     },
   ];
 
@@ -197,6 +215,8 @@ export async function createAssetsPanel(container, projectData) {
       e.preventDefault();
       if (_selectedNode?.type === "asset-folder") {
         startRenameFolder(_selectedNode);
+      } else if (_selectedNode?.type === "asset-model") {
+        startRenameModel(_selectedNode);
       }
     }
 
@@ -205,10 +225,13 @@ export async function createAssetsPanel(container, projectData) {
       if (_selectedNodes.size > 0) {
         for (const node of _selectedNodes) {
           if (node.type === "asset-folder") deleteFolder(node);
+          else if (node.type === "asset-model") deleteModel(node);
         }
         _selectedNodes.clear();
       } else if (_selectedNode?.type === "asset-folder") {
         deleteFolder(_selectedNode);
+      } else if (_selectedNode?.type === "asset-model") {
+        deleteModel(_selectedNode);
       }
     }
   });
@@ -237,16 +260,23 @@ export async function createAssetsPanel(container, projectData) {
     const ul = document.createElement("ul");
     ul.className = "ctx-menu";
 
-    if (
+    const showFolderActions =
       isBackground ||
       !targetNode ||
       targetNode.type === "root" ||
-      targetNode.type === "folder-scenes"
-    ) {
+      targetNode.type === "folder-scenes";
+
+    if (showFolderActions) {
       ul.appendChild(
         makeCtxItem(t("assets.addFolder"), async () => {
           closeContextMenu();
           await createFolder();
+        }),
+      );
+      ul.appendChild(
+        makeCtxItem(t("assets.importModel"), async () => {
+          closeContextMenu();
+          await importModel();
         }),
       );
     }
@@ -256,6 +286,12 @@ export async function createAssetsPanel(container, projectData) {
         makeCtxItem(t("assets.addFolder"), async () => {
           closeContextMenu();
           await createFolder();
+        }),
+      );
+      ul.appendChild(
+        makeCtxItem(t("assets.importModel"), async () => {
+          closeContextMenu();
+          await importModel();
         }),
       );
       ul.appendChild(makeCtxSeparator());
@@ -278,6 +314,32 @@ export async function createAssetsPanel(container, projectData) {
           async () => {
             closeContextMenu();
             await deleteFolder(targetNode);
+          },
+          true,
+        ),
+      );
+    }
+
+    if (!isBackground && targetNode?.type === "asset-model") {
+      ul.appendChild(
+        makeCtxItem(t("contextMenu.rename"), () => {
+          closeContextMenu();
+          startRenameModel(targetNode);
+        }),
+      );
+      ul.appendChild(
+        makeCtxItem(t("contextMenu.duplicate"), async () => {
+          closeContextMenu();
+          await duplicateModel(targetNode);
+        }),
+      );
+      ul.appendChild(makeCtxSeparator());
+      ul.appendChild(
+        makeCtxItem(
+          t("contextMenu.delete"),
+          async () => {
+            closeContextMenu();
+            await deleteModel(targetNode);
           },
           true,
         ),
@@ -519,15 +581,162 @@ export async function createAssetsPanel(container, projectData) {
     });
   }
 
+  // Models
+  async function importModel() {
+    const sourcePath = await invoke("pick_model_file");
+    if (!sourcePath) return;
+
+    const targetFolder = getNodePath(_currentFolderNode);
+
+    try {
+      const fileName = await invoke("import_asset_file", {
+        projectFolder: projectData._folder,
+        sourcePath,
+        targetFolder,
+      });
+      logger.info(
+        "Assets",
+        `Imported "${fileName}" → "${targetFolder || "assets/"}"`,
+      );
+
+      const diskPath = targetFolder ? `${targetFolder}/${fileName}` : fileName;
+      const node = buildModelNode(fileName, diskPath);
+
+      const targetNode =
+        _currentFolderNode.type === "asset-folder" ||
+        _currentFolderNode.type === "root"
+          ? _currentFolderNode
+          : treeData[0];
+
+      targetNode.children.push(node);
+      rebuildTree();
+      renderGrid(targetNode);
+    } catch (e) {
+      logger.warn("Assets", `Failed to import model: ${e}`);
+    }
+  }
+
+  async function deleteModel(node) {
+    const result = await Popup.deleteFolderConfirm(node.label);
+    if (result !== "delete") return;
+    try {
+      await invoke("delete_asset_file", {
+        projectFolder: projectData._folder,
+        filePath: node._diskPath,
+      });
+      logger.info("Assets", `Deleted model "${node.label}"`);
+      const parent = findParent(treeData, node);
+      if (parent) parent.children = parent.children.filter((c) => c !== node);
+      if (_selectedNode === node) _selectedNode = null;
+      _selectedNodes.delete(node);
+      renderGrid(_currentFolderNode);
+    } catch (e) {
+      logger.warn("Assets", `Failed to delete model "${node.label}": ${e}`);
+    }
+  }
+
+  async function duplicateModel(node) {
+    const dotIdx = node._diskName.lastIndexOf(".");
+    const stem = dotIdx > 0 ? node._diskName.slice(0, dotIdx) : node._diskName;
+    const ext = dotIdx > 0 ? node._diskName.slice(dotIdx) : "";
+    const newName = stem + " Copy" + ext;
+
+    const parentPath = getNodePath(
+      findParent(treeData, node) ?? _currentFolderNode,
+    );
+    const destPath = parentPath ? `${parentPath}/${newName}` : newName;
+
+    try {
+      await invoke("copy_asset_file", {
+        projectFolder: projectData._folder,
+        sourcePath: node._diskPath,
+        destPath,
+      });
+      logger.info("Assets", `Duplicated model "${node.label}" → "${newName}"`);
+      const newNode = buildModelNode(newName, destPath);
+      const parent = findParent(treeData, node) ?? _currentFolderNode;
+      parent.children.push(newNode);
+      renderGrid(_currentFolderNode);
+    } catch (e) {
+      logger.warn("Assets", `Failed to duplicate model "${node.label}": ${e}`);
+    }
+  }
+
+  function startRenameModel(node) {
+    const cards = gridEl.querySelectorAll(".assets-grid-card");
+    let targetCard = null;
+    cards.forEach((card) => {
+      if (card._item === node) targetCard = card;
+    });
+    if (!targetCard) return;
+
+    const labelEl = targetCard.querySelector(".assets-grid-label");
+    const oldName = node._diskName;
+    const dotIdx = oldName.lastIndexOf(".");
+    const stem = dotIdx > 0 ? oldName.slice(0, dotIdx) : oldName;
+    const ext = dotIdx > 0 ? oldName.slice(dotIdx) : "";
+
+    const input = document.createElement("input");
+    input.className = "assets-folder-prompt-input";
+    input.value = stem;
+    input.spellcheck = false;
+    labelEl.replaceWith(input);
+    input.focus();
+    input.select();
+
+    async function commit() {
+      const newStem = input.value.trim();
+      if (!newStem || newStem + ext === oldName) {
+        renderGrid(_currentFolderNode);
+        return;
+      }
+      const newName = newStem + ext;
+      const parentPath = getNodePath(
+        findParent(treeData, node) ?? _currentFolderNode,
+      );
+      const newPath = parentPath ? `${parentPath}/${newName}` : newName;
+
+      try {
+        await invoke("rename_asset_file", {
+          projectFolder: projectData._folder,
+          oldPath: node._diskPath,
+          newPath,
+        });
+        logger.info("Assets", `Renamed model "${oldName}" → "${newName}"`);
+        node.label = newName;
+        node._diskName = newName;
+        node._diskPath = newPath;
+        renderGrid(_currentFolderNode);
+      } catch (e) {
+        logger.warn("Assets", `Failed to rename model "${oldName}": ${e}`);
+        renderGrid(_currentFolderNode);
+      }
+    }
+
+    input.addEventListener("blur", commit);
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        input.blur();
+      }
+      if (e.key === "Escape") {
+        input.value = stem;
+        input.blur();
+      }
+    });
+  }
+
   // ── Árbol ─────────────────────────────────────────────────────────────────
   function renderTree(nodes, parent, depth = 0) {
-    for (const node of nodes) {
+    const folderNodes = nodes.filter((n) => n.type !== "asset-model");
+    for (const node of folderNodes) {
       const row = document.createElement("div");
       row.className = "assets-tree-row";
       if (_selectedNode === node) row.classList.add("selected");
       row.style.paddingLeft = `${8 + depth * 16}px`;
 
-      const hasChildren = node.children?.length > 0;
+      const hasChildren =
+        node.children?.some((c) => c.type !== "asset-model") ?? false;
 
       row.innerHTML = `
         <span class="assets-tree-chevron">
@@ -734,7 +943,7 @@ export async function createAssetsPanel(container, projectData) {
     }
 
     createIcons({
-      icons: { Folder, Box, Container },
+      icons: { Folder, Box, Container, Package },
       attrs: { width: 28, height: 28 },
       root: gridEl,
     });

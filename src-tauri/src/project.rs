@@ -256,29 +256,51 @@ pub fn list_asset_folders(project_folder: String) -> Result<Vec<String>, String>
 } */
 
 #[derive(Serialize)]
+pub struct FileNode {
+    pub name: String,
+}
+
+#[derive(Serialize)]
 pub struct FolderNode {
     pub name: String,
     pub children: Vec<FolderNode>,
+    pub files: Vec<FileNode>,
 }
 
-fn read_folder_tree(path: &Path) -> Result<Vec<FolderNode>, String> {
-    let mut nodes = vec![];
+fn read_folder_tree(path: &Path) -> Result<(Vec<FolderNode>, Vec<FileNode>), String> {
+    let mut folders = vec![];
+    let mut files = vec![];
+
     for entry in read_dir(path).map_err(|e| e.to_string())? {
         let entry = entry.map_err(|e| e.to_string())?;
-        if entry.file_type().map_err(|e| e.to_string())?.is_dir() {
-            let name = entry.file_name().to_string_lossy().to_string();
-            let children = read_folder_tree(&entry.path())?;
-            nodes.push(FolderNode { name, children });
+        let ft = entry.file_type().map_err(|e| e.to_string())?;
+        let name = entry.file_name().to_string_lossy().to_string();
+
+        if ft.is_dir() {
+            let (children, child_files) = read_folder_tree(&entry.path())?;
+            folders.push(FolderNode { name, children, files: child_files });
+        } else if ft.is_file() {
+            let lower = name.to_lowercase();
+            if lower.ends_with(".glb") {
+                files.push(FileNode { name });
+            }
         }
     }
-    Ok(nodes)
+    Ok((folders, files))
+}
+
+#[derive(Serialize)]
+pub struct AssetTree {
+    pub folders: Vec<FolderNode>,
+    pub files: Vec<FileNode>,
 }
 
 #[tauri::command]
-pub fn list_asset_tree(project_folder: String) -> Result<Vec<FolderNode>, String> {
+pub fn list_asset_tree(project_folder: String) -> Result<AssetTree, String> {
     let assets_path = Path::new(&project_folder).join("assets");
     create_dir_all(&assets_path).map_err(|e| e.to_string())?;
-    read_folder_tree(&assets_path)
+    let (folders, files) = read_folder_tree(&assets_path)?;
+    Ok(AssetTree { folders, files })
 }
 
 #[tauri::command]
@@ -335,4 +357,74 @@ pub fn copy_asset_folder(
 ) -> Result<(), String> {
     let base = Path::new(&project_folder).join("assets");
     copy_dir_recursive_renamed(&base.join(&source_path), &base.join(&dest_path))
+}
+
+/// SISTEMA PARA ASSETS PERO MODELOS Y ASSETS ESPECIFICOS
+#[tauri::command]
+pub async fn pick_model_file(app: tauri::AppHandle) -> Result<Option<String>, String> {
+    use tauri_plugin_dialog::DialogExt;
+    use std::sync::{Arc, Mutex};
+
+    let (tx, rx) = std::sync::mpsc::channel();
+    let tx = Arc::new(Mutex::new(Some(tx)));
+
+    app.dialog()
+        .file()
+        .add_filter("3D Model", &["glb"])
+        .pick_file(move |file| {
+            if let Some(tx) = tx.lock().unwrap().take() {
+                let _ = tx.send(file.map(|p| p.to_string()));
+            }
+        });
+
+    rx.recv().map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub fn import_asset_file(
+    project_folder: String,
+    source_path: String,
+    target_folder: String,
+) -> Result<String, String> {
+    let src = Path::new(&source_path);
+    let file_name = src.file_name().ok_or("Invalid source path")?;
+    let dest_dir = if target_folder.is_empty() {
+        Path::new(&project_folder).join("assets")
+    } else {
+        Path::new(&project_folder).join("assets").join(&target_folder)
+    };
+    create_dir_all(&dest_dir).map_err(|e| e.to_string())?;
+    let dest = dest_dir.join(file_name);
+    std::fs::copy(src, &dest).map_err(|e| e.to_string())?;
+    Ok(file_name.to_string_lossy().to_string())
+}
+
+#[tauri::command]
+pub fn delete_asset_file(project_folder: String, file_path: String) -> Result<(), String> {
+    let path = Path::new(&project_folder).join("assets").join(&file_path);
+    std::fs::remove_file(&path).map_err(|e| e.to_string())?;
+    Ok(())
+}
+
+#[tauri::command]
+pub fn rename_asset_file(
+    project_folder: String,
+    old_path: String,
+    new_path: String,
+) -> Result<(), String> {
+    let base = Path::new(&project_folder).join("assets");
+    rename(base.join(&old_path), base.join(&new_path)).map_err(|e| e.to_string())?;
+    Ok(())
+}
+
+#[tauri::command]
+pub fn copy_asset_file(
+    project_folder: String,
+    source_path: String,
+    dest_path: String,
+) -> Result<(), String> {
+    let base = Path::new(&project_folder).join("assets");
+    std::fs::copy(base.join(&source_path), base.join(&dest_path))
+        .map_err(|e| e.to_string())?;
+    Ok(())
 }

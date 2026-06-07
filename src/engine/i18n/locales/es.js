@@ -108,6 +108,7 @@ export default {
     empty: "Sin assets",
     addFolder: "Añadir Carpeta",
     newFolderName: "Nombre de carpeta",
+    importModel: "Importar Modelo",
   },
   toasts: {
     generalError: { title: "Error", message: "Algo salió mal." },
