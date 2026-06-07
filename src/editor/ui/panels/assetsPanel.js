@@ -629,6 +629,7 @@ export async function createAssetsPanel(container, projectData) {
       if (parent) parent.children = parent.children.filter((c) => c !== node);
       if (_selectedNode === node) _selectedNode = null;
       _selectedNodes.delete(node);
+      rebuildTree();
       renderGrid(_currentFolderNode);
     } catch (e) {
       logger.warn("Assets", `Failed to delete model "${node.label}": ${e}`);
@@ -656,6 +657,7 @@ export async function createAssetsPanel(container, projectData) {
       const newNode = buildModelNode(newName, destPath);
       const parent = findParent(treeData, node) ?? _currentFolderNode;
       parent.children.push(newNode);
+      rebuildTree();
       renderGrid(_currentFolderNode);
     } catch (e) {
       logger.warn("Assets", `Failed to duplicate model "${node.label}": ${e}`);
@@ -728,27 +730,34 @@ export async function createAssetsPanel(container, projectData) {
 
   // ── Árbol ─────────────────────────────────────────────────────────────────
   function renderTree(nodes, parent, depth = 0) {
-    const folderNodes = nodes.filter((n) => n.type !== "asset-model");
-    for (const node of folderNodes) {
+    for (const node of nodes) {
       const row = document.createElement("div");
       row.className = "assets-tree-row";
       if (_selectedNode === node) row.classList.add("selected");
       row.style.paddingLeft = `${8 + depth * 16}px`;
 
-      const hasChildren =
+      const hasSubfolders =
         node.children?.some((c) => c.type !== "asset-model") ?? false;
 
+      const hasAnyChildren = (node.children?.length ?? 0) > 0;
+
       row.innerHTML = `
-        <span class="assets-tree-chevron">
-          ${
-            hasChildren
-              ? `<i data-lucide="${node.expanded ? "chevron-down" : "chevron-right"}"></i>`
-              : ""
-          }
-        </span>
-        <i data-lucide="${node.children !== undefined ? (node.expanded ? "folder-open" : "folder-closed") : node.icon}" class="assets-tree-icon" style="color:${node.iconColor ?? "#6b7280"}"></i>
-        <span class="assets-tree-label">${node.label}</span>
-      `;
+      <span class="assets-tree-chevron">
+    ${
+      hasAnyChildren
+        ? `<i data-lucide="${node.expanded ? "chevron-down" : "chevron-right"}"></i>`
+        : ""
+    }
+  </span>
+      <i data-lucide="${
+        node.children !== undefined
+          ? node.expanded
+            ? "folder-open"
+            : "folder-closed"
+          : node.icon
+      }" class="assets-tree-icon" style="color:${node.iconColor ?? "#6b7280"}"></i>
+      <span class="assets-tree-label">${node.label}</span>
+    `;
 
       row.addEventListener("click", () => {
         activateAssets();
@@ -758,7 +767,7 @@ export async function createAssetsPanel(container, projectData) {
         row.classList.add("selected");
         _selectedNode = node;
 
-        if (hasChildren) {
+        if (hasAnyChildren) {
           node.expanded = !node.expanded;
         }
 
@@ -806,7 +815,7 @@ export async function createAssetsPanel(container, projectData) {
 
       parent.appendChild(row);
 
-      if (hasChildren && node.expanded) {
+      if (hasAnyChildren && node.expanded) {
         renderTree(node.children, parent, depth + 1);
       }
     }
@@ -820,6 +829,7 @@ export async function createAssetsPanel(container, projectData) {
         ChevronRight,
         Box,
         Container,
+        Package,
       },
       attrs: { width: 13, height: 13 },
       root: parent,
