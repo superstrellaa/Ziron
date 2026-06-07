@@ -325,6 +325,41 @@ html,
   flex-shrink: 0;
 }
 
+#model-preview-tooltip {
+  position: fixed;
+  pointer-events: none;
+  z-index: 2001;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  background: #0e0e1a;
+  border: 1px solid #2a2a3e;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.7);
+  width: 200px;
+}
+
+#model-preview-tooltip.visible {
+  opacity: 1;
+}
+
+#model-preview-tooltip canvas {
+  display: block;
+  width: 200px;
+  height: 180px;
+}
+
+#model-preview-label {
+  font-size: 11px;
+  font-family: "Geist Mono", monospace;
+  color: #9ca3af;
+  padding: 5px 8px 6px;
+  border-top: 1px solid #1e1e30;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 /* ── Toast container ── */
 #toast-container {
   position: fixed;

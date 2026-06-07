@@ -19,6 +19,13 @@ import {
 import { Popup } from "../../../engine/ui/popup/popupTypes.js";
 import { logger } from "../../../engine/core/logger.js";
 
+import {
+  initModelPreview,
+  showModelPreview,
+  hideModelPreview,
+  moveModelPreview,
+} from "../../systems/rendering/modelPreview.js";
+
 export async function createAssetsPanel(container, projectData) {
   const panel = document.createElement("div");
   panel.id = "assets-panel";
@@ -53,6 +60,8 @@ export async function createAssetsPanel(container, projectData) {
 
   const treeEl = panel.querySelector("#assets-tree");
   const gridEl = panel.querySelector("#assets-grid");
+
+  initModelPreview();
 
   // ── Cargar carpetas de assets desde disco ────────────────────────────────
   function buildModelNode(name, diskPath) {
@@ -875,6 +884,19 @@ export async function createAssetsPanel(container, projectData) {
         <i data-lucide="${item.icon}" class="assets-grid-icon" style="color:${item.iconColor ?? "#a78bfa"}"></i>
         <span class="assets-grid-label">${item.label}</span>
       `;
+
+      if (item.type === "asset-model") {
+        const absolutePath = `${projectData._folder}/assets/${item._diskPath}`;
+        card.addEventListener("mouseenter", (e) => {
+          showModelPreview(absolutePath, item.label, e.clientX, e.clientY);
+        });
+        card.addEventListener("mouseleave", () => {
+          hideModelPreview();
+        });
+        card.addEventListener("mousemove", (e) => {
+          moveModelPreview(e.clientX, e.clientY);
+        });
+      }
 
       if (
         item.children !== undefined &&
