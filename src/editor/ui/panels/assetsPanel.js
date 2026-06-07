@@ -322,6 +322,19 @@ export async function createAssetsPanel(container, projectData) {
 
     if (!isBackground && targetNode?.type === "asset-model") {
       ul.appendChild(
+        makeCtxItem(t("assets.addFolder"), async () => {
+          closeContextMenu();
+          await createFolder();
+        }),
+      );
+      ul.appendChild(
+        makeCtxItem(t("assets.importModel"), async () => {
+          closeContextMenu();
+          await importModel();
+        }),
+      );
+      ul.appendChild(makeCtxSeparator());
+      ul.appendChild(
         makeCtxItem(t("contextMenu.rename"), () => {
           closeContextMenu();
           startRenameModel(targetNode);
