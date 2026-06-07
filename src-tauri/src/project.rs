@@ -281,7 +281,8 @@ fn read_folder_tree(path: &Path) -> Result<(Vec<FolderNode>, Vec<FileNode>), Str
             folders.push(FolderNode { name, children, files: child_files });
         } else if ft.is_file() {
             let lower = name.to_lowercase();
-            if lower.ends_with(".glb") {
+            if lower.ends_with(".glb") || lower.ends_with(".gltf") 
+            || lower.ends_with(".obj") || lower.ends_with(".fbx") {
                 files.push(FileNode { name });
             }
         }
@@ -370,7 +371,7 @@ pub async fn pick_model_file(app: tauri::AppHandle) -> Result<Option<String>, St
 
     app.dialog()
         .file()
-        .add_filter("3D Model", &["glb"])
+        .add_filter("3D Model", &["glb", "gltf", "obj", "fbx"])
         .pick_file(move |file| {
             if let Some(tx) = tx.lock().unwrap().take() {
                 let _ = tx.send(file.map(|p| p.to_string()));
