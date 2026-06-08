@@ -11,6 +11,7 @@ let _scene = null;
 let _camera = null;
 let _rafId = null;
 let _currentModel = null;
+let _loadToken = 0;
 
 const W = 200;
 const H = 180;
@@ -105,6 +106,7 @@ async function _loadModel(absolutePath) {
   _clearModel();
   _stopLoop();
 
+  const token = ++_loadToken;
   const url = convertFileSrc(absolutePath);
   const ext = absolutePath.split(".").pop().toLowerCase();
 
@@ -128,6 +130,19 @@ async function _loadModel(absolutePath) {
         loader.load(url, resolve, undefined, reject),
       );
     } else {
+      return;
+    }
+
+    if (token !== _loadToken) {
+      model.traverse((obj) => {
+        obj.geometry?.dispose();
+        if (obj.material) {
+          const mats = Array.isArray(obj.material)
+            ? obj.material
+            : [obj.material];
+          mats.forEach((m) => m.dispose());
+        }
+      });
       return;
     }
 
