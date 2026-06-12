@@ -171,7 +171,10 @@ export async function createScene(renderer, projectData, onProgress = null) {
       firstSelected = sceneManager.add("cube", { name: "Cube" });
       logger.info("Scene", "New scene — default cube added");
     } else {
-      const regularEntities = saved.entities.filter((e) => e.type !== "sun");
+      const regularEntities = saved.entities.filter(
+        (e) => e.type !== "sun" && e.type !== "model",
+      );
+      const modelEntities = saved.entities.filter((e) => e.type === "model");
       const savedSun = saved.entities.find((e) => e.type === "sun");
 
       const items = regularEntities.map((e) => ({
@@ -201,6 +204,20 @@ export async function createScene(renderer, projectData, onProgress = null) {
         },
         onProgress,
       );
+
+      for (const e of modelEntities) {
+        const absolutePath = `${projectData._folder}/assets/${e.modelPath}`;
+        const entity = await sceneManager.addModel(absolutePath, e.modelPath, {
+          id: e.id,
+          name: e.name,
+          active: e.active ?? true,
+        });
+        entity.mesh.position.fromArray(e.position);
+        entity.mesh.rotation.set(e.rotation[0], e.rotation[1], e.rotation[2]);
+        entity.mesh.scale.fromArray(e.scale);
+        entity.mesh.visible = entity.active;
+        added.push(entity);
+      }
 
       firstSelected = added[0] ?? null;
 

@@ -22,7 +22,14 @@ export async function saveScene(
       scale: mesh.scale.toArray(),
       active: entity.active ?? true,
     };
-    if (entity.type !== "sun" && mesh.material?.color) {
+    if (entity.type === "model") {
+      base.modelPath = entity.modelPath;
+    }
+    if (
+      entity.type !== "sun" &&
+      entity.type !== "model" &&
+      mesh.material?.color
+    ) {
       base.color = "#" + mesh.material.color.getHexString();
     }
     return base;

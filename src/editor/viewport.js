@@ -68,7 +68,16 @@ export async function createViewport(container, projectData) {
   );
   topArea.appendChild(container.querySelector("#properties"));
 
-  const assets = await createAssetsPanel(container, projectData);
+  const assets = await createAssetsPanel(container, projectData, {
+    onAddModel: async (absolutePath, modelPath, name) => {
+      const entity = await sceneManager.addModel(absolutePath, modelPath, {
+        name,
+      });
+      // el sceneManager ya emite onAdd, que hierarchy escucha automáticamente
+      // solo marcamos dirty
+      if (!history.isDirty()) hierarchy.setDirty(true);
+    },
+  });
 
   // ── Context menu y save ───────────────────────────────────────────────────
   const ctxMenu = createContextMenu(

@@ -26,7 +26,11 @@ import {
   moveModelPreview,
 } from "../../systems/rendering/modelPreview.js";
 
-export async function createAssetsPanel(container, projectData) {
+export async function createAssetsPanel(
+  container,
+  projectData,
+  callbacks = {},
+) {
   const panel = document.createElement("div");
   panel.id = "assets-panel";
 
@@ -887,14 +891,19 @@ export async function createAssetsPanel(container, projectData) {
 
       if (item.type === "asset-model") {
         const absolutePath = `${projectData._folder}/assets/${item._diskPath}`;
-        card.addEventListener("mouseenter", (e) => {
-          showModelPreview(absolutePath, item.label, e.clientX, e.clientY);
-        });
-        card.addEventListener("mouseleave", () => {
-          hideModelPreview();
-        });
-        card.addEventListener("mousemove", (e) => {
-          moveModelPreview(e.clientX, e.clientY);
+
+        card.addEventListener("mouseenter", (e) =>
+          showModelPreview(absolutePath, item.label, e.clientX, e.clientY),
+        );
+        card.addEventListener("mouseleave", () => hideModelPreview());
+        card.addEventListener("mousemove", (e) =>
+          moveModelPreview(e.clientX, e.clientY),
+        );
+
+        card.addEventListener("dblclick", async () => {
+          if (!callbacks.onAddModel) return;
+          const name = item._diskName.replace(/\.[^.]+$/, ""); // sin extensión
+          await callbacks.onAddModel(absolutePath, item._diskPath, name);
         });
       }
 

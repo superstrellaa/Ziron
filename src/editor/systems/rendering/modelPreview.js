@@ -1,8 +1,6 @@
 import * as THREE from "three";
 import { Timer } from "three";
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
-import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader.js";
-import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader.js";
+import { loadModelFromPath } from "../../../engine/world/modelLoader";
 import { convertFileSrc } from "@tauri-apps/api/core";
 
 let _container = null;
@@ -107,31 +105,9 @@ async function _loadModel(absolutePath) {
   _stopLoop();
 
   const token = ++_loadToken;
-  const url = convertFileSrc(absolutePath);
-  const ext = absolutePath.split(".").pop().toLowerCase();
 
   try {
-    let model;
-
-    if (ext === "glb" || ext === "gltf") {
-      const loader = new GLTFLoader();
-      const gltf = await new Promise((resolve, reject) =>
-        loader.load(url, resolve, undefined, reject),
-      );
-      model = gltf.scene;
-    } else if (ext === "obj") {
-      const loader = new OBJLoader();
-      model = await new Promise((resolve, reject) =>
-        loader.load(url, resolve, undefined, reject),
-      );
-    } else if (ext === "fbx") {
-      const loader = new FBXLoader();
-      model = await new Promise((resolve, reject) =>
-        loader.load(url, resolve, undefined, reject),
-      );
-    } else {
-      return;
-    }
+    const model = await loadModelFromPath(absolutePath);
 
     if (token !== _loadToken) {
       model.traverse((obj) => {

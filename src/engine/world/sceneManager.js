@@ -1,6 +1,8 @@
+import * as THREE from "three";
 import { buildEntity } from "./entityFactory.js";
 import { createEntityRegistry } from "./entityRegistry.js";
 import { logger } from "../core/logger.js";
+import { loadModelFromPath } from "./modelLoader.js";
 
 export function createSceneManager(scene) {
   const registry = createEntityRegistry();
@@ -21,6 +23,18 @@ export function createSceneManager(scene) {
 
   function _emit(event, payload) {
     listeners[event]?.forEach((cb) => cb(payload));
+  }
+
+  function _disposeObject(obj) {
+    obj.traverse((child) => {
+      child.geometry?.dispose();
+      if (child.material) {
+        const mats = Array.isArray(child.material)
+          ? child.material
+          : [child.material];
+        mats.forEach((m) => m.dispose());
+      }
+    });
   }
 
   // ── API individual ────────────────────────────────────────────────────────
@@ -57,6 +71,46 @@ export function createSceneManager(scene) {
     logger.info("SceneManager", `Added raw "${entity.name}" (id:${entity.id})`);
   }
 
+  async function addModel(absolutePath, modelPath, options = {}) {
+    const id = registry.consumeId(options.id ?? null);
+    const group = new THREE.Group();
+
+    const entity = {
+      id,
+      name: options.name ?? "Model",
+      type: "model",
+      modelPath, // ruta relativa a assets/ — se guarda en escena
+      mesh: group,
+      active: options.active ?? true,
+    };
+
+    try {
+      const model = await loadModelFromPath(absolutePath);
+      group.add(model);
+    } catch (e) {
+      // placeholder wireframe si falla la carga
+      const placeholder = new THREE.Mesh(
+        new THREE.BoxGeometry(1, 1, 1),
+        new THREE.MeshStandardMaterial({ color: 0xff3333, wireframe: true }),
+      );
+      group.add(placeholder);
+      logger.warn(
+        "SceneManager",
+        `Failed to load model "${absolutePath}": ${e}`,
+      );
+    }
+
+    group.visible = entity.active;
+    scene.add(group);
+    registry.set(entity);
+    _emit("onAdd", entity);
+    logger.info(
+      "SceneManager",
+      `Added model "${entity.name}" (id:${entity.id})`,
+    );
+    return entity;
+  }
+
   function remove(id) {
     const entity = registry.get(id);
     if (!entity) {
@@ -64,11 +118,9 @@ export function createSceneManager(scene) {
       return false;
     }
     scene.remove(entity.mesh);
-    entity.mesh.geometry.dispose();
-    entity.mesh.material.dispose();
+    _disposeObject(entity.mesh);
     registry.remove(id);
     _emit("onRemove", entity);
-
     logger.info("SceneManager", `Removed "${entity.name}" (id:${id})`);
     return true;
   }
@@ -125,8 +177,7 @@ export function createSceneManager(scene) {
           continue;
         }
         scene.remove(entity.mesh);
-        entity.mesh.geometry.dispose();
-        entity.mesh.material.dispose();
+        _disposeObject(entity.mesh);
         registry.remove(id);
         removed.push(entity);
       }
@@ -176,6 +227,7 @@ export function createSceneManager(scene) {
     add,
     addAt,
     addRaw,
+    addModel,
     remove,
     // batch
     addBatch,
