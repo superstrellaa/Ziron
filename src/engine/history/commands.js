@@ -89,15 +89,17 @@ export function DuplicateCommand(sceneManager, sourceEntity, onCreated) {
 
 export function DeleteCommand(sceneManager, entity) {
   const snapshot = {
-    id: entity.id, // guardar ID original
+    id: entity.id,
     type: entity.type,
     name: entity.name,
     active: entity.active ?? true,
     position: entity.mesh.position.clone(),
     quaternion: entity.mesh.quaternion.clone(),
     scale: entity.mesh.scale.clone(),
-    color: entity.mesh.material.color.getHex(),
+    color: entity.mesh.material?.color?.getHex() ?? null,
+    modelPath: entity.modelPath ?? null,
     index: sceneManager.indexOf(entity.id),
+    _absolutePath: entity._absolutePath ?? null,
   };
   let restoredEntity = null;
 
@@ -106,14 +108,24 @@ export function DeleteCommand(sceneManager, entity) {
     execute() {
       sceneManager.remove(entity.id);
     },
-    undo() {
-      restoredEntity = sceneManager.addAt(snapshot.index, snapshot.type, {
-        id: snapshot.id, // restaurar con el ID original
-        name: snapshot.name,
-        color: snapshot.color,
-        position: snapshot.position,
-        active: snapshot.active,
-      });
+    async undo() {
+      if (snapshot.type === "model") {
+        // restaurar modelo
+        const absolutePath = snapshot._absolutePath;
+        restoredEntity = await sceneManager.addModel(
+          absolutePath,
+          snapshot.modelPath,
+          { id: snapshot.id, name: snapshot.name, active: snapshot.active },
+        );
+      } else {
+        restoredEntity = sceneManager.addAt(snapshot.index, snapshot.type, {
+          id: snapshot.id,
+          name: snapshot.name,
+          color: snapshot.color,
+          position: snapshot.position,
+          active: snapshot.active,
+        });
+      }
       restoredEntity.mesh.quaternion.copy(snapshot.quaternion);
       restoredEntity.mesh.scale.copy(snapshot.scale);
       if (!snapshot.active) sceneManager.setActive(restoredEntity.id, false);
@@ -123,7 +135,7 @@ export function DeleteCommand(sceneManager, entity) {
 
 export function MultiDeleteCommand(sceneManager, entities) {
   const snapshots = entities.map((e) => ({
-    id: e.id, // guardar ID original
+    id: e.id,
     entity: e,
     type: e.type,
     name: e.name,
@@ -131,8 +143,10 @@ export function MultiDeleteCommand(sceneManager, entities) {
     position: e.mesh.position.clone(),
     quaternion: e.mesh.quaternion.clone(),
     scale: e.mesh.scale.clone(),
-    color: e.mesh.material.color.getHex(),
+    color: e.mesh.material?.color?.getHex() ?? null,
+    modelPath: e.modelPath ?? null,
     index: sceneManager.indexOf(e.id),
+    _absolutePath: e._absolutePath ?? null,
   }));
 
   return {
@@ -141,23 +155,39 @@ export function MultiDeleteCommand(sceneManager, entities) {
       await sceneManager.removeBatch(snapshots.map((s) => s.entity.id));
     },
     async undo() {
-      const items = snapshots.map((s) => ({
-        type: s.type,
-        options: {
-          id: s.id,
-          name: s.name,
-          color: s.color,
-          position: s.position,
-          active: s.active,
-        },
-        index: s.index,
-        _source: s,
-      }));
-      await sceneManager.addBatch(items, (entity, item) => {
-        entity.mesh.quaternion.copy(item._source.quaternion);
-        entity.mesh.scale.copy(item._source.scale);
-        if (!item._source.active) sceneManager.setActive(entity.id, false);
-      });
+      for (const s of snapshots) {
+        if (s.type === "model") {
+          const entity = await sceneManager.addModel(
+            s._absolutePath,
+            s.modelPath,
+            { id: s.id, name: s.name, active: s.active },
+          );
+          entity.mesh.quaternion.copy(s.quaternion);
+          entity.mesh.scale.copy(s.scale);
+          if (!s.active) sceneManager.setActive(entity.id, false);
+        }
+      }
+
+      const primitives = snapshots.filter((s) => s.type !== "model");
+      if (primitives.length > 0) {
+        const items = primitives.map((s) => ({
+          type: s.type,
+          options: {
+            id: s.id,
+            name: s.name,
+            color: s.color,
+            position: s.position,
+            active: s.active,
+          },
+          index: s.index,
+          _source: s,
+        }));
+        await sceneManager.addBatch(items, (entity, item) => {
+          entity.mesh.quaternion.copy(item._source.quaternion);
+          entity.mesh.scale.copy(item._source.scale);
+          if (!item._source.active) sceneManager.setActive(entity.id, false);
+        });
+      }
     },
   };
 }

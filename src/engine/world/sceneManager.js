@@ -79,7 +79,8 @@ export function createSceneManager(scene) {
       id,
       name: options.name ?? "Model",
       type: "model",
-      modelPath, // ruta relativa a assets/ — se guarda en escena
+      modelPath,
+      _absolutePath: absolutePath,
       mesh: group,
       active: options.active ?? true,
     };
