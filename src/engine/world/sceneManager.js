@@ -89,7 +89,6 @@ export function createSceneManager(scene) {
       const model = await loadModelFromPath(absolutePath);
       group.add(model);
     } catch (e) {
-      // placeholder wireframe si falla la carga
       const placeholder = new THREE.Mesh(
         new THREE.BoxGeometry(1, 1, 1),
         new THREE.MeshStandardMaterial({ color: 0xff3333, wireframe: true }),
@@ -103,7 +102,13 @@ export function createSceneManager(scene) {
 
     group.visible = entity.active;
     scene.add(group);
-    registry.set(entity);
+
+    if (options.index != null) {
+      registry.insertAt(options.index, entity);
+    } else {
+      registry.set(entity);
+    }
+
     _emit("onAdd", entity);
     logger.info(
       "SceneManager",

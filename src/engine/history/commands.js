@@ -110,12 +110,15 @@ export function DeleteCommand(sceneManager, entity) {
     },
     async undo() {
       if (snapshot.type === "model") {
-        // restaurar modelo
-        const absolutePath = snapshot._absolutePath;
         restoredEntity = await sceneManager.addModel(
-          absolutePath,
+          snapshot._absolutePath,
           snapshot.modelPath,
-          { id: snapshot.id, name: snapshot.name, active: snapshot.active },
+          {
+            id: snapshot.id,
+            name: snapshot.name,
+            active: snapshot.active,
+            index: snapshot.index,
+          },
         );
       } else {
         restoredEntity = sceneManager.addAt(snapshot.index, snapshot.type, {
@@ -126,6 +129,8 @@ export function DeleteCommand(sceneManager, entity) {
           active: snapshot.active,
         });
       }
+
+      restoredEntity.mesh.position.copy(snapshot.position);
       restoredEntity.mesh.quaternion.copy(snapshot.quaternion);
       restoredEntity.mesh.scale.copy(snapshot.scale);
       if (!snapshot.active) sceneManager.setActive(restoredEntity.id, false);
@@ -160,8 +165,9 @@ export function MultiDeleteCommand(sceneManager, entities) {
           const entity = await sceneManager.addModel(
             s._absolutePath,
             s.modelPath,
-            { id: s.id, name: s.name, active: s.active },
+            { id: s.id, name: s.name, active: s.active, index: s.index },
           );
+          entity.mesh.position.copy(s.position); // ← position
           entity.mesh.quaternion.copy(s.quaternion);
           entity.mesh.scale.copy(s.scale);
           if (!s.active) sceneManager.setActive(entity.id, false);
