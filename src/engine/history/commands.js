@@ -69,14 +69,25 @@ export function DuplicateCommand(sceneManager, sourceEntity, onCreated) {
   let entity = null;
   return {
     type: EventType.CreateObject,
-    execute() {
-      entity = sceneManager.add(sourceEntity.type, {
-        name: sourceEntity.name + " (copy)",
-        color: sourceEntity.mesh.material.color.getHex(),
-        position: sourceEntity.mesh.position
-          .clone()
-          .add(new THREE.Vector3(1, 0, 0)),
-      });
+    async execute() {
+      if (sourceEntity.type === "model") {
+        entity = await sceneManager.addModel(
+          sourceEntity._absolutePath,
+          sourceEntity.modelPath,
+          { name: sourceEntity.name + " (copy)" },
+        );
+        entity.mesh.position
+          .copy(sourceEntity.mesh.position)
+          .add(new THREE.Vector3(1, 0, 0));
+      } else {
+        entity = sceneManager.add(sourceEntity.type, {
+          name: sourceEntity.name + " (copy)",
+          color: sourceEntity.mesh.material.color.getHex(),
+          position: sourceEntity.mesh.position
+            .clone()
+            .add(new THREE.Vector3(1, 0, 0)),
+        });
+      }
       entity.mesh.quaternion.copy(sourceEntity.mesh.quaternion);
       entity.mesh.scale.copy(sourceEntity.mesh.scale);
       onCreated?.(entity);
@@ -203,20 +214,28 @@ export function MultiDuplicateCommand(sceneManager, entities, onCreated) {
   return {
     type: EventType.CreateObject,
     async execute() {
-      const items = entities.map((e) => ({
-        type: e.type,
-        options: {
-          name: e.name + " (copy)",
-          color: e.mesh.material.color.getHex(),
-          position: e.mesh.position.clone().add(new THREE.Vector3(1, 0, 0)),
-        },
-        _source: e,
-      }));
+      created = [];
 
-      created = await sceneManager.addBatch(items, (entity, item) => {
-        entity.mesh.quaternion.copy(item._source.mesh.quaternion);
-        entity.mesh.scale.copy(item._source.mesh.scale);
-      });
+      for (const e of entities) {
+        let entity;
+        if (e.type === "model") {
+          entity = await sceneManager.addModel(e._absolutePath, e.modelPath, {
+            name: e.name + " (copy)",
+          });
+          entity.mesh.position
+            .copy(e.mesh.position)
+            .add(new THREE.Vector3(1, 0, 0));
+        } else {
+          entity = sceneManager.add(e.type, {
+            name: e.name + " (copy)",
+            color: e.mesh.material.color.getHex(),
+            position: e.mesh.position.clone().add(new THREE.Vector3(1, 0, 0)),
+          });
+        }
+        entity.mesh.quaternion.copy(e.mesh.quaternion);
+        entity.mesh.scale.copy(e.mesh.scale);
+        created.push(entity);
+      }
 
       onCreated?.(created);
     },
