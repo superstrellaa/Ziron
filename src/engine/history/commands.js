@@ -167,7 +167,7 @@ export function MultiDeleteCommand(sceneManager, entities) {
             s.modelPath,
             { id: s.id, name: s.name, active: s.active, index: s.index },
           );
-          entity.mesh.position.copy(s.position); // ← position
+          entity.mesh.position.copy(s.position);
           entity.mesh.quaternion.copy(s.quaternion);
           entity.mesh.scale.copy(s.scale);
           if (!s.active) sceneManager.setActive(entity.id, false);

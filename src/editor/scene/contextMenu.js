@@ -71,12 +71,15 @@ export function createContextMenu(
     const raycaster = new THREE.Raycaster();
     raycaster.setFromCamera(mouse, camera);
     const meshes = sceneManager.getAll().map((en) => en.mesh);
-    const hits = raycaster.intersectObjects(meshes, false);
+    const hits = raycaster.intersectObjects(meshes, true);
 
     let hitEntity = null;
     if (hits.length > 0) {
-      hitEntity =
-        sceneManager.getAll().find((en) => en.mesh === hits[0].object) ?? null;
+      let obj = hits[0].object;
+      while (obj && !hitEntity) {
+        hitEntity = sceneManager.getAll().find((en) => en.mesh === obj) ?? null;
+        obj = obj.parent;
+      }
       if (hitEntity && hitEntity.type !== "sun")
         selection.selectEntity(hitEntity);
     }

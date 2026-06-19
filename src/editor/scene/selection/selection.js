@@ -161,15 +161,14 @@ export function createSelectionSystem(
       .getAll()
       .filter((en) => en.active !== false)
       .map((en) => en.mesh);
-    const hits2 = raycaster.intersectObjects(meshes, false);
+    const hits2 = raycaster.intersectObjects(meshes, true);
 
     if (hits2.length === 0) {
       if (!e.shiftKey) deselect();
       return;
     }
 
-    const hitMesh = hits2[0].object;
-    const entity = sceneManager.getAll().find((en) => en.mesh === hitMesh);
+    const entity = findEntityFromHit(hits2[0].object, sceneManager);
     if (!entity) return;
 
     // multi seleccion de click normal
@@ -222,6 +221,17 @@ export function createSelectionSystem(
     selected = null;
     multi.setSelected(entities);
     notifyChange();
+  }
+
+  // Helper: sube por los padres hasta encontrar el mesh registrado como entity.mesh
+  function findEntityFromHit(hitObject, sceneManager) {
+    let obj = hitObject;
+    while (obj) {
+      const entity = sceneManager.getAll().find((en) => en.mesh === obj);
+      if (entity) return entity;
+      obj = obj.parent;
+    }
+    return null;
   }
 
   function refreshMultiPivot() {
