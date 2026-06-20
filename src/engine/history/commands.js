@@ -50,6 +50,25 @@ export function ScaleCommand(mesh, from, to) {
     },
   };
 }
+export function CreateModelCommand(
+  sceneManager,
+  absolutePath,
+  modelPath,
+  options,
+  onCreated,
+) {
+  let entity = null;
+  return {
+    type: EventType.CreateObject,
+    async execute() {
+      entity = await sceneManager.addModel(absolutePath, modelPath, options);
+      onCreated?.(entity);
+    },
+    undo() {
+      if (entity) sceneManager.remove(entity.id);
+    },
+  };
+}
 
 export function CreateCommand(sceneManager, type, options, onCreated) {
   let entity = null;

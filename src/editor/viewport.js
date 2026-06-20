@@ -18,6 +18,7 @@ import { createProperties } from "./ui/panels/properties.js";
 import { createAssetsPanel } from "./ui/panels/assetsPanel.js";
 import { createAutoSave } from "./systems/persistence/autoSave.js";
 import { activateScene } from "./systems/app/selectionContext.js";
+import { CreateModelCommand } from "../engine/history/commands.js";
 
 export async function createViewport(container, projectData) {
   // Creación de DOM
@@ -51,9 +52,18 @@ export async function createViewport(container, projectData) {
 
   // ── Callback compartido de añadir modelo ────────────────────────────────
   async function addModelToScene(absolutePath, modelPath, name) {
-    const entity = await sceneManager.addModel(absolutePath, modelPath, {
-      name,
-    });
+    let entity = null;
+    const cmd = CreateModelCommand(
+      sceneManager,
+      absolutePath,
+      modelPath,
+      { name },
+      (created) => {
+        entity = created;
+      },
+    );
+    await cmd.execute();
+    history.push(cmd);
     if (!history.isDirty()) hierarchy.setDirty(true);
     return entity;
   }
