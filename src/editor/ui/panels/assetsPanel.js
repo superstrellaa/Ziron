@@ -20,6 +20,10 @@ import { Popup } from "../../../engine/ui/popup/popupTypes.js";
 import { logger } from "../../../engine/core/logger.js";
 
 import {
+  setDraggingModel,
+  clearDraggingModel,
+} from "../../systems/app/dragState.js";
+import {
   initModelPreview,
   showModelPreview,
   hideModelPreview,
@@ -902,8 +906,24 @@ export async function createAssetsPanel(
 
         card.addEventListener("dblclick", async () => {
           if (!callbacks.onAddModel) return;
-          const name = item._diskName.replace(/\.[^.]+$/, ""); // sin extensión
+          const name = item._diskName.replace(/\.[^.]+$/, "");
           await callbacks.onAddModel(absolutePath, item._diskPath, name);
+        });
+
+        card.draggable = true;
+        card.addEventListener("dragstart", (e) => {
+          hideModelPreview();
+          const name = item._diskName.replace(/\.[^.]+$/, "");
+          const payload = { absolutePath, diskPath: item._diskPath, name };
+
+          setDraggingModel(payload);
+
+          e.dataTransfer.setData("text/plain", ""); // necesario para que algunos WebViews permitan el drag
+          e.dataTransfer.effectAllowed = "copy";
+        });
+
+        card.addEventListener("dragend", () => {
+          clearDraggingModel();
         });
       }
 

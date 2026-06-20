@@ -8,6 +8,7 @@ import { createRenderer } from "./systems/rendering/rendererSetup.js";
 import { setupHistory } from "./systems/rendering/historySetup.js";
 import { createRenderLoop } from "./systems/rendering/renderLoop.js";
 import { connectViewportEvents } from "./systems/rendering/viewportEvents.js";
+import { connectModelDragDrop } from "./systems/rendering/modelDragDrop.js";
 import { logger } from "../engine/core/logger.js";
 import { createHierarchy } from "./ui/panels/hierarchy.js";
 import { onKeybind } from "./systems/input/keybinds.js";
@@ -48,6 +49,15 @@ export async function createViewport(container, projectData) {
     flyControls,
   );
 
+  // ── Callback compartido de añadir modelo ────────────────────────────────
+  async function addModelToScene(absolutePath, modelPath, name) {
+    const entity = await sceneManager.addModel(absolutePath, modelPath, {
+      name,
+    });
+    if (!history.isDirty()) hierarchy.setDirty(true);
+    return entity;
+  }
+
   // ── UI ────────────────────────────────────────────────────────────────────
   const hierarchy = createHierarchy(
     container,
@@ -55,6 +65,7 @@ export async function createViewport(container, projectData) {
     selection,
     sceneName,
     () => history,
+    addModelToScene,
   );
   topArea.insertBefore(container.querySelector("#hierarchy"), viewportEl);
 
@@ -69,14 +80,7 @@ export async function createViewport(container, projectData) {
   topArea.appendChild(container.querySelector("#properties"));
 
   const assets = await createAssetsPanel(container, projectData, {
-    onAddModel: async (absolutePath, modelPath, name) => {
-      const entity = await sceneManager.addModel(absolutePath, modelPath, {
-        name,
-      });
-      // el sceneManager ya emite onAdd, que hierarchy escucha automáticamente
-      // solo marcamos dirty
-      if (!history.isDirty()) hierarchy.setDirty(true);
-    },
+    onAddModel: addModelToScene,
   });
 
   // ── Context menu y save ───────────────────────────────────────────────────
@@ -111,6 +115,12 @@ export async function createViewport(container, projectData) {
     setProjectOpen,
   });
 
+  const { destroy: destroyDragDrop } = connectModelDragDrop({
+    viewportEl,
+    camera,
+    addModelToScene,
+  });
+
   // esto esta aquí para que todas las demas paranoias tengan su evento, lo de arriba básicamente
   if (firstSelected) {
     activateScene();
@@ -133,9 +143,10 @@ export async function createViewport(container, projectData) {
       autoSave.stop();
       renderLoop.stop();
       destroyEvents();
+      destroyDragDrop();
     },
     isDirty: () => history.isDirty(),
     triggerSave,
-    restartAutoSave: () => autoSave.restart(), // exponer el restart de auto save para que al cambiar config
+    restartAutoSave: () => autoSave.restart(),
   };
 }

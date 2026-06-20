@@ -3,6 +3,10 @@ import { t } from "../../../engine/i18n/i18n.js";
 import { onKeybind } from "../../systems/input/keybinds.js";
 import { RenameCommand } from "../../../engine/history/commands.js";
 import { getContext } from "../../systems/app/selectionContext.js";
+import {
+  getDraggingModel,
+  clearDraggingModel,
+} from "../../systems/app/dragState.js";
 
 export function createHierarchy(
   container,
@@ -10,6 +14,7 @@ export function createHierarchy(
   selection,
   sceneName = "",
   getHistory,
+  onAddModel = null,
 ) {
   const panel = document.createElement("div");
   panel.id = "hierarchy";
@@ -261,6 +266,21 @@ export function createHierarchy(
     } else {
       _ctxMenu?.showAt(e.clientX, e.clientY, null);
     }
+  });
+
+  panel.addEventListener("dragover", (e) => {
+    if (!getDraggingModel()) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "copy";
+  });
+
+  panel.addEventListener("drop", async (e) => {
+    const payload = getDraggingModel();
+    if (!payload || !onAddModel) return;
+    e.preventDefault();
+    clearDraggingModel();
+    const { absolutePath, diskPath, name } = payload;
+    await onAddModel(absolutePath, diskPath, name);
   });
 
   function setSelected(single, multi = []) {
