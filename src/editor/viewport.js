@@ -86,6 +86,7 @@ export async function createViewport(container, projectData) {
     selection,
     sceneManager,
     () => history,
+    projectData,
   );
   topArea.appendChild(container.querySelector("#properties"));
 

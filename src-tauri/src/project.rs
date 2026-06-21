@@ -429,3 +429,44 @@ pub fn copy_asset_file(
         .map_err(|e| e.to_string())?;
     Ok(())
 }
+
+/// PARA COSAS DEL ASSET PICKER
+fn read_folder_tree_filtered(path: &Path, extensions: &[String]) -> Result<(Vec<FolderNode>, Vec<FileNode>), String> {
+    let mut folders = vec![];
+    let mut files = vec![];
+
+    for entry in read_dir(path).map_err(|e| e.to_string())? {
+        let entry = entry.map_err(|e| e.to_string())?;
+        let ft = entry.file_type().map_err(|e| e.to_string())?;
+        let name = entry.file_name().to_string_lossy().to_string();
+
+        if ft.is_dir() {
+            let (children, child_files) = read_folder_tree_filtered(&entry.path(), extensions)?;
+            folders.push(FolderNode { name, children, files: child_files });
+        } else if ft.is_file() {
+            let lower = name.to_lowercase();
+            if extensions.iter().any(|ext| lower.ends_with(ext.as_str())) {
+                files.push(FileNode { name });
+            }
+        }
+    }
+    Ok((folders, files))
+}
+
+/// Lista assets filtrados por extensión (usado por el asset picker de componentes)
+#[tauri::command]
+pub fn list_assets_by_extension(project_folder: String, extensions: Vec<String>) -> Result<AssetTree, String> {
+    let assets_path = Path::new(&project_folder).join("assets");
+    create_dir_all(&assets_path).map_err(|e| e.to_string())?;
+
+    let normalized: Vec<String> = extensions
+        .iter()
+        .map(|e| {
+            let e = e.to_lowercase();
+            if e.starts_with('.') { e } else { format!(".{}", e) }
+        })
+        .collect();
+
+    let (folders, files) = read_folder_tree_filtered(&assets_path, &normalized)?;
+    Ok(AssetTree { folders, files })
+}

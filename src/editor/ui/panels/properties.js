@@ -7,8 +7,15 @@ import {
   MultiSetActiveCommand,
 } from "../../../engine/history/commands.js";
 import { createIcons, TableProperties } from "lucide";
+import { renderComponents } from "./components/componentsPanel.js";
 
-export function createProperties(container, selection, sceneManager, history) {
+export function createProperties(
+  container,
+  selection,
+  sceneManager,
+  history,
+  projectData,
+) {
   const panel = document.createElement("div");
   panel.id = "properties";
 
@@ -183,6 +190,8 @@ export function createProperties(container, selection, sceneManager, history) {
         <div class="prop-field"><span class="prop-axis prop-axis-y">Y</span><input class="prop-input" id="prop-sy" type="number" step="0.1" autocomplete="off" spellcheck="false" /></div>
         <div class="prop-field"><span class="prop-axis prop-axis-z">Z</span><input class="prop-input" id="prop-sz" type="number" step="0.1" autocomplete="off" spellcheck="false" /></div>
       </div>
+
+      <div id="prop-components"></div>
     `;
 
     const checkbox = body.querySelector("#prop-active");
@@ -396,6 +405,13 @@ export function createProperties(container, selection, sceneManager, history) {
     );
 
     startLoop(entities);
+
+    if (isSingle) {
+      renderComponents(entity, body.querySelector("#prop-components"), {
+        projectData,
+        history,
+      });
+    }
 
     _unsubUpdate = sceneManager.on("onUpdate", unsubUpdate);
   }

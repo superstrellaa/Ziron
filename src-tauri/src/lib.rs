@@ -113,6 +113,7 @@ pub fn run() {
             project::delete_asset_file,
             project::rename_asset_file,
             project::copy_asset_file,
+            project::list_assets_by_extension
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

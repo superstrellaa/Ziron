@@ -6,6 +6,7 @@ import { setLocale } from "./engine/i18n/i18n.js";
 import { t } from "./engine/i18n/i18n.js";
 import { logger } from "./engine/core/logger.js";
 import { initTooltipSystem } from "./engine/ui/tooltip.js";
+import { initAssetPickerSystem } from "./engine/ui/assetPicker/assetPicker.js";
 import { initToastSystem } from "./engine/ui/toasts/toasts.js";
 import { initPopupSystem } from "./engine/ui/popup/popup.js";
 import { invoke } from "@tauri-apps/api/core";
@@ -28,6 +29,7 @@ await loadConfig();
 applyConfigKeybinds();
 setLocale(get("editor.locale") ?? "en");
 initTooltipSystem();
+initAssetPickerSystem();
 initToastSystem();
 initPopupSystem();
 

@@ -100,6 +100,18 @@ export default {
     rotation: "Rotation (deg)",
     scale: "Scale",
   },
+  assetPicker: {
+    title: "Select Asset",
+    loading: "Loading assets...",
+    empty: "No matching assets found",
+  },
+  components: {
+    model: { title: "Model", texture: "Texture" },
+    texture: {
+      empty: "No texture assigned",
+      pickTip: "Click to select a texture",
+    },
+  },
   assets: {
     header: "Assets",
     project: "Project",
