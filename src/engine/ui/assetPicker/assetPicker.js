@@ -10,6 +10,18 @@ export function initAssetPickerSystem() {
   overlay.id = "asset-picker-overlay";
   overlay.innerHTML = `<div id="asset-picker-box"></div>`;
   document.body.appendChild(overlay);
+
+  overlay.addEventListener("mousedown", (e) => {
+    if (e.target === overlay) {
+      close(null);
+    }
+  });
+
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && currentResolve) {
+      close(null);
+    }
+  });
 }
 
 function flattenFiles(node, basePath, out) {
