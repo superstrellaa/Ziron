@@ -2,6 +2,7 @@ import { t } from "../../../../engine/i18n/i18n.js";
 import { createIcons, Image } from "lucide";
 import { openAssetPicker } from "../../../../engine/ui/assetPicker/assetPicker.js";
 import { GenericCommand } from "../../../../engine/history/commands.js";
+import { applyModelTexture } from "../../../../engine/world/modelTexture.js";
 
 export const FIELD_RENDERERS = {
   texture: renderTextureField,
@@ -43,10 +44,12 @@ function renderTextureField(field, entity, container, ctx) {
         "SetTexture",
         () => {
           field.set(entity, selected);
+          applyModelTexture(entity, ctx.projectData, selected);
           ctx.onChange?.();
         },
         () => {
           field.set(entity, from);
+          applyModelTexture(entity, ctx.projectData, from);
           ctx.onChange?.();
         },
       );

@@ -4,6 +4,7 @@ import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 import { createSceneManager } from "../world/sceneManager.js";
 import { createSunEntity } from "../world/sunEntity.js";
 import { loadScene } from "../../editor/systems/persistence/scenePersistence.js";
+import { applyModelTexture } from "../world/modelTexture.js";
 
 const vertexShader = `
   varying vec3 vWorldDir;
@@ -213,6 +214,12 @@ export async function createScene(renderer, projectData, onProgress = null) {
           active: e.active ?? true,
         });
         entity.components = e.components ?? {};
+
+        const texturePath = entity.components?.model?.texture;
+        if (texturePath) {
+          applyModelTexture(entity, projectData, texturePath);
+        }
+
         entity.mesh.position.fromArray(e.position);
         entity.mesh.rotation.set(e.rotation[0], e.rotation[1], e.rotation[2]);
         entity.mesh.scale.fromArray(e.scale);

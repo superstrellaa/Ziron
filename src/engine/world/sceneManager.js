@@ -123,6 +123,7 @@ export function createSceneManager(scene) {
       logger.warn("SceneManager", `Entity id ${id} not found`);
       return false;
     }
+    if (entity._appliedTexture) entity._appliedTexture.dispose();
     scene.remove(entity.mesh);
     _disposeObject(entity.mesh);
     registry.remove(id);
