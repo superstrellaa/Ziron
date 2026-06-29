@@ -16,6 +16,7 @@ import { get, set } from "../../systems/persistence/config.js";
 import { logger } from "../../../engine/core/logger.js";
 import { Toast } from "../../../engine/ui/toasts/toastTypes.js";
 import { EDITOR_VERSION } from "../../systems/app/versionManager.js";
+import { Popup } from "../../../engine/ui/popup/popupTypes.js";
 
 export async function createWelcomeScreen(
   container,
@@ -102,6 +103,11 @@ export async function createWelcomeScreen(
       onProjectReady(projectData);
     } catch (e) {
       logger.warn("Welcome", `Failed to open project: ${e}`);
+      Toast.generalError();
+      Popup.error(
+        "Failed to open project: " +
+          (typeof e === "string" ? e : (e?.message ?? String(e))),
+      );
     }
   });
 
@@ -227,6 +233,10 @@ function renderNewProjectPanel(content, el, onProjectReady, onCancel) {
     } catch (e) {
       logger.warn("Welcome", `Failed to create project: ${e}`);
       Toast.createProjectError();
+      Popup.error(
+        "Failed to create project: " +
+          (typeof e === "string" ? e : (e?.message ?? String(e))),
+      );
       createBtn.disabled = false;
       createBtn.textContent = t("welcome.newProjectPanel.createBtn");
     }

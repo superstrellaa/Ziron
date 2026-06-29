@@ -81,9 +81,14 @@ export function openPopup({
         const id = btn.dataset.id;
 
         const btnDef = buttons.find((b) => b.id === id);
-        if (btnDef?.copyText) {
-          await writeText(btnDef.copyText).catch(() => {});
-          Toast.contentCopied();
+        if (btnDef?.copyText != null) {
+          try {
+            console.log("Copying:", btnDef.copyText);
+            await writeText(String(btnDef.copyText));
+            Toast.contentCopied();
+          } catch (err) {
+            console.error("Clipboard failed:", err);
+          }
         }
 
         close(id);

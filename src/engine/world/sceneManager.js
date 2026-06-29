@@ -3,6 +3,7 @@ import { buildEntity } from "./entityFactory.js";
 import { createEntityRegistry } from "./entityRegistry.js";
 import { logger } from "../core/logger.js";
 import { loadModelFromPath } from "./modelLoader.js";
+import { Toast } from "../ui/toasts/toastTypes.js";
 
 export function createSceneManager(scene) {
   const registry = createEntityRegistry();
@@ -98,6 +99,7 @@ export function createSceneManager(scene) {
         "SceneManager",
         `Failed to load model "${absolutePath}": ${e}`,
       );
+      Toast.generalError();
     }
 
     group.visible = entity.active;

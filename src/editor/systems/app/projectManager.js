@@ -6,6 +6,7 @@ import { Popup } from "../../../engine/ui/popup/popupTypes.js";
 import { logger } from "../../../engine/core/logger.js";
 import { getWorkspace, setToolbarProject } from "./workspaceManager.js";
 import { EDITOR_VERSION } from "./versionManager.js";
+import { Toast } from "../../../engine/ui/toasts/toastTypes.js";
 
 let _activeViewport = null;
 
@@ -57,6 +58,11 @@ export async function checkVersionAndLoad(projectData, onCancel = null) {
         );
       } catch (e) {
         logger.warn("ProjectManager", `Could not update project version: ${e}`);
+        Toast.generalError();
+        Popup.error(
+          "Could not update project version: " +
+            (typeof e === "string" ? e : (e?.message ?? String(e))),
+        );
       }
     }
   }

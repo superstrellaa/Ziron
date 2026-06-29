@@ -13,6 +13,6 @@
     "core:window:allow-set-cursor-visible",
     "process:allow-restart",
     "dialog:default",
-    "clipboard-manager:default"
+    "clipboard-manager:allow-write-text"
   ]
 }

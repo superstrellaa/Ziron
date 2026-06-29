@@ -1,6 +1,7 @@
 import { invoke } from "@tauri-apps/api/core";
 import { logger } from "../../../engine/core/logger.js";
 import { Toast } from "../../../engine/ui/toasts/toastTypes.js";
+import { Popup } from "../../../engine/ui/popup/popupTypes.js";
 
 export async function saveScene(
   projectData,
@@ -48,6 +49,10 @@ export async function saveScene(
   } catch (e) {
     logger.warn("ScenePersistence", `Failed to save scene: ${e}`);
     Toast.saveError();
+    Popup.error(
+      "Failed to save scene: " +
+        (typeof e === "string" ? e : (e?.message ?? String(e))),
+    );
     return false;
   }
 }
@@ -61,6 +66,10 @@ export async function loadScene(projectData, sceneName = "main") {
   } catch (e) {
     logger.warn("ScenePersistence", `Failed to load scene: ${e}`);
     Toast.loadError();
+    Popup.error(
+      "Failed to load scene: " +
+        (typeof e === "string" ? e : (e?.message ?? String(e))),
+    );
     return null;
   }
 }

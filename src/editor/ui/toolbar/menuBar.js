@@ -12,6 +12,8 @@ import { t } from "../../../engine/i18n/i18n.js";
 import { logger } from "../../../engine/core/logger.js";
 import { openSettings } from "../panels/settingsPanel.js";
 import { onKeybind } from "../../systems/input/keybinds.js";
+import { Toast } from "../../../engine/ui/toasts/toastTypes.js";
+import { Popup } from "../../../engine/ui/popup/popupTypes.js";
 
 let _onLoadProject = null;
 let _onNewProject = null;
@@ -95,6 +97,11 @@ export function initMenuBar({ onLoadProject, onNewProject, onCloseProject }) {
       _onLoadProject?.(projectData);
     } catch (e) {
       logger.warn("Menu", `Failed to open project: ${e}`);
+      Toast.generalError();
+      Popup.error(
+        "Failed to open project: " +
+          (typeof e === "string" ? e : (e?.message ?? String(e))),
+      );
     }
   });
 

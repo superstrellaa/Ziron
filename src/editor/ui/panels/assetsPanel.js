@@ -36,6 +36,7 @@ import {
   hideModelPreview,
   moveModelPreview,
 } from "../../systems/rendering/modelPreview.js";
+import { Toast } from "../../../engine/ui/toasts/toastTypes.js";
 
 export async function createAssetsPanel(
   container,
@@ -138,6 +139,11 @@ export async function createAssetsPanel(
       return tree; // { folders, files }
     } catch (e) {
       logger.warn("Assets", `Failed to load asset tree: ${e}`);
+      Toast.generalError();
+      Popup.error(
+        "Failed to load asset tree: " +
+          (typeof e === "string" ? e : (e?.message ?? String(e))),
+      );
       return { folders: [], files: [] };
     }
   }
@@ -525,6 +531,11 @@ export async function createAssetsPanel(
       renderGrid(targetNode);
     } catch (e) {
       logger.warn("Assets", `Failed to create folder "${folderPath}": ${e}`);
+      Toast.generalError();
+      Popup.error(
+        "Failed to create folder: " +
+          (typeof e === "string" ? e : (e?.message ?? String(e))),
+      );
     }
   }
 
@@ -553,6 +564,11 @@ export async function createAssetsPanel(
       renderGrid(nextFolder);
     } catch (e) {
       logger.warn("Assets", `Failed to delete folder "${node.label}": ${e}`);
+      Toast.generalError();
+      Popup.error(
+        "Failed to delete folder: " +
+          (typeof e === "string" ? e : (e?.message ?? String(e))),
+      );
     }
   }
 
@@ -590,6 +606,11 @@ export async function createAssetsPanel(
       renderGrid(parent);
     } catch (e) {
       logger.warn("Assets", `Failed to duplicate folder "${node.label}": ${e}`);
+      Toast.generalError();
+      Popup.error(
+        "Failed to duplicate folder: " +
+          (typeof e === "string" ? e : (e?.message ?? String(e))),
+      );
     }
   }
 
@@ -641,6 +662,11 @@ export async function createAssetsPanel(
         renderGrid(findParent(treeData, node) ?? treeData[0]);
       } catch (e) {
         logger.warn("Assets", `Failed to rename folder "${oldName}": ${e}`);
+        Toast.generalError();
+        Popup.error(
+          "Failed to rename folder: " +
+            (typeof e === "string" ? e : (e?.message ?? String(e))),
+        );
         rebuildTree();
       }
     }
@@ -734,6 +760,11 @@ export async function createAssetsPanel(
         targetNode.children.push(buildAssetFileNode(fileName, diskPath));
       } catch (e) {
         logger.warn("Assets", `Failed to import texture "${sourcePath}": ${e}`);
+        Toast.generalError();
+        Popup.error(
+          "Failed to import texture: " +
+            (typeof e === "string" ? e : (e?.message ?? String(e))),
+        );
       }
     }
 
@@ -772,6 +803,11 @@ export async function createAssetsPanel(
       renderGrid(targetNode);
     } catch (e) {
       logger.warn("Assets", `Failed to import model: ${e}`);
+      Toast.generalError();
+      Popup.error(
+        "Failed to import model: " +
+          (typeof e === "string" ? e : (e?.message ?? String(e))),
+      );
     }
   }
 
@@ -792,6 +828,11 @@ export async function createAssetsPanel(
       renderGrid(_currentFolderNode);
     } catch (e) {
       logger.warn("Assets", `Failed to delete model "${node.label}": ${e}`);
+      Toast.generalError();
+      Popup.error(
+        "Failed to delete model: " +
+          (typeof e === "string" ? e : (e?.message ?? String(e))),
+      );
     }
   }
 
@@ -820,6 +861,11 @@ export async function createAssetsPanel(
       renderGrid(_currentFolderNode);
     } catch (e) {
       logger.warn("Assets", `Failed to duplicate model "${node.label}": ${e}`);
+      Toast.generalError();
+      Popup.error(
+        "Failed to duplicate model: " +
+          (typeof e === "string" ? e : (e?.message ?? String(e))),
+      );
     }
   }
 
@@ -870,6 +916,11 @@ export async function createAssetsPanel(
         renderGrid(_currentFolderNode);
       } catch (e) {
         logger.warn("Assets", `Failed to rename model "${oldName}": ${e}`);
+        Toast.generalError();
+        Popup.error(
+          "Failed to rename model: " +
+            (typeof e === "string" ? e : (e?.message ?? String(e))),
+        );
         renderGrid(_currentFolderNode);
       }
     }

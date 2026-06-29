@@ -1,5 +1,7 @@
 import { invoke } from "@tauri-apps/api/core";
 import { logger } from "../../../engine/core/logger.js";
+import { Toast } from "../../../engine/ui/toasts/toastTypes.js";
+import { Popup } from "../../../engine/ui/popup/popupTypes.js";
 
 let _config = null;
 
@@ -10,6 +12,11 @@ export async function loadConfig() {
     return _config;
   } catch (e) {
     logger.warn("Config", `Failed to load config: ${e}`);
+    Toast.generalError();
+    Popup.error(
+      "Failed to load config: " +
+        (typeof e === "string" ? e : (e?.message ?? String(e))),
+    );
     return null;
   }
 }
@@ -21,6 +28,11 @@ export async function saveConfig() {
     logger.info("Config", "Config saved");
   } catch (e) {
     logger.warn("Config", `Failed to save config: ${e}`);
+    Toast.generalError();
+    Popup.error(
+      "Failed to save config: " +
+        (typeof e === "string" ? e : (e?.message ?? String(e))),
+    );
   }
 }
 
