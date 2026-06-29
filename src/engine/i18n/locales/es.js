@@ -73,6 +73,7 @@ export default {
     rename: "Renombrar",
     copy: "Copiar",
     paste: "Pegar",
+    import: "Importar",
     objects3d: "Objeto 3D",
     cube: "Cubo",
     sphere: "Esfera",
@@ -121,6 +122,7 @@ export default {
     addFolder: "Añadir Carpeta",
     newFolderName: "Nombre de carpeta",
     importModel: "Importar Modelo",
+    importTexture: "Importar Textura",
   },
   toasts: {
     generalError: { title: "Error", message: "Algo salió mal." },

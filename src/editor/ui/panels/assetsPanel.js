@@ -8,7 +8,14 @@ import {
   Box,
   Container,
   Package,
+  FileImage,
 } from "lucide";
+import {
+  initTexturePreview,
+  showTexturePreview,
+  hideTexturePreview,
+  moveTexturePreview,
+} from "../../systems/rendering/texturePreview.js";
 import { invoke } from "@tauri-apps/api/core";
 import { t } from "../../../engine/i18n/i18n.js";
 import {
@@ -61,6 +68,7 @@ export async function createAssetsPanel(
       Box,
       Container,
       Package,
+      FileImage,
     },
     attrs: { width: 13, height: 13, stroke: "#cccccc" },
     root: panel,
@@ -70,9 +78,31 @@ export async function createAssetsPanel(
   const gridEl = panel.querySelector("#assets-grid");
 
   initModelPreview();
+  initTexturePreview();
 
   // ── Cargar carpetas de assets desde disco ────────────────────────────────
-  function buildModelNode(name, diskPath) {
+  const IMAGE_EXTENSIONS = ["png", "jpg", "jpeg", "webp"];
+
+  function getExt(name) {
+    const idx = name.lastIndexOf(".");
+    return idx >= 0 ? name.slice(idx + 1).toLowerCase() : "";
+  }
+
+  function isImageFile(name) {
+    return IMAGE_EXTENSIONS.includes(getExt(name));
+  }
+
+  function buildAssetFileNode(name, diskPath) {
+    if (isImageFile(name)) {
+      return {
+        label: name,
+        icon: "file-image",
+        iconColor: "#34d399",
+        type: "asset-texture",
+        _diskName: name,
+        _diskPath: diskPath,
+      };
+    }
     return {
       label: name,
       icon: "package",
@@ -93,7 +123,7 @@ export async function createAssetsPanel(
         buildAssetFolderNodeRecursive(child, diskPath),
       ),
       ...(folderNode.files ?? []).map((f) =>
-        buildModelNode(f.name, `${diskPath}/${f.name}`),
+        buildAssetFileNode(f.name, `${diskPath}/${f.name}`),
       ),
     ];
     return node;
@@ -150,7 +180,7 @@ export async function createAssetsPanel(
     buildAssetFolderNodeRecursive(node),
   );
   const assetRootFileNodes = (assetTree.files ?? []).map((f) =>
-    buildModelNode(f.name, f.name),
+    buildAssetFileNode(f.name, f.name),
   );
 
   const treeData = [
@@ -232,7 +262,10 @@ export async function createAssetsPanel(
       e.preventDefault();
       if (_selectedNode?.type === "asset-folder") {
         startRenameFolder(_selectedNode);
-      } else if (_selectedNode?.type === "asset-model") {
+      } else if (
+        _selectedNode?.type === "asset-model" ||
+        _selectedNode?.type === "asset-texture"
+      ) {
         startRenameModel(_selectedNode);
       }
     }
@@ -242,12 +275,16 @@ export async function createAssetsPanel(
       if (_selectedNodes.size > 0) {
         for (const node of _selectedNodes) {
           if (node.type === "asset-folder") deleteFolder(node);
-          else if (node.type === "asset-model") deleteModel(node);
+          else if (node.type === "asset-model" || node.type === "asset-texture")
+            deleteModel(node);
         }
         _selectedNodes.clear();
       } else if (_selectedNode?.type === "asset-folder") {
         deleteFolder(_selectedNode);
-      } else if (_selectedNode?.type === "asset-model") {
+      } else if (
+        _selectedNode?.type === "asset-model" ||
+        _selectedNode?.type === "asset-texture"
+      ) {
         deleteModel(_selectedNode);
       }
     }
@@ -277,40 +314,36 @@ export async function createAssetsPanel(
     const ul = document.createElement("ul");
     ul.className = "ctx-menu";
 
-    const showFolderActions =
+    const isFileNode =
+      targetNode?.type === "asset-model" ||
+      targetNode?.type === "asset-texture";
+
+    const showImportAction =
       isBackground ||
       !targetNode ||
       targetNode.type === "root" ||
-      targetNode.type === "folder-scenes";
+      targetNode.type === "folder-scenes" ||
+      targetNode.type === "asset-folder" ||
+      isFileNode;
 
-    if (showFolderActions) {
-      ul.appendChild(
-        makeCtxItem(t("assets.addFolder"), async () => {
-          closeContextMenu();
-          await createFolder();
-        }),
-      );
-      ul.appendChild(
-        makeCtxItem(t("assets.importModel"), async () => {
-          closeContextMenu();
-          await importModel();
-        }),
-      );
+    if (showImportAction) {
+      if (
+        isBackground ||
+        !targetNode ||
+        targetNode.type === "root" ||
+        targetNode.type === "asset-folder"
+      ) {
+        ul.appendChild(
+          makeCtxItem(t("assets.addFolder"), async () => {
+            closeContextMenu();
+            await createFolder();
+          }),
+        );
+      }
+      ul.appendChild(buildImportSubmenu());
     }
 
     if (!isBackground && targetNode?.type === "asset-folder") {
-      ul.appendChild(
-        makeCtxItem(t("assets.addFolder"), async () => {
-          closeContextMenu();
-          await createFolder();
-        }),
-      );
-      ul.appendChild(
-        makeCtxItem(t("assets.importModel"), async () => {
-          closeContextMenu();
-          await importModel();
-        }),
-      );
       ul.appendChild(makeCtxSeparator());
       ul.appendChild(
         makeCtxItem(t("contextMenu.rename"), () => {
@@ -337,19 +370,7 @@ export async function createAssetsPanel(
       );
     }
 
-    if (!isBackground && targetNode?.type === "asset-model") {
-      ul.appendChild(
-        makeCtxItem(t("assets.addFolder"), async () => {
-          closeContextMenu();
-          await createFolder();
-        }),
-      );
-      ul.appendChild(
-        makeCtxItem(t("assets.importModel"), async () => {
-          closeContextMenu();
-          await importModel();
-        }),
-      );
+    if (!isBackground && isFileNode) {
       ul.appendChild(makeCtxSeparator());
       ul.appendChild(
         makeCtxItem(t("contextMenu.rename"), () => {
@@ -382,6 +403,12 @@ export async function createAssetsPanel(
     document.body.appendChild(menu);
     _contextMenu = menu;
 
+    createIcons({
+      icons: { ChevronRight },
+      attrs: { width: 12, height: 12, stroke: "#6b7280" },
+      root: menu,
+    });
+
     const rect = menu.getBoundingClientRect();
     if (rect.right > window.innerWidth) menu.style.left = x - rect.width + "px";
     if (rect.bottom > window.innerHeight)
@@ -403,6 +430,72 @@ export async function createAssetsPanel(
     const sep = document.createElement("div");
     sep.className = "ctx-separator";
     return sep;
+  }
+
+  function buildImportSubmenu() {
+    const li = document.createElement("li");
+    li.className = "ctx-item ctx-has-sub";
+    li.innerHTML = `<span class="ctx-label">${t("contextMenu.import")}</span><i data-lucide="chevron-right"></i>`;
+
+    const sub = document.createElement("ul");
+    sub.className = "ctx-menu ctx-submenu";
+
+    sub.appendChild(
+      makeCtxItem(t("assets.importModel"), async () => {
+        closeContextMenu();
+        await importModel();
+      }),
+    );
+    sub.appendChild(
+      makeCtxItem(t("assets.importTexture"), async () => {
+        closeContextMenu();
+        await importTexture();
+      }),
+    );
+
+    li.appendChild(sub);
+
+    let closeTimer = null;
+    li.addEventListener("mouseenter", () => {
+      clearTimeout(closeTimer);
+      sub.style.display = "block";
+      adjustSubmenuPosition(li, sub);
+    });
+    li.addEventListener("mouseleave", (e) => {
+      if (sub.contains(e.relatedTarget)) return;
+      closeTimer = setTimeout(() => (sub.style.display = "none"), 120);
+    });
+    sub.addEventListener("mouseenter", () => clearTimeout(closeTimer));
+    sub.addEventListener("mouseleave", () => {
+      closeTimer = setTimeout(() => (sub.style.display = "none"), 120);
+    });
+
+    return li;
+  }
+
+  function adjustSubmenuPosition(li, sub) {
+    sub.style.left = "";
+    sub.style.right = "";
+    sub.style.top = "";
+
+    const liRect = li.getBoundingClientRect();
+    const subRect = sub.getBoundingClientRect();
+
+    if (liRect.right + subRect.width > window.innerWidth) {
+      sub.style.left = "auto";
+      sub.style.right = "calc(100% - 4px)";
+    } else {
+      sub.style.left = "calc(100% - 4px)";
+      sub.style.right = "auto";
+    }
+
+    if (liRect.top + subRect.height > window.innerHeight) {
+      sub.style.top = "auto";
+      sub.style.bottom = "0";
+    } else {
+      sub.style.top = "-4px";
+      sub.style.bottom = "auto";
+    }
   }
 
   // ── Operaciones de carpeta ────────────────────────────────────────────────
@@ -611,7 +704,43 @@ export async function createAssetsPanel(
     });
   }
 
-  // Models
+  // Models y texturas
+  async function importTexture() {
+    const sourcePaths = await invoke("pick_texture_files");
+    if (!sourcePaths || sourcePaths.length === 0) return;
+
+    const targetFolder = getNodePath(_currentFolderNode);
+    const targetNode =
+      _currentFolderNode.type === "asset-folder" ||
+      _currentFolderNode.type === "root"
+        ? _currentFolderNode
+        : treeData[0];
+
+    for (const sourcePath of sourcePaths) {
+      try {
+        const fileName = await invoke("import_asset_file", {
+          projectFolder: projectData._folder,
+          sourcePath,
+          targetFolder,
+        });
+        logger.info(
+          "Assets",
+          `Imported texture "${fileName}" → "${targetFolder || "assets/"}"`,
+        );
+
+        const diskPath = targetFolder
+          ? `${targetFolder}/${fileName}`
+          : fileName;
+        targetNode.children.push(buildAssetFileNode(fileName, diskPath));
+      } catch (e) {
+        logger.warn("Assets", `Failed to import texture "${sourcePath}": ${e}`);
+      }
+    }
+
+    rebuildTree();
+    renderGrid(targetNode);
+  }
+
   async function importModel() {
     const sourcePath = await invoke("pick_model_file");
     if (!sourcePath) return;
@@ -630,7 +759,7 @@ export async function createAssetsPanel(
       );
 
       const diskPath = targetFolder ? `${targetFolder}/${fileName}` : fileName;
-      const node = buildModelNode(fileName, diskPath);
+      const node = buildAssetFileNode(fileName, diskPath);
 
       const targetNode =
         _currentFolderNode.type === "asset-folder" ||
@@ -684,7 +813,7 @@ export async function createAssetsPanel(
         destPath,
       });
       logger.info("Assets", `Duplicated model "${node.label}" → "${newName}"`);
-      const newNode = buildModelNode(newName, destPath);
+      const newNode = buildAssetFileNode(newName, destPath);
       const parent = findParent(treeData, node) ?? _currentFolderNode;
       parent.children.push(newNode);
       rebuildTree();
@@ -860,6 +989,7 @@ export async function createAssetsPanel(
         Box,
         Container,
         Package,
+        FileImage,
       },
       attrs: { width: 13, height: 13 },
       root: parent,
@@ -925,6 +1055,18 @@ export async function createAssetsPanel(
         card.addEventListener("dragend", () => {
           clearDraggingModel();
         });
+      }
+
+      if (item.type === "asset-texture") {
+        const absolutePath = `${projectData._folder}/assets/${item._diskPath}`;
+
+        card.addEventListener("mouseenter", (e) =>
+          showTexturePreview(absolutePath, item.label, e.clientX, e.clientY),
+        );
+        card.addEventListener("mouseleave", () => hideTexturePreview());
+        card.addEventListener("mousemove", (e) =>
+          moveTexturePreview(e.clientX, e.clientY),
+        );
       }
 
       if (
@@ -1017,7 +1159,7 @@ export async function createAssetsPanel(
     }
 
     createIcons({
-      icons: { Folder, Box, Container, Package },
+      icons: { Folder, Box, Container, Package, FileImage },
       attrs: { width: 28, height: 28 },
       root: gridEl,
     });

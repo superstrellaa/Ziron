@@ -72,6 +72,7 @@ export default {
     rename: "Rename",
     copy: "Copy",
     paste: "Paste",
+    import: "Import",
     objects3d: "3D Object",
     cube: "Cube",
     sphere: "Sphere",
@@ -120,6 +121,7 @@ export default {
     addFolder: "Add Folder",
     newFolderName: "Folder name",
     importModel: "Import Model",
+    importTexture: "Import Texture",
   },
   toasts: {
     generalError: { title: "Error", message: "Something went wrong." },

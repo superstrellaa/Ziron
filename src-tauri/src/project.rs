@@ -281,11 +281,14 @@ fn read_folder_tree(path: &Path) -> Result<(Vec<FolderNode>, Vec<FileNode>), Str
             folders.push(FolderNode { name, children, files: child_files });
         } else if ft.is_file() {
             let lower = name.to_lowercase();
-            if lower.ends_with(".glb") || lower.ends_with(".gltf") 
-            || lower.ends_with(".obj") || lower.ends_with(".fbx") {
+            if lower.ends_with(".glb") || lower.ends_with(".gltf")
+                || lower.ends_with(".obj") || lower.ends_with(".fbx")
+                || lower.ends_with(".png") || lower.ends_with(".jpg")
+                || lower.ends_with(".jpeg") || lower.ends_with(".webp")
+            {
                 files.push(FileNode { name });
-            }
         }
+}
     }
     Ok((folders, files))
 }
@@ -360,7 +363,7 @@ pub fn copy_asset_folder(
     copy_dir_recursive_renamed(&base.join(&source_path), &base.join(&dest_path))
 }
 
-/// SISTEMA PARA ASSETS PERO MODELOS Y ASSETS ESPECIFICOS
+/// SISTEMA PARA ASSETS PERO MODELOS Y ASSETS ESPECIFICOS | TAMBIEN IMAGENES DE TEXTURAS
 #[tauri::command]
 pub async fn pick_model_file(app: tauri::AppHandle) -> Result<Option<String>, String> {
     use tauri_plugin_dialog::DialogExt;
@@ -375,6 +378,29 @@ pub async fn pick_model_file(app: tauri::AppHandle) -> Result<Option<String>, St
         .pick_file(move |file| {
             if let Some(tx) = tx.lock().unwrap().take() {
                 let _ = tx.send(file.map(|p| p.to_string()));
+            }
+        });
+
+    rx.recv().map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub async fn pick_texture_files(app: tauri::AppHandle) -> Result<Vec<String>, String> {
+    use tauri_plugin_dialog::DialogExt;
+    use std::sync::{Arc, Mutex};
+
+    let (tx, rx) = std::sync::mpsc::channel();
+    let tx = Arc::new(Mutex::new(Some(tx)));
+
+    app.dialog()
+        .file()
+        .add_filter("Image", &["png", "jpg", "jpeg", "webp"])
+        .pick_files(move |files| {
+            if let Some(tx) = tx.lock().unwrap().take() {
+                let paths = files
+                    .map(|fs| fs.into_iter().map(|p| p.to_string()).collect())
+                    .unwrap_or_default();
+                let _ = tx.send(paths);
             }
         });
 

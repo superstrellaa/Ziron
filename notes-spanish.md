@@ -7,3 +7,4 @@
 - Los logs del motor usan un sistema custom con categorías y formato visual propio.
 - La entidad del sol puede hacer que cambie el skybox en base a su rotación en X
 - Puedes importar modelos custom solo FBX, OBJ y GLB
+- Puedes importar texturas custom
