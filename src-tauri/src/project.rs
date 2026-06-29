@@ -287,8 +287,8 @@ fn read_folder_tree(path: &Path) -> Result<(Vec<FolderNode>, Vec<FileNode>), Str
                 || lower.ends_with(".jpeg") || lower.ends_with(".webp")
             {
                 files.push(FileNode { name });
+            }
         }
-}
     }
     Ok((folders, files))
 }

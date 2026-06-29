@@ -24,6 +24,7 @@ export async function saveScene(
     };
     if (entity.type === "model") {
       base.modelPath = entity.modelPath;
+      base.components = entity.components ?? {};
     }
     if (
       entity.type !== "sun" &&

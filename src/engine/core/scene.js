@@ -212,6 +212,7 @@ export async function createScene(renderer, projectData, onProgress = null) {
           name: e.name,
           active: e.active ?? true,
         });
+        entity.components = e.components ?? {};
         entity.mesh.position.fromArray(e.position);
         entity.mesh.rotation.set(e.rotation[0], e.rotation[1], e.rotation[2]);
         entity.mesh.scale.fromArray(e.scale);
