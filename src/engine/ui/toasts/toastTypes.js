@@ -86,6 +86,125 @@ export const Toast = {
       messageKey: "toasts.autoSaveProject.message",
       ...extra,
     }),
+  updateProjectVersionError: (extra) =>
+    pushToast({
+      type: "error",
+      titleKey: "toasts.updateProjectVersionError.title",
+      messageKey: "toasts.updateProjectVersionError.message",
+      ...extra,
+    }),
+  failedToLoadConfig: (extra) =>
+    pushToast({
+      type: "error",
+      titleKey: "toasts.failedToLoadConfig.title",
+      messageKey: "toasts.failedToLoadConfig.message",
+      ...extra,
+    }),
+  failedToSaveConfig: (extra) =>
+    pushToast({
+      type: "error",
+      titleKey: "toasts.failedToSaveConfig.title",
+      messageKey: "toasts.failedToSaveConfig.message",
+      ...extra,
+    }),
+  failedToLoadAssetTree: (extra) =>
+    pushToast({
+      type: "error",
+      titleKey: "toasts.failedToLoadAssetTree.title",
+      messageKey: "toasts.failedToLoadAssetTree.message",
+      ...extra,
+    }),
+  failedToCreateFolder: (extra) =>
+    pushToast({
+      type: "error",
+      titleKey: "toasts.failedToCreateFolder.title",
+      messageKey: "toasts.failedToCreateFolder.message",
+      ...extra,
+    }),
+  failedToDeleteFolder: (extra) =>
+    pushToast({
+      type: "error",
+      titleKey: "toasts.failedToDeleteFolder.title",
+      messageKey: "toasts.failedToDeleteFolder.message",
+      ...extra,
+    }),
+  failedToDuplicateFolder: (extra) =>
+    pushToast({
+      type: "error",
+      titleKey: "toasts.failedToDuplicateFolder.title",
+      messageKey: "toasts.failedToDuplicateFolder.message",
+      ...extra,
+    }),
+  failedToRenameFolder: (extra) =>
+    pushToast({
+      type: "error",
+      titleKey: "toasts.failedToRenameFolder.title",
+      messageKey: "toasts.failedToRenameFolder.message",
+      ...extra,
+    }),
+  failedToImportTexture: (extra) =>
+    pushToast({
+      type: "error",
+      titleKey: "toasts.failedToImportTexture.title",
+      messageKey: "toasts.failedToImportTexture.message",
+      ...extra,
+    }),
+  failedToImportModel: (extra) =>
+    pushToast({
+      type: "error",
+      titleKey: "toasts.failedToImportModel.title",
+      messageKey: "toasts.failedToImportModel.message",
+      ...extra,
+    }),
+  failedToDeleteModel: (extra) =>
+    pushToast({
+      type: "error",
+      titleKey: "toasts.failedToDeleteModel.title",
+      messageKey: "toasts.failedToDeleteModel.message",
+      ...extra,
+    }),
+  failedToDuplicateModel: (extra) =>
+    pushToast({
+      type: "error",
+      titleKey: "toasts.failedToDuplicateModel.title",
+      messageKey: "toasts.failedToDuplicateModel.message",
+      ...extra,
+    }),
+  failedToRenameModel: (extra) =>
+    pushToast({
+      type: "error",
+      titleKey: "toasts.failedToRenameModel.title",
+      messageKey: "toasts.failedToRenameModel.message",
+      ...extra,
+    }),
+  failedToOpenProject: (extra) =>
+    pushToast({
+      type: "error",
+      titleKey: "toasts.failedToOpenProject.title",
+      messageKey: "toasts.failedToOpenProject.message",
+      ...extra,
+    }),
+  unknownEntityType: (extra) =>
+    pushToast({
+      type: "error",
+      titleKey: "toasts.unknownEntityType.title",
+      messageKey: "toasts.unknownEntityType.message",
+      ...extra,
+    }),
+  failedToLoadTexture: (extra) =>
+    pushToast({
+      type: "error",
+      titleKey: "toasts.failedToLoadTexture.title",
+      messageKey: "toasts.failedToLoadTexture.message",
+      ...extra,
+    }),
+  failedToLoadModel: (extra) =>
+    pushToast({
+      type: "error",
+      titleKey: "toasts.failedToLoadModel.title",
+      messageKey: "toasts.failedToLoadModel.message",
+      ...extra,
+    }),
 
   info: (title, message, duration) =>
     pushToast({ type: "info", title, message, duration }),

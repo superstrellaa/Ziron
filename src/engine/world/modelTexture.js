@@ -22,7 +22,7 @@ export async function applyModelTexture(entity, projectData, relativePath) {
     texture = await _loader.loadAsync(url);
   } catch (e) {
     console.warn("[ModelTexture] Failed to load texture:", e);
-    Toast.generalError();
+    Toast.failedToLoadTexture();
     Popup.error(
       "Failed to load texture: " +
         (typeof e === "string" ? e : (e?.message ?? String(e))),

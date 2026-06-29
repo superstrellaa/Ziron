@@ -58,7 +58,7 @@ export async function checkVersionAndLoad(projectData, onCancel = null) {
         );
       } catch (e) {
         logger.warn("ProjectManager", `Could not update project version: ${e}`);
-        Toast.generalError();
+        Toast.updateProjectVersionError();
         Popup.error(
           "Could not update project version: " +
             (typeof e === "string" ? e : (e?.message ?? String(e))),

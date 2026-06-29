@@ -160,6 +160,75 @@ export default {
       title: "Project Autosaved",
       message: "Your project has been autosaved.",
     },
+    updateProjectVersionError: {
+      title: "Project Update Failed",
+      message:
+        "Could not update the project to the latest ZIRON Studio version.",
+    },
+    failedToLoadConfig: {
+      title: "Failed to Load Config",
+      message: "Could not load the main configuration file.",
+    },
+    failedToSaveConfig: {
+      title: "Failed to Save Config",
+      message: "Could not save the main configuration file.",
+    },
+    failedToLoadAssetTree: {
+      title: "Failed to Load Asset Tree",
+      message: "Could not load the asset tree.",
+    },
+    failedToCreateFolder: {
+      title: "Failed to Create Folder",
+      message: "Could not create the folder.",
+    },
+    failedToDeleteFolder: {
+      title: "Failed to Delete Folder",
+      message: "Could not delete the folder.",
+    },
+    failedToDuplicateFolder: {
+      title: "Failed to Duplicate Folder",
+      message: "Could not duplicate the folder.",
+    },
+    failedToRenameFolder: {
+      title: "Failed to Rename Folder",
+      message: "Could not rename the folder.",
+    },
+    failedToImportTexture: {
+      title: "Failed to Import Texture",
+      message: "Could not import the texture.",
+    },
+    failedToImportModel: {
+      title: "Failed to Import Model",
+      message: "Could not import the model.",
+    },
+    failedToDeleteModel: {
+      title: "Failed to Delete Model",
+      message: "Could not delete the model.",
+    },
+    failedToDuplicateModel: {
+      title: "Failed to Duplicate Model",
+      message: "Could not duplicate the model.",
+    },
+    failedToRenameModel: {
+      title: "Failed to Rename Model",
+      message: "Could not rename the model.",
+    },
+    failedToOpenProject: {
+      title: "Failed to Open Project",
+      message: "Could not open the project.",
+    },
+    unknownEntityType: {
+      title: "Unknown Entity Type",
+      message: "The entity type is unknown.",
+    },
+    failedToLoadTexture: {
+      title: "Failed to Load Texture",
+      message: "Could not load the texture.",
+    },
+    failedToLoadModel: {
+      title: "Failed to Load Model",
+      message: "Could not load the model.",
+    },
   },
   popups: {
     unsavedScene: {

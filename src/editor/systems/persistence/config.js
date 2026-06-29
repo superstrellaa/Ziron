@@ -12,7 +12,7 @@ export async function loadConfig() {
     return _config;
   } catch (e) {
     logger.warn("Config", `Failed to load config: ${e}`);
-    Toast.generalError();
+    Toast.failedToLoadConfig();
     Popup.error(
       "Failed to load config: " +
         (typeof e === "string" ? e : (e?.message ?? String(e))),
@@ -28,7 +28,7 @@ export async function saveConfig() {
     logger.info("Config", "Config saved");
   } catch (e) {
     logger.warn("Config", `Failed to save config: ${e}`);
-    Toast.generalError();
+    Toast.failedToSaveConfig();
     Popup.error(
       "Failed to save config: " +
         (typeof e === "string" ? e : (e?.message ?? String(e))),

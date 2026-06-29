@@ -170,6 +170,75 @@ export default {
       title: "Proyecto Guardado Automáticamente",
       message: "Tu proyecto ha sido guardado automáticamente.",
     },
+    updateProjectVersionError: {
+      title: "Error al Actualizar Proyecto",
+      message:
+        "El proyecto no se pudo actualizar a la última versión de ZIRON Studio.",
+    },
+    failedToLoadConfig: {
+      title: "Error al Cargar Configuración",
+      message: "No se pudo cargar el archivo de configuración principal.",
+    },
+    failedToSaveConfig: {
+      title: "Error al Guardar Configuración",
+      message: "No se pudo guardar el archivo de configuración principal.",
+    },
+    failedToLoadAssetTree: {
+      title: "Error al Cargar Árbol de Assets",
+      message: "No se pudo cargar el árbol de assets del proyecto.",
+    },
+    failedToCreateFolder: {
+      title: "Error al Crear Carpeta",
+      message: "No se pudo crear la carpeta.",
+    },
+    failedToDeleteFolder: {
+      title: "Error al Eliminar Carpeta",
+      message: "No se pudo eliminar la carpeta.",
+    },
+    failedToDuplicateFolder: {
+      title: "Error al Duplicar Carpeta",
+      message: "No se pudo duplicar la carpeta.",
+    },
+    failedToRenameFolder: {
+      title: "Error al Renombrar Carpeta",
+      message: "No se pudo renombrar la carpeta.",
+    },
+    failedToImportTexture: {
+      title: "Error al Importar Textura",
+      message: "No se pudo importar la textura.",
+    },
+    failedToImportModel: {
+      title: "Error al Importar Modelo",
+      message: "No se pudo importar el modelo.",
+    },
+    failedToDeleteModel: {
+      title: "Error al Eliminar Modelo",
+      message: "No se pudo eliminar el modelo.",
+    },
+    failedToDuplicateModel: {
+      title: "Error al Duplicar Modelo",
+      message: "No se pudo duplicar el modelo.",
+    },
+    failedToRenameModel: {
+      title: "Error al Renombrar Modelo",
+      message: "No se pudo renombrar el modelo.",
+    },
+    failedToOpenProject: {
+      title: "Error al Abrir Proyecto",
+      message: "No se pudo abrir el proyecto.",
+    },
+    unknownEntityType: {
+      title: "Tipo de Entidad Desconocido",
+      message: "El tipo de entidad no es reconocido.",
+    },
+    failedToLoadTexture: {
+      title: "Error al Cargar Textura",
+      message: "No se pudo cargar la textura.",
+    },
+    failedToLoadModel: {
+      title: "Error al Cargar Modelo",
+      message: "No se pudo cargar el modelo.",
+    },
   },
   popups: {
     unsavedScene: {

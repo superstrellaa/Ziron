@@ -139,7 +139,7 @@ export async function createAssetsPanel(
       return tree; // { folders, files }
     } catch (e) {
       logger.warn("Assets", `Failed to load asset tree: ${e}`);
-      Toast.generalError();
+      Toast.failedToLoadAssetTree();
       Popup.error(
         "Failed to load asset tree: " +
           (typeof e === "string" ? e : (e?.message ?? String(e))),
@@ -531,7 +531,7 @@ export async function createAssetsPanel(
       renderGrid(targetNode);
     } catch (e) {
       logger.warn("Assets", `Failed to create folder "${folderPath}": ${e}`);
-      Toast.generalError();
+      Toast.failedToCreateFolder();
       Popup.error(
         "Failed to create folder: " +
           (typeof e === "string" ? e : (e?.message ?? String(e))),
@@ -564,7 +564,7 @@ export async function createAssetsPanel(
       renderGrid(nextFolder);
     } catch (e) {
       logger.warn("Assets", `Failed to delete folder "${node.label}": ${e}`);
-      Toast.generalError();
+      Toast.failedToDeleteFolder();
       Popup.error(
         "Failed to delete folder: " +
           (typeof e === "string" ? e : (e?.message ?? String(e))),
@@ -606,7 +606,7 @@ export async function createAssetsPanel(
       renderGrid(parent);
     } catch (e) {
       logger.warn("Assets", `Failed to duplicate folder "${node.label}": ${e}`);
-      Toast.generalError();
+      Toast.failedToDuplicateFolder();
       Popup.error(
         "Failed to duplicate folder: " +
           (typeof e === "string" ? e : (e?.message ?? String(e))),
@@ -662,7 +662,7 @@ export async function createAssetsPanel(
         renderGrid(findParent(treeData, node) ?? treeData[0]);
       } catch (e) {
         logger.warn("Assets", `Failed to rename folder "${oldName}": ${e}`);
-        Toast.generalError();
+        Toast.failedToRenameFolder();
         Popup.error(
           "Failed to rename folder: " +
             (typeof e === "string" ? e : (e?.message ?? String(e))),
@@ -760,7 +760,7 @@ export async function createAssetsPanel(
         targetNode.children.push(buildAssetFileNode(fileName, diskPath));
       } catch (e) {
         logger.warn("Assets", `Failed to import texture "${sourcePath}": ${e}`);
-        Toast.generalError();
+        Toast.failedToImportTexture();
         Popup.error(
           "Failed to import texture: " +
             (typeof e === "string" ? e : (e?.message ?? String(e))),
@@ -803,7 +803,7 @@ export async function createAssetsPanel(
       renderGrid(targetNode);
     } catch (e) {
       logger.warn("Assets", `Failed to import model: ${e}`);
-      Toast.generalError();
+      Toast.failedToImportModel();
       Popup.error(
         "Failed to import model: " +
           (typeof e === "string" ? e : (e?.message ?? String(e))),
@@ -828,7 +828,7 @@ export async function createAssetsPanel(
       renderGrid(_currentFolderNode);
     } catch (e) {
       logger.warn("Assets", `Failed to delete model "${node.label}": ${e}`);
-      Toast.generalError();
+      Toast.failedToDeleteModel();
       Popup.error(
         "Failed to delete model: " +
           (typeof e === "string" ? e : (e?.message ?? String(e))),
@@ -861,7 +861,7 @@ export async function createAssetsPanel(
       renderGrid(_currentFolderNode);
     } catch (e) {
       logger.warn("Assets", `Failed to duplicate model "${node.label}": ${e}`);
-      Toast.generalError();
+      Toast.failedToDuplicateModel();
       Popup.error(
         "Failed to duplicate model: " +
           (typeof e === "string" ? e : (e?.message ?? String(e))),
@@ -916,7 +916,7 @@ export async function createAssetsPanel(
         renderGrid(_currentFolderNode);
       } catch (e) {
         logger.warn("Assets", `Failed to rename model "${oldName}": ${e}`);
-        Toast.generalError();
+        Toast.failedToRenameModel();
         Popup.error(
           "Failed to rename model: " +
             (typeof e === "string" ? e : (e?.message ?? String(e))),

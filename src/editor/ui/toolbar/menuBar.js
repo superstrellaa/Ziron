@@ -97,7 +97,7 @@ export function initMenuBar({ onLoadProject, onNewProject, onCloseProject }) {
       _onLoadProject?.(projectData);
     } catch (e) {
       logger.warn("Menu", `Failed to open project: ${e}`);
-      Toast.generalError();
+      Toast.failedToOpenProject();
       Popup.error(
         "Failed to open project: " +
           (typeof e === "string" ? e : (e?.message ?? String(e))),

@@ -103,7 +103,7 @@ export async function createWelcomeScreen(
       onProjectReady(projectData);
     } catch (e) {
       logger.warn("Welcome", `Failed to open project: ${e}`);
-      Toast.generalError();
+      Toast.failedToOpenProject();
       Popup.error(
         "Failed to open project: " +
           (typeof e === "string" ? e : (e?.message ?? String(e))),

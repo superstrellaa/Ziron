@@ -19,7 +19,7 @@ export function buildEntity(type, options = {}, nextId) {
   const geoFactory = GEOMETRIES[type];
   if (!geoFactory && type !== "sun") {
     logger.warn("EntityFactory", `Unknown entity type "${type}"`);
-    Toast.generalError();
+    Toast.unknownEntityType();
     return null;
   }
 
