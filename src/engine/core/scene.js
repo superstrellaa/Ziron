@@ -4,139 +4,9 @@ import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 import { createSceneManager } from "../world/sceneManager.js";
 import { createSunEntity } from "../world/sunEntity.js";
 import { loadScene } from "../../editor/systems/persistence/scenePersistence.js";
-import { applyModelTexture } from "../world/model/modelTexture.js";
-
-const vertexShader = `
-  varying vec3 vWorldDir;
-  void main() {
-    vec4 worldPos = modelMatrix * vec4(position, 1.0);
-    vWorldDir = normalize(worldPos.xyz);
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-  }
-`;
-
-const fragmentShader = `
-  varying vec3 vWorldDir;
-  uniform vec3 uSunDir;
-  uniform float uSunAltitude; 
-
-  vec3 nightZenith   = vec3(0.02, 0.02, 0.08);
-  vec3 nightHorizon  = vec3(0.04, 0.05, 0.14);
-  vec3 dawnZenith    = vec3(0.10, 0.10, 0.28);
-  vec3 dawnHorizon   = vec3(0.72, 0.36, 0.22);
-  vec3 dayZenith     = vec3(0.20, 0.38, 0.72);
-  vec3 dayHorizon    = vec3(0.58, 0.72, 0.95);
-
-  vec3 skyColorAt(float alt, vec3 dir) {
-    float y = normalize(dir).y;
-
-    float dawn = smoothstep(-0.15, 0.20, alt);  
-    float day  = smoothstep(0.05, 0.35, alt); 
-
-    vec3 zenith  = mix(mix(nightZenith,  dawnZenith,  dawn), dayZenith,  day);
-    vec3 horizon = mix(mix(nightHorizon, dawnHorizon, dawn), dayHorizon, day);
-
-    float t = clamp(y * 0.5 + 0.5, 0.0, 1.0);
-    vec3 sky = mix(horizon, zenith, pow(t, 0.7));
-
-    float dawnT = smoothstep(-0.15, 0.3, alt) * (1.0 - smoothstep(0.3, 0.6, alt));
-    float sunDot = max(0.0, dot(normalize(dir), normalize(uSunDir)));
-    float halo = pow(sunDot, 8.0) * dawnT * 0.6;
-    sky += vec3(0.9, 0.45, 0.15) * halo;
-
-    float fog = exp(-abs(y) * 5.0) * (0.4 + dawn * 0.3);
-    sky = mix(sky, mix(nightHorizon, dawnHorizon * 1.1, dawn), fog * (1.0 - day * 0.5));
-
-    sky = mix(sky, sky + vec3(0.04, 0.02, 0.12), 0.35 * (1.0 - day * 0.6));
-
-    return sky;
-  }
-
-  void main() {
-    vec3 col = skyColorAt(uSunAltitude, vWorldDir);
-    gl_FragColor = vec4(col, 1.0);
-  }
-`;
-
-function createInfiniteGrid() {
-  const material = new THREE.ShaderMaterial({
-    uniforms: {
-      uCameraPos: { value: new THREE.Vector3() },
-    },
-    vertexShader: `
-      varying vec3 vWorldPos;
-      void main() {
-        vec4 worldPos = modelMatrix * vec4(position, 1.0);
-        vWorldPos = worldPos.xyz;
-        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-      }
-    `,
-    fragmentShader: `
-      varying vec3 vWorldPos;
-      uniform vec3 uCameraPos;
-
-      float line(float coord, float spacing, float thickness) {
-        float f = abs(fract(coord / spacing + 0.5) - 0.5) * spacing;
-        float df = fwidth(coord) * thickness;
-        return 1.0 - smoothstep(0.0, df, f);
-      }
-
-      void main() {
-        float g1  = max(line(vWorldPos.x, 1.0, 1.5), line(vWorldPos.z, 1.0, 1.5));
-        float g10 = max(line(vWorldPos.x, 10.0, 2.0), line(vWorldPos.z, 10.0, 2.0));
-
-        float dist = length(vWorldPos.xz - uCameraPos.xz);
-        float fade = 1.0 - smoothstep(30.0, 80.0, dist);
-
-        vec4 cFine   = vec4(0.165, 0.188, 0.376, 0.6);
-        vec4 cCoarse = vec4(0.22,  0.25,  0.50,  0.9);
-
-        vec4 col = mix(
-          cFine   * g1,
-          cCoarse * g10,
-          g10
-        );
-
-        col.a *= fade;
-        if (col.a < 0.01) discard;
-        gl_FragColor = col;
-      }
-    `,
-    transparent: true,
-    depthWrite: false,
-    side: THREE.DoubleSide,
-  });
-
-  const mesh = new THREE.Mesh(new THREE.PlaneGeometry(600, 600), material);
-  mesh.rotation.x = -Math.PI / 2;
-  mesh.userData.isInfiniteGrid = true;
-  return mesh;
-}
-
-export function createProceduralSky() {
-  const uniforms = {
-    uSunDir: { value: new THREE.Vector3(1, 0.5, 0) },
-    uSunAltitude: { value: 0.5 },
-  };
-
-  const skyMat = new THREE.ShaderMaterial({
-    vertexShader,
-    fragmentShader,
-    uniforms,
-    side: THREE.BackSide,
-    depthWrite: false,
-  });
-
-  const skyMesh = new THREE.Mesh(new THREE.SphereGeometry(450, 32, 32), skyMat);
-
-  function updateSky(sunWorldPos) {
-    const dir = sunWorldPos.clone().normalize();
-    uniforms.uSunDir.value.copy(dir);
-    uniforms.uSunAltitude.value = dir.y;
-  }
-
-  return { skyMesh, updateSky };
-}
+import { createProceduralSky } from "../world/environment/proceduralSky.js";
+import { createInfiniteGrid } from "../world/environment/infiniteGrid.js";
+import { loadSavedEntities } from "../world/persistence/sceneLoader.js";
 
 export async function createScene(renderer, projectData, onProgress = null) {
   const scene = new THREE.Scene();
@@ -159,11 +29,11 @@ export async function createScene(renderer, projectData, onProgress = null) {
 
   if (projectData) {
     const startupScene = projectData.startup_scene ?? "scenes/main.ziron.scene";
-    const sceneName_fromFile = startupScene
+    const sceneNameFromFile = startupScene
       .replace("scenes/", "")
       .replace(".ziron.scene", "");
 
-    const saved = await loadScene(projectData, sceneName_fromFile);
+    const saved = await loadScene(projectData, sceneNameFromFile);
     sceneName = saved?.name ?? "main";
 
     const hasEntities = saved?.entities?.some((e) => e.type !== "sun");
@@ -172,73 +42,14 @@ export async function createScene(renderer, projectData, onProgress = null) {
       firstSelected = sceneManager.add("cube", { name: "Cube" });
       logger.info("Scene", "New scene — default cube added");
     } else {
-      const regularEntities = saved.entities.filter(
-        (e) => e.type !== "sun" && e.type !== "model",
-      );
-      const modelEntities = saved.entities.filter((e) => e.type === "model");
-      const savedSun = saved.entities.find((e) => e.type === "sun");
-
-      const items = regularEntities.map((e) => ({
-        type: e.type,
-        options: {
-          name: e.name,
-          color: e.color ? parseInt(e.color.replace("#", ""), 16) : undefined,
-          active: e.active ?? true,
-        },
-        _savedTransform: {
-          position: e.position,
-          rotation: e.rotation,
-          scale: e.scale,
-          active: e.active ?? true,
-        },
-      }));
-
-      const added = await sceneManager.addBatch(
-        items,
-        (entity, item) => {
-          const t = item._savedTransform;
-          entity.mesh.position.fromArray(t.position);
-          entity.mesh.rotation.set(t.rotation[0], t.rotation[1], t.rotation[2]);
-          entity.mesh.scale.fromArray(t.scale);
-          entity.mesh.visible = t.active;
-          if (!t.active) sceneManager.setActive(entity.id, false);
-        },
+      const added = await loadSavedEntities(
+        saved,
+        sceneManager,
+        sun,
+        projectData,
         onProgress,
       );
-
-      for (const e of modelEntities) {
-        const absolutePath = `${projectData._folder}/assets/${e.modelPath}`;
-        const entity = await sceneManager.addModel(absolutePath, e.modelPath, {
-          id: e.id,
-          name: e.name,
-          active: e.active ?? true,
-        });
-        entity.components = e.components ?? {};
-
-        const texturePath = entity.components?.model?.texture;
-        if (texturePath) {
-          applyModelTexture(entity, projectData, texturePath);
-        }
-
-        entity.mesh.position.fromArray(e.position);
-        entity.mesh.rotation.set(e.rotation[0], e.rotation[1], e.rotation[2]);
-        entity.mesh.scale.fromArray(e.scale);
-        entity.mesh.visible = entity.active;
-        added.push(entity);
-      }
-
       firstSelected = added[0] ?? null;
-
-      if (savedSun) {
-        sun.entity.mesh.rotation.set(
-          savedSun.rotation[0],
-          savedSun.rotation[1],
-          savedSun.rotation[2],
-        );
-        sun.entity.mesh.position.fromArray(savedSun.position);
-        sun.update();
-      }
-
       logger.info(
         "Scene",
         `Loaded ${saved.entities.length} entities from disk`,
