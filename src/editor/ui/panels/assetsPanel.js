@@ -27,6 +27,11 @@ import { Popup } from "../../../engine/ui/popup/popupTypes.js";
 import { logger } from "../../../engine/core/logger.js";
 
 import {
+  registerOpenMenu,
+  clearActiveMenu,
+} from "../../../engine/ui/contextMenuRegistry.js";
+
+import {
   setDraggingModel,
   clearDraggingModel,
 } from "../../systems/app/dragState.js";
@@ -301,6 +306,7 @@ export async function createAssetsPanel(
     if (_contextMenu) {
       _contextMenu.remove();
       _contextMenu = null;
+      clearActiveMenu(closeContextMenu);
     }
   }
 
@@ -311,6 +317,7 @@ export async function createAssetsPanel(
 
   function showContextMenu(x, y, targetNode, isBackground = false) {
     closeContextMenu();
+    registerOpenMenu(closeContextMenu);
 
     const menu = document.createElement("div");
     menu.className = "ctx-menu-wrapper";

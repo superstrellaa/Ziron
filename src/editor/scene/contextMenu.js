@@ -6,6 +6,10 @@ import {
   DeleteCommand,
   DuplicateCommand,
 } from "../../engine/history/commands.js";
+import {
+  registerOpenMenu,
+  clearActiveMenu,
+} from "../../engine/ui/contextMenuRegistry.js";
 
 function getMenuStructure() {
   return {
@@ -106,10 +110,12 @@ function closeMenu() {
   if (!activeMenu) return;
   activeMenu.remove();
   activeMenu = null;
+  clearActiveMenu(closeMenu);
 }
 
 function showMenu(x, y, sceneManager, history, selection, hitEntity) {
   closeMenu();
+  registerOpenMenu(closeMenu);
 
   const menu = document.createElement("div");
   menu.className = "ctx-menu-wrapper";
