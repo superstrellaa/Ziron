@@ -8,7 +8,7 @@ import { createRenderer } from "./systems/rendering/rendererSetup.js";
 import { setupHistory } from "./systems/rendering/historySetup.js";
 import { createRenderLoop } from "./systems/rendering/renderLoop.js";
 import { connectViewportEvents } from "./systems/rendering/viewportEvents.js";
-import { connectModelDragDrop } from "./systems/rendering/modelDragDrop.js";
+import { connectModelDragDrop } from "./systems/assets/modelDragDrop.js";
 import { logger } from "../engine/core/logger.js";
 import { createHierarchy } from "./ui/panels/hierarchy.js";
 import { onKeybind } from "./systems/input/keybinds.js";

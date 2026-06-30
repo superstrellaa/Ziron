@@ -4,7 +4,7 @@ import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 import { createSceneManager } from "../world/sceneManager.js";
 import { createSunEntity } from "../world/sunEntity.js";
 import { loadScene } from "../../editor/systems/persistence/scenePersistence.js";
-import { applyModelTexture } from "../world/modelTexture.js";
+import { applyModelTexture } from "../world/model/modelTexture.js";
 
 const vertexShader = `
   varying vec3 vWorldDir;

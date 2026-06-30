@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { convertFileSrc } from "@tauri-apps/api/core";
-import { Toast } from "../ui/toasts/toastTypes";
-import { Popup } from "../ui/popup/popupTypes";
+import { Toast } from "../../ui/toasts/toastTypes";
+import { Popup } from "../../ui/popup/popupTypes";
 
 THREE.Cache.enabled = true; // evita recargar la misma textura varias veces
 const _loader = new THREE.TextureLoader();

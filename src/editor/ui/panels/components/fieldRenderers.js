@@ -2,7 +2,7 @@ import { t } from "../../../../engine/i18n/i18n.js";
 import { createIcons, Image } from "lucide";
 import { openAssetPicker } from "../../../../engine/ui/assetPicker/assetPicker.js";
 import { GenericCommand } from "../../../../engine/history/commands.js";
-import { applyModelTexture } from "../../../../engine/world/modelTexture.js";
+import { applyModelTexture } from "../../../../engine/world/model/modelTexture.js";
 
 export const FIELD_RENDERERS = {
   texture: renderTextureField,

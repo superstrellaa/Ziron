@@ -15,7 +15,7 @@ import {
   showTexturePreview,
   hideTexturePreview,
   moveTexturePreview,
-} from "../../systems/rendering/texturePreview.js";
+} from "../../systems/assets/texturePreview.js";
 import { invoke } from "@tauri-apps/api/core";
 import { t } from "../../../engine/i18n/i18n.js";
 import {
@@ -35,7 +35,7 @@ import {
   showModelPreview,
   hideModelPreview,
   moveModelPreview,
-} from "../../systems/rendering/modelPreview.js";
+} from "../../systems/assets/modelPreview.js";
 import { Toast } from "../../../engine/ui/toasts/toastTypes.js";
 
 export async function createAssetsPanel(

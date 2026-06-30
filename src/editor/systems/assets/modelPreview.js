@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { Timer } from "three";
-import { loadModelFromPath } from "../../../engine/world/modelLoader";
+import { loadModelFromPath } from "../../../engine/world/model/modelLoader";
 import { convertFileSrc } from "@tauri-apps/api/core";
 
 let _container = null;

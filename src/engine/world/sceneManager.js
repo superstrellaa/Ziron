@@ -2,7 +2,7 @@ import * as THREE from "three";
 import { buildEntity } from "./entityFactory.js";
 import { createEntityRegistry } from "./entityRegistry.js";
 import { logger } from "../core/logger.js";
-import { loadModelFromPath } from "./modelLoader.js";
+import { loadModelFromPath } from "./model/modelLoader.js";
 import { Toast } from "../ui/toasts/toastTypes.js";
 
 export function createSceneManager(scene) {
