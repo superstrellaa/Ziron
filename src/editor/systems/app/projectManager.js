@@ -40,8 +40,11 @@ export async function checkVersionAndLoad(projectData, onCancel = null) {
 
     if (result === "cancel") {
       if (!_activeViewport) {
-        onCancel?.() ??
+        if (onCancel) {
+          onCancel();
+        } else {
           createWelcomeScreen(getWorkspace(), checkVersionAndLoad);
+        }
       }
       return;
     }
