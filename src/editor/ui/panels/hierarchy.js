@@ -1,4 +1,4 @@
-import { createIcons, Box, Container } from "lucide";
+import { createIcons, Box, Container, TriangleAlert } from "lucide";
 import { t } from "../../../engine/i18n/i18n.js";
 import { onKeybind } from "../../systems/input/keybinds.js";
 import { RenameCommand } from "../../../engine/history/commands.js";
@@ -82,7 +82,14 @@ export function createHierarchy(
     for (const entity of entities) {
       const row = rowMap.get(entity.id);
 
-      const desired = `<span class="h-icon"><i data-lucide="box"></i></span><span class="h-name">${entity.name}</span>`;
+      const isError = entity._loadError === true;
+
+      const desired = `
+        <span class="h-icon"><i data-lucide="${isError ? "triangle-alert" : "box"}"></i></span>
+        <span class="h-name ${isError ? "h-name--error" : ""}">${entity.name}</span>
+        ${isError ? `<span class="h-error-badge" data-tooltip="Model file not found">!</span>` : ""}
+      `;
+
       if (row.innerHTML !== desired) {
         row.innerHTML = desired;
         dirty = true;
@@ -90,13 +97,14 @@ export function createHierarchy(
 
       row.classList.toggle("h-selected", selectedIds.has(entity.id));
       row.classList.toggle("h-inactive", entity.active === false);
+      row.classList.toggle("h-error", isError);
 
       list.appendChild(row);
     }
 
     if (dirty) {
       createIcons({
-        icons: { Box },
+        icons: { Box, TriangleAlert },
         attrs: { width: 12, height: 12, stroke: "#cccccc" },
       });
     }

@@ -95,11 +95,12 @@ export function createSceneManager(scene) {
         new THREE.MeshStandardMaterial({ color: 0xff3333, wireframe: true }),
       );
       group.add(placeholder);
+      entity._loadError = true;
       logger.warn(
         "SceneManager",
         `Failed to load model "${absolutePath}": ${e}`,
       );
-      Toast.generalError();
+      Toast.failedToLoadModel();
     }
 
     group.visible = entity.active;
