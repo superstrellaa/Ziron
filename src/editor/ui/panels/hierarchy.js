@@ -87,7 +87,7 @@ export function createHierarchy(
       const desired = `
         <span class="h-icon"><i data-lucide="${isError ? "triangle-alert" : "box"}"></i></span>
         <span class="h-name ${isError ? "h-name--error" : ""}">${entity.name}</span>
-        ${isError ? `<span class="h-error-badge" data-tooltip="Model file not found">!</span>` : ""}
+        ${isError ? `<span class="h-error-badge" data-tooltip="Model file not found">!</span>` : ""} //todo: esta aqui lo que hay que traducir
       `;
 
       if (row.innerHTML !== desired) {
