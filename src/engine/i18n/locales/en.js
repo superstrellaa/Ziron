@@ -89,6 +89,7 @@ export default {
   },
   hierarchy: {
     header: "Scene",
+    modelNotFound: "Model file not found",
   },
   properties: {
     header: "Properties",

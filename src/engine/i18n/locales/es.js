@@ -90,6 +90,7 @@ export default {
   },
   hierarchy: {
     header: "Escena",
+    modelNotFound: "Archivo de modelo no encontrado",
   },
   properties: {
     header: "Propiedades",
