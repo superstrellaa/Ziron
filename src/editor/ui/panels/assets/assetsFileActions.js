@@ -87,7 +87,7 @@ export function initFileActions(ctx) {
   };
 
   ctx.deleteModel = async function deleteModel(node) {
-    const result = await Popup.deleteFolderConfirm(node.label);
+    const result = await Popup.deleteFileConfirm(node.label);
     if (result !== "delete") return;
     try {
       await invoke("delete_asset_file", {

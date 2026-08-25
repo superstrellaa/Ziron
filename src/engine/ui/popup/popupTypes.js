@@ -70,6 +70,18 @@ export const Popup = {
       keybinds: { Escape: "cancel", Enter: "delete" },
     }),
 
+  deleteFileConfirm: (fileName) =>
+    openPopup({
+      type: "warning",
+      titleKey: "popups.deleteFile.title",
+      message: t("popups.deleteFile.message").replace("{file}", fileName),
+      buttons: [
+        { id: "cancel", labelKey: "popups.buttons.cancel", variant: "default" },
+        { id: "delete", labelKey: "popups.buttons.delete", variant: "danger" },
+      ],
+      keybinds: { Escape: "cancel", Enter: "delete" },
+    }),
+
   /**
    * Error genérico con opción de copiar el mensaje
    * Resuelve con: "close"

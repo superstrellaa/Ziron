@@ -261,6 +261,11 @@ export default {
       message:
         '¿Seguro que quieres eliminar "{folder}"? Esta acción es permanente y no se puede deshacer.',
     },
+    deleteFile: {
+      title: "Eliminar Archivo",
+      message:
+        '¿Seguro que quieres eliminar "{file}"? Esta acción es permanente y no se puede deshacer.',
+    },
     error: {
       title: "Ocurrió un error",
     },

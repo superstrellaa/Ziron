@@ -250,6 +250,11 @@ export default {
       message:
         'Are you sure you want to delete "{folder}"? This action is permanent and cannot be undone.',
     },
+    deleteFile: {
+      title: "Delete File",
+      message:
+        'Are you sure you want to delete "{file}"? This action is permanent and cannot be undone.',
+    },
     error: {
       title: "An error occurred",
     },
