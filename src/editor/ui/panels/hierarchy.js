@@ -1,4 +1,11 @@
-import { createIcons, Box, Container, TriangleAlert } from "lucide";
+import {
+  createIcons,
+  Box,
+  Container,
+  Package,
+  Sun,
+  TriangleAlert,
+} from "lucide";
 import { t } from "../../../engine/i18n/i18n.js";
 import { onKeybind } from "../../systems/input/keybinds.js";
 import { RenameCommand } from "../../../engine/history/commands.js";
@@ -7,6 +14,16 @@ import {
   getDraggingModel,
   clearDraggingModel,
 } from "../../systems/app/dragState.js";
+
+const ENTITY_ICONS = {
+  sun: "sun",
+  model: "package",
+};
+
+function iconForEntity(entity) {
+  if (entity._loadError === true) return "triangle-alert";
+  return ENTITY_ICONS[entity.type] ?? "box";
+}
 
 export function createHierarchy(
   container,
@@ -83,9 +100,10 @@ export function createHierarchy(
       const row = rowMap.get(entity.id);
 
       const isError = entity._loadError === true;
+      const icon = iconForEntity(entity);
 
       const desired = `
-        <span class="h-icon"><i data-lucide="${isError ? "triangle-alert" : "box"}"></i></span>
+        <span class="h-icon"><i data-lucide="${icon}"></i></span>
         <span class="h-name ${isError ? "h-name--error" : ""}">${entity.name}</span>
         ${isError ? `<span class="h-error-badge" data-tooltip="${t("hierarchy.modelNotFound")}">!</span>` : ""}
       `;
@@ -104,7 +122,7 @@ export function createHierarchy(
 
     if (dirty) {
       createIcons({
-        icons: { Box, TriangleAlert },
+        icons: { Box, Package, Sun, TriangleAlert },
         attrs: { width: 12, height: 12, stroke: "#cccccc" },
       });
     }
