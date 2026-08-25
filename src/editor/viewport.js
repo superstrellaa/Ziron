@@ -15,7 +15,7 @@ import { onKeybind } from "./systems/input/keybinds.js";
 import { saveScene } from "./systems/persistence/scenePersistence.js";
 import { setProjectOpen } from "./ui/toolbar/menuBar.js";
 import { createProperties } from "./ui/panels/properties.js";
-import { createAssetsPanel } from "./ui/panels/assetsPanel.js";
+import { createAssetsPanel } from "./ui/panels/assets/assetsPanel.js";
 import { createAutoSave } from "./systems/persistence/autoSave.js";
 import { activateScene } from "./systems/app/selectionContext.js";
 import { CreateModelCommand } from "../engine/history/commands.js";
