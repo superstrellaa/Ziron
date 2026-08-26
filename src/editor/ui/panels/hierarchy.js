@@ -8,7 +8,10 @@ import {
 } from "lucide";
 import { t } from "../../../engine/i18n/i18n.js";
 import { onKeybind } from "../../systems/input/keybinds.js";
-import { RenameCommand } from "../../../engine/history/commands.js";
+import {
+  RenameCommand,
+  MultiRenameCommand,
+} from "../../../engine/history/commands.js";
 import { getContext } from "../../systems/app/selectionContext.js";
 import {
   getDraggingModel,
@@ -69,6 +72,7 @@ export function createHierarchy(
   let selectedIds = new Set();
   let lastClickedId = null;
   let editingId = null;
+  let multiEditing = null;
 
   let _ctxMenu = null;
 
@@ -98,6 +102,11 @@ export function createHierarchy(
 
     for (const entity of entities) {
       const row = rowMap.get(entity.id);
+
+      if (entity.id === editingId || multiEditing?.ids.includes(entity.id)) {
+        list.appendChild(row);
+        continue;
+      }
 
       const isError = entity._loadError === true;
       const icon = iconForEntity(entity);
@@ -136,13 +145,21 @@ export function createHierarchy(
     }
   }
 
+  function resolveTemplateName(template, index) {
+    return template.replace(/\{id\}/g, index + 1);
+  }
+
   // registrar paranoias para que el rename funcione
   onKeybind("RENAME", (e) => {
     if (getContext() !== "scene") return;
-    if (selectedIds.size !== 1) return;
-    if (editingId !== null) return;
+    if (selectedIds.size === 0) return;
+    if (editingId !== null || multiEditing !== null) return;
     e.preventDefault();
-    startRename([...selectedIds][0]);
+    if (selectedIds.size === 1) {
+      startRename([...selectedIds][0]);
+    } else {
+      startMultiRename([...selectedIds]);
+    }
   });
 
   window.addEventListener("ziron:rename", (e) => {
@@ -157,6 +174,7 @@ export function createHierarchy(
 
   function startRename(id) {
     if (editingId !== null) commitRename();
+    if (multiEditing !== null) return; // no mezclar con un rename múltiple activo
 
     const row = rowMap.get(id);
     if (!row) return;
@@ -203,6 +221,100 @@ export function createHierarchy(
     }
 
     input.addEventListener("blur", () => commitRename());
+  }
+
+  function startMultiRename(ids) {
+    if (editingId !== null) return; // no mezclar con un rename individual activo
+    if (multiEditing !== null) return;
+
+    const idSet = new Set(ids);
+    const orderedEntities = sceneManager
+      .getAll()
+      .filter((e) => idSet.has(e.id));
+    if (orderedEntities.length === 0) return;
+
+    const topEntity = orderedEntities[0];
+    const topRow = rowMap.get(topEntity.id);
+    if (!topRow) return;
+
+    multiEditing = { ids: orderedEntities.map((e) => e.id) };
+
+    for (const entity of orderedEntities) {
+      const row = rowMap.get(entity.id);
+      const nameEl = row?.querySelector(".h-name");
+      if (nameEl) nameEl.style.display = "none";
+    }
+
+    const input = document.createElement("input");
+    input.className = "h-rename-input";
+    input.type = "text";
+    input.spellcheck = false;
+    input.autocomplete = "off";
+    input.style.flex = "1";
+    topRow.appendChild(input);
+
+    topRow.scrollIntoView({ block: "nearest", behavior: "smooth" });
+
+    input.focus();
+
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        commitMultiRename();
+      } else if (e.key === "Escape") {
+        e.preventDefault();
+        cancelMultiRename();
+      }
+    });
+    input.addEventListener("blur", () => commitMultiRename());
+
+    function commitMultiRename() {
+      if (multiEditing === null) return;
+      const editedIds = multiEditing.ids;
+      multiEditing = null;
+      input.remove();
+
+      const newName = input.value.trim();
+      if (!newName) {
+        render();
+        return;
+      }
+
+      const idSet2 = new Set(editedIds);
+      const entities = sceneManager.getAll().filter((e) => idSet2.has(e.id));
+
+      const hasTemplate = newName.includes("{id}");
+      const toRename = entities.filter(
+        (e, i) =>
+          e.name !== (hasTemplate ? resolveTemplateName(newName, i) : newName),
+      );
+
+      if (toRename.length > 0) {
+        const resolved = toRename.map((e) => ({
+          entity: e,
+          name: hasTemplate
+            ? resolveTemplateName(newName, entities.indexOf(e))
+            : newName,
+        }));
+        const cmd = MultiRenameCommand(
+          sceneManager,
+          resolved.map((r) => r.entity),
+          null,
+          resolved,
+        );
+        cmd.execute();
+        getHistory().push(cmd);
+      } else {
+        render();
+      }
+    }
+
+    function cancelMultiRename() {
+      if (multiEditing === null) return;
+      multiEditing = null;
+      input.remove();
+      render();
+    }
   }
 
   list.addEventListener("click", (e) => {
@@ -270,10 +382,14 @@ export function createHierarchy(
   window.addEventListener("keydown", (e) => {
     if (e.key !== "F2") return;
     if (getContext() !== "scene") return;
-    if (selectedIds.size !== 1) return;
-    if (editingId !== null) return;
+    if (selectedIds.size === 0) return;
+    if (editingId !== null || multiEditing !== null) return;
     e.preventDefault();
-    startRename([...selectedIds][0]);
+    if (selectedIds.size === 1) {
+      startRename([...selectedIds][0]);
+    } else {
+      startMultiRename([...selectedIds]);
+    }
   });
 
   panel.addEventListener("contextmenu", (e) => {
