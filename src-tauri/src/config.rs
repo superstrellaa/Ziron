@@ -42,6 +42,9 @@ fn default_config() -> Value {
             "auto_save": true,
             "auto_save_interval": 5
         },
+        "ui": {
+            "transform_toolbar_corner": "top-left"
+        },
         "window": {
             "width": 800,
             "height": 600,

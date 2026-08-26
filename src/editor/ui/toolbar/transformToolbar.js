@@ -8,6 +8,7 @@ import {
 import { t } from "../../../engine/i18n/i18n.js";
 import { logger } from "../../../engine/core/logger.js";
 import { onKeybind } from "../../systems/input/keybinds.js";
+import { get, set } from "../../systems/persistence/config.js";
 
 const MODES = [
   { key: "translate", icon: "move" },
@@ -18,9 +19,21 @@ const MODES = [
 const CORNERS = ["top-left", "top-right", "bottom-left", "bottom-right"];
 const MARGIN = 12;
 
+const CONFIG_KEY = "ui.transform_toolbar_corner";
+const DEFAULT_CORNER = "top-left";
+
+function loadSavedCorner() {
+  const saved = get(CONFIG_KEY);
+  return CORNERS.includes(saved) ? saved : DEFAULT_CORNER;
+}
+
+function persistCorner(corner) {
+  set(CONFIG_KEY, corner);
+}
+
 export function createTransformToolbar(container, gizmo, flyControls) {
   let currentMode = "translate";
-  let currentCorner = "top-left";
+  let currentCorner = loadSavedCorner();
 
   let dragging = false;
   let didMove = false;
@@ -58,6 +71,11 @@ export function createTransformToolbar(container, gizmo, flyControls) {
   });
 
   applyCorner(currentCorner, false);
+
+  const resizeObserver = new ResizeObserver(() => {
+    applyCorner(currentCorner, false);
+  });
+  resizeObserver.observe(container);
 
   widget.querySelectorAll(".tt-btn").forEach((btn) => {
     btn.addEventListener("click", () => setMode(btn.dataset.mode));
@@ -115,6 +133,7 @@ export function createTransformToolbar(container, gizmo, flyControls) {
       const idx = CORNERS.indexOf(currentCorner);
       currentCorner = CORNERS[(idx + 1) % CORNERS.length];
       applyCorner(currentCorner);
+      persistCorner(currentCorner);
       return;
     }
 
@@ -132,6 +151,7 @@ export function createTransformToolbar(container, gizmo, flyControls) {
     currentCorner = `${onTop ? "top" : "bottom"}-${onLeft ? "left" : "right"}`;
 
     applyCorner(currentCorner);
+    persistCorner(currentCorner);
   });
 
   function applyCorner(corner, animate = true) {
