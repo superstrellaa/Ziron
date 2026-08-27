@@ -7,6 +7,7 @@ export function createRenderLoop(renderer, camera, scene, flyControls, sun) {
 
   let _sunDirty = true;
   const _origSunUpdate = sun.update.bind(sun);
+  const _lastSunQuat = new THREE.Quaternion().copy(sun.entity.mesh.quaternion);
 
   sun.update = () => {
     _sunDirty = true;
@@ -23,6 +24,11 @@ export function createRenderLoop(renderer, camera, scene, flyControls, sun) {
     _rafId = requestAnimationFrame(tick);
 
     flyControls.update();
+
+    if (!sun.entity.mesh.quaternion.equals(_lastSunQuat)) {
+      _sunDirty = true;
+      _lastSunQuat.copy(sun.entity.mesh.quaternion);
+    }
 
     if (_sunDirty) {
       _origSunUpdate();
