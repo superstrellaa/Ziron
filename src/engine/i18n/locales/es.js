@@ -10,6 +10,11 @@ export default {
     closeProject: "Cerrar Proyecto",
     settings: "Ajustes",
   },
+  dropOverlay: {
+    title: "Soltar archivo",
+    subtitle:
+      "Suéltalo aquí para importarlo en la carpeta de assets actualmente abierta",
+  },
   welcome: {
     recentProjects: "Proyectos Recientes",
     newProject: "Nuevo Proyecto",
@@ -265,6 +270,11 @@ export default {
       title: "Eliminar Archivo",
       message:
         '¿Seguro que quieres eliminar "{file}"? Esta acción es permanente y no se puede deshacer.',
+    },
+    unsupportedFileType: {
+      title: "Archivo No Soportado",
+      message:
+        "Este tipo de archivo no es soportado. Puedes importar modelos 3D (.glb, .gltf, .obj, .fbx) o imágenes (.png, .jpg, .jpeg, .webp).",
     },
     error: {
       title: "Ocurrió un error",

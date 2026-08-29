@@ -22,6 +22,7 @@ import {
   checkVersionAndLoad,
   getActiveViewport,
 } from "./editor/systems/app/projectManager.js";
+import { initDragDropOverlay } from "./editor/systems/app/dragDropOverlay.js";
 import { Popup } from "./engine/ui/popup/popupTypes.js";
 
 // ── Inicialización ────────────────────────────────────────────────────────────
@@ -60,6 +61,7 @@ createIcons({
 initWorkspaceManager();
 initWindowManager(getActiveViewport);
 initProjectMenuBar();
+initDragDropOverlay();
 
 // ── Arranque ──────────────────────────────────────────────────────────────────
 const launchProject = await invoke("get_launch_project").catch(() => null);

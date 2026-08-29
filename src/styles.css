@@ -158,6 +158,47 @@ html,
   color: white !important;
 }
 
+/* ── Drop overlay (arrastrar archivos desde el SO) ── */
+#drop-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  background: rgba(10, 10, 20, 0.88);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+
+#drop-overlay.drop-overlay-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+#drop-overlay-icon {
+  color: #a78bfa;
+  display: flex;
+  filter: drop-shadow(0 0 24px rgba(167, 139, 250, 0.35));
+}
+
+#drop-overlay-title {
+  color: #e5e7eb;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+#drop-overlay-subtitle {
+  color: #9ca3af;
+  font-size: 13px;
+  max-width: 360px;
+  text-align: center;
+}
+
 /* ── Context Menu ── */
 .ctx-menu {
   list-style: none;

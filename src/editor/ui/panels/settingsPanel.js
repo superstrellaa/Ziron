@@ -24,6 +24,10 @@ import { getActiveViewport } from "../../systems/app/projectManager.js";
 
 let _activePanel = null;
 
+export function isSettingsOpen() {
+  return _activePanel !== null;
+}
+
 export function openSettings() {
   if (_activePanel) return;
 

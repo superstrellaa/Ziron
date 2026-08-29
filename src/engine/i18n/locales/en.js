@@ -10,6 +10,10 @@ export default {
     closeProject: "Close Project",
     settings: "Settings",
   },
+  dropOverlay: {
+    title: "Drop file",
+    subtitle: "Drop here to import it into the currently opened assets folder",
+  },
   welcome: {
     recentProjects: "Recent Projects",
     newProject: "New Project",
@@ -254,6 +258,11 @@ export default {
       title: "Delete File",
       message:
         'Are you sure you want to delete "{file}"? This action is permanent and cannot be undone.',
+    },
+    unsupportedFileType: {
+      title: "Unsupported File",
+      message:
+        "This file type isn't supported. You can import 3D models (.glb, .gltf, .obj, .fbx) or images (.png, .jpg, .jpeg, .webp).",
     },
     error: {
       title: "An error occurred",

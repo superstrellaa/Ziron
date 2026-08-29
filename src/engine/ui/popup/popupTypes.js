@@ -83,6 +83,23 @@ export const Popup = {
     }),
 
   /**
+   * Archivo arrastrado desde el SO con una extensión no soportada.
+   * Resuelve con: "close"
+   */
+  unsupportedFileType: (fileName) =>
+    openPopup({
+      type: "error",
+      titleKey: "popups.unsupportedFileType.title",
+      message: t("popups.unsupportedFileType.message").replace(
+        "{file}",
+        fileName ?? "",
+      ),
+      buttons: [
+        { id: "close", labelKey: "popups.buttons.close", variant: "primary" },
+      ],
+    }),
+
+  /**
    * Error genérico con opción de copiar el mensaje
    * Resuelve con: "close"
    */
