@@ -150,14 +150,18 @@ export async function createViewport(container, projectData) {
   logger.info("Viewport", "Renderer ready");
 
   return {
+    // Función usada para eliminar y limpiar el viewport activo
     destroy() {
       autoSave.stop();
       renderLoop.stop();
       destroyEvents();
       destroyDragDrop();
     },
+    // esto es para obtener si hay cambios
     isDirty: () => history.isDirty(),
+    // su nombre lo dice
     triggerSave,
+    // reinicia el auto-save, útil para cuando se abre un proyecto nuevo
     restartAutoSave: () => autoSave.restart(),
     // Usado por dragDropOverlay.js para importar archivos arrastrados desde
     // el SO a la carpeta actualmente abierta en el panel de assets.
