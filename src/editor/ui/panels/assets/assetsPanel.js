@@ -86,5 +86,8 @@ export async function createAssetsPanel(
   ctx.rebuildTree();
   ctx.renderGrid(ctx.treeData[0]);
 
-  return { panel };
+  return {
+    panel,
+    importExternalPaths: ctx.importExternalPaths,
+  };
 }

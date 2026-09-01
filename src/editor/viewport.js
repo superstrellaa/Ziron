@@ -159,5 +159,8 @@ export async function createViewport(container, projectData) {
     isDirty: () => history.isDirty(),
     triggerSave,
     restartAutoSave: () => autoSave.restart(),
+    // Usado por dragDropOverlay.js para importar archivos arrastrados desde
+    // el SO a la carpeta actualmente abierta en el panel de assets.
+    importPaths: (paths) => assets.importExternalPaths(paths),
   };
 }

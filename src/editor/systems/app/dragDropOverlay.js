@@ -59,15 +59,37 @@ function hideOverlay() {
   _overlay.classList.remove("drop-overlay-visible");
 }
 
-function handleDrop(paths) {
+async function handleDrop(paths) {
+  const supported = [];
+
   for (const path of paths) {
     if (!isSupportedFile(path)) {
+      logger.warn("DragDropOverlay", `Unsupported file dropped: "${path}"`);
       Popup.unsupportedFileType(fileNameFromPath(path));
       continue;
-    } else {
-      //TODO: obtener la carpeta abierta en el explorador de assets e importar el comando al archivo y aaaahgj
     }
+    supported.push(path);
   }
+
+  if (supported.length === 0) return;
+
+  const viewport = getActiveViewport();
+  if (!viewport?.importPaths) {
+    // No debería pasar (canShowOverlay ya exige un viewport activo), pero
+    // por si acaso el proyecto se cerró justo entre el drop y este punto.
+    logger.warn(
+      "DragDropOverlay",
+      "No hay viewport activo con importPaths, se descarta el drop",
+    );
+    return;
+  }
+
+  logger.info(
+    "DragDropOverlay",
+    `Importing ${supported.length} file(s) via drag & drop: ${supported.join(", ")}`,
+  );
+
+  await viewport.importPaths(supported);
 }
 
 export async function initDragDropOverlay() {

@@ -2,7 +2,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { logger } from "../../../../engine/core/logger.js";
 import { Popup } from "../../../../engine/ui/popup/popupTypes.js";
 import { Toast } from "../../../../engine/ui/toasts/toastTypes.js";
-import { findParent, getNodePath } from "./assetsContext.js";
+import { findParent, getNodePath, isImageFile } from "./assetsContext.js";
 import { buildAssetFileNode } from "./assetsTreeLoader.js";
 
 export function initFileActions(ctx) {
@@ -84,6 +84,50 @@ export function initFileActions(ctx) {
           (typeof e === "string" ? e : (e?.message ?? String(e))),
       );
     }
+  };
+
+  ctx.importExternalPaths = async function importExternalPaths(sourcePaths) {
+    if (!sourcePaths || sourcePaths.length === 0) return;
+
+    const targetFolder = getNodePath(ctx, ctx.currentFolderNode);
+    const targetNode =
+      ctx.currentFolderNode.type === "asset-folder" ||
+      ctx.currentFolderNode.type === "root"
+        ? ctx.currentFolderNode
+        : ctx.treeData[0];
+
+    for (const sourcePath of sourcePaths) {
+      try {
+        const fileName = await invoke("import_asset_file", {
+          projectFolder: ctx.projectData._folder,
+          sourcePath,
+          targetFolder,
+        });
+        logger.info(
+          "Assets",
+          `Imported "${fileName}" (drag & drop) → "${targetFolder || "assets/"}"`,
+        );
+
+        const diskPath = targetFolder
+          ? `${targetFolder}/${fileName}`
+          : fileName;
+        targetNode.children.push(buildAssetFileNode(fileName, diskPath));
+      } catch (e) {
+        logger.warn(
+          "Assets",
+          `Failed to import "${sourcePath}" (drag & drop): ${e}`,
+        );
+        if (isImageFile(sourcePath)) Toast.failedToImportTexture();
+        else Toast.failedToImportModel();
+        Popup.error(
+          "Failed to import file: " +
+            (typeof e === "string" ? e : (e?.message ?? String(e))),
+        );
+      }
+    }
+
+    ctx.rebuildTree();
+    ctx.renderGrid(targetNode);
   };
 
   ctx.deleteModel = async function deleteModel(node) {
