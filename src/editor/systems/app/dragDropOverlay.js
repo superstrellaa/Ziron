@@ -4,6 +4,7 @@ import { t } from "../../../engine/i18n/i18n.js";
 import { Popup } from "../../../engine/ui/popup/popupTypes.js";
 import { getActiveViewport } from "./projectManager.js";
 import { isSettingsOpen } from "../../ui/panels/settingsPanel.js";
+import { logger } from "../../../engine/core/logger.js";
 
 const MODEL_EXTENSIONS = ["glb", "gltf", "obj", "fbx"];
 const IMAGE_EXTENSIONS = ["png", "jpg", "jpeg", "webp"];
@@ -35,7 +36,7 @@ function buildOverlay() {
   const overlay = document.createElement("div");
   overlay.id = "drop-overlay";
   overlay.innerHTML = `
-    <div id="drop-overlay-icon"></div>
+    <div id="drop-overlay-icon"><i data-lucide="file-plus-corner"></i></div>
     <div id="drop-overlay-title">${t("dropOverlay.title")}</div>
     <div id="drop-overlay-subtitle">${t("dropOverlay.subtitle")}</div>
   `;
@@ -63,6 +64,8 @@ function handleDrop(paths) {
     if (!isSupportedFile(path)) {
       Popup.unsupportedFileType(fileNameFromPath(path));
       continue;
+    } else {
+      //TODO: obtener la carpeta abierta en el explorador de assets e importar el comando al archivo y aaaahgj
     }
   }
 }
@@ -79,6 +82,10 @@ export async function initDragDropOverlay() {
     }
 
     if (type === "drop") {
+      logger.debug(
+        "DragDropOverlay",
+        `Drop event received with paths: ${event.payload.paths?.join(", ")}`,
+      );
       hideOverlay();
       if (!canShowOverlay()) return;
 
