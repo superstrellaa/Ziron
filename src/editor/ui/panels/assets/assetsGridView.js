@@ -17,10 +17,7 @@ import {
   hideModelPreview,
   moveModelPreview,
 } from "../../../systems/assets/modelPreview.js";
-import {
-  setDraggingModel,
-  clearDraggingModel,
-} from "../../../systems/app/dragState.js";
+import { beginInternalDrag } from "../../../systems/app/internalDrag.js";
 import { t } from "../../../../engine/i18n/i18n.js";
 
 const GRID_ICONS = { Folder, Box, Container, Package, FileImage };
@@ -64,20 +61,14 @@ export function initGridView(ctx) {
           await ctx.callbacks.onAddModel(absolutePath, item._diskPath, name);
         });
 
-        card.draggable = true;
-        card.addEventListener("dragstart", (e) => {
+        card.addEventListener("mousedown", (e) => {
+          if (e.button !== 0) return;
           hideModelPreview();
           const name = item._diskName.replace(/\.[^.]+$/, "");
-          const payload = { absolutePath, diskPath: item._diskPath, name };
-
-          setDraggingModel(payload);
-
-          e.dataTransfer.setData("text/plain", ""); // necesario para que algunos WebViews permitan el drag
-          e.dataTransfer.effectAllowed = "copy";
-        });
-
-        card.addEventListener("dragend", () => {
-          clearDraggingModel();
+          beginInternalDrag(
+            { absolutePath, diskPath: item._diskPath, name },
+            e,
+          );
         });
       }
 

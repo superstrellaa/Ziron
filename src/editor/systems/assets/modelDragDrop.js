@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { getDraggingModel, clearDraggingModel } from "../app/dragState.js";
+import { registerDropZone } from "../app/internalDrag.js";
 
 export function connectModelDragDrop({ viewportEl, camera, addModelToScene }) {
   const raycaster = new THREE.Raycaster();
@@ -7,23 +7,12 @@ export function connectModelDragDrop({ viewportEl, camera, addModelToScene }) {
   const mouse = new THREE.Vector2();
   const hitPoint = new THREE.Vector3();
 
-  function onDragOver(e) {
-    if (!getDraggingModel()) return;
-    e.preventDefault();
-    e.dataTransfer.dropEffect = "copy";
-  }
-
-  async function onDrop(e) {
-    const payload = getDraggingModel();
-    if (!payload) return;
-    e.preventDefault();
-    clearDraggingModel();
-
+  async function onDrop(payload, clientX, clientY) {
     const { absolutePath, diskPath, name } = payload;
 
     const rect = viewportEl.getBoundingClientRect();
-    mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-    mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+    mouse.x = ((clientX - rect.left) / rect.width) * 2 - 1;
+    mouse.y = -((clientY - rect.top) / rect.height) * 2 + 1;
 
     raycaster.setFromCamera(mouse, camera);
     const hit = raycaster.ray.intersectPlane(groundPlane, hitPoint);
@@ -32,12 +21,10 @@ export function connectModelDragDrop({ viewportEl, camera, addModelToScene }) {
     if (hit) entity.mesh.position.copy(hit);
   }
 
-  viewportEl.addEventListener("dragover", onDragOver);
-  viewportEl.addEventListener("drop", onDrop);
+  const unregister = registerDropZone(viewportEl, onDrop);
 
   function destroy() {
-    viewportEl.removeEventListener("dragover", onDragOver);
-    viewportEl.removeEventListener("drop", onDrop);
+    unregister();
   }
 
   return { destroy };

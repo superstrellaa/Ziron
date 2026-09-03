@@ -13,10 +13,7 @@ import {
   MultiRenameCommand,
 } from "../../../engine/history/commands.js";
 import { getContext } from "../../systems/app/selectionContext.js";
-import {
-  getDraggingModel,
-  clearDraggingModel,
-} from "../../systems/app/dragState.js";
+import { registerDropZone } from "../../systems/app/internalDrag.js";
 
 const ENTITY_ICONS = {
   sun: "sun",
@@ -410,17 +407,8 @@ export function createHierarchy(
     }
   });
 
-  panel.addEventListener("dragover", (e) => {
-    if (!getDraggingModel()) return;
-    e.preventDefault();
-    e.dataTransfer.dropEffect = "copy";
-  });
-
-  panel.addEventListener("drop", async (e) => {
-    const payload = getDraggingModel();
-    if (!payload || !onAddModel) return;
-    e.preventDefault();
-    clearDraggingModel();
+  registerDropZone(panel, async (payload) => {
+    if (!onAddModel) return;
     const { absolutePath, diskPath, name } = payload;
     await onAddModel(absolutePath, diskPath, name);
   });

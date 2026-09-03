@@ -269,6 +269,34 @@ html,
   display: block;
 }
 
+/* ── Drag interno (assets → jerarquía / viewport) ── */
+#internal-drag-ghost {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 600;
+  pointer-events: none;
+  background: #1a1a2e;
+  border: 1px solid #7c5cbf;
+  border-radius: 4px;
+  padding: 4px 10px;
+  font-size: 12px;
+  color: #e5e7eb;
+  font-family: "Geist Mono", monospace;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  white-space: nowrap;
+}
+
+body.internal-dragging,
+body.internal-dragging * {
+  cursor: grabbing !important;
+}
+
+.drag-zone-active {
+  outline: 2px solid #7c5cbf;
+  outline-offset: -2px;
+}
+
 /* ── Transform Toolbar ── */
 #transform-toolbar {
   position: absolute;
