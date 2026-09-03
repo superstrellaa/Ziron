@@ -17,7 +17,7 @@ import {
   hideModelPreview,
   moveModelPreview,
 } from "../../../systems/assets/modelPreview.js";
-import { beginInternalDrag } from "../../../systems/app/internalDrag.js";
+import { beginInternalDrag } from "../../../systems/app/drag/internalDrag.js";
 import { t } from "../../../../engine/i18n/i18n.js";
 
 const GRID_ICONS = { Folder, Box, Container, Package, FileImage };

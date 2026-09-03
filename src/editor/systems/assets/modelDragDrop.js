@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { registerDropZone } from "../app/internalDrag.js";
+import { registerDropZone } from "../app/drag/internalDrag.js";
 
 export function connectModelDragDrop({ viewportEl, camera, addModelToScene }) {
   const raycaster = new THREE.Raycaster();

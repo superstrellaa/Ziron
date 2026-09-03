@@ -13,7 +13,7 @@ import {
   MultiRenameCommand,
 } from "../../../engine/history/commands.js";
 import { getContext } from "../../systems/app/selectionContext.js";
-import { registerDropZone } from "../../systems/app/internalDrag.js";
+import { registerDropZone } from "../../systems/app/drag/internalDrag.js";
 
 const ENTITY_ICONS = {
   sun: "sun",

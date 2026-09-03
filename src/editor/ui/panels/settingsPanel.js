@@ -20,7 +20,7 @@ import { Popup } from "../../../engine/ui/popup/popupTypes.js";
 import { relaunch } from "@tauri-apps/plugin-process";
 import { invoke } from "@tauri-apps/api/core";
 import { Toast } from "../../../engine/ui/toasts/toastTypes.js";
-import { getActiveViewport } from "../../systems/app/projectManager.js";
+import { getActiveViewport } from "../../systems/app/project/projectManager.js";
 
 let _activePanel = null;
 

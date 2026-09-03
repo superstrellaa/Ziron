@@ -1,4 +1,4 @@
-import { t } from "../../../engine/i18n/i18n.js";
+import { t } from "../../../../engine/i18n/i18n.js";
 
 let _toolbarTitle = null;
 let _workspace = null;

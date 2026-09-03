@@ -1,12 +1,12 @@
 import { invoke } from "@tauri-apps/api/core";
-import { createViewport } from "../../viewport.js";
-import { createWelcomeScreen } from "../../ui/panels/welcomeScreen.js";
-import { initMenuBar, setProjectOpen } from "../../ui/toolbar/menuBar.js";
-import { Popup } from "../../../engine/ui/popup/popupTypes.js";
-import { logger } from "../../../engine/core/logger.js";
+import { createViewport } from "../../../viewport.js";
+import { createWelcomeScreen } from "../../../ui/panels/welcomeScreen.js";
+import { initMenuBar, setProjectOpen } from "../../../ui/toolbar/menuBar.js";
+import { Popup } from "../../../../engine/ui/popup/popupTypes.js";
+import { logger } from "../../../../engine/core/logger.js";
 import { getWorkspace, setToolbarProject } from "./workspaceManager.js";
 import { EDITOR_VERSION } from "./versionManager.js";
-import { Toast } from "../../../engine/ui/toasts/toastTypes.js";
+import { Toast } from "../../../../engine/ui/toasts/toastTypes.js";
 
 let _activeViewport = null;
 

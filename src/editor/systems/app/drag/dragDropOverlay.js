@@ -1,10 +1,10 @@
 import { getCurrentWebview } from "@tauri-apps/api/webview";
 import { createIcons, FilePlusCorner } from "lucide";
-import { t } from "../../../engine/i18n/i18n.js";
-import { Popup } from "../../../engine/ui/popup/popupTypes.js";
-import { getActiveViewport } from "./projectManager.js";
-import { isSettingsOpen } from "../../ui/panels/settingsPanel.js";
-import { logger } from "../../../engine/core/logger.js";
+import { t } from "../../../../engine/i18n/i18n.js";
+import { Popup } from "../../../../engine/ui/popup/popupTypes.js";
+import { getActiveViewport } from "../project/projectManager.js";
+import { isSettingsOpen } from "../../../ui/panels/settingsPanel.js";
+import { logger } from "../../../../engine/core/logger.js";
 
 const MODEL_EXTENSIONS = ["glb", "gltf", "obj", "fbx"];
 const IMAGE_EXTENSIONS = ["png", "jpg", "jpeg", "webp"];

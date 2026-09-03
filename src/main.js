@@ -15,14 +15,14 @@ import { createWelcomeScreen } from "./editor/ui/panels/welcomeScreen.js";
 import {
   initWorkspaceManager,
   getWorkspace,
-} from "./editor/systems/app/workspaceManager.js";
+} from "./editor/systems/app/project/workspaceManager.js";
 import { initWindowManager } from "./editor/systems/app/windowManager.js";
 import {
   initProjectMenuBar,
   checkVersionAndLoad,
   getActiveViewport,
-} from "./editor/systems/app/projectManager.js";
-import { initDragDropOverlay } from "./editor/systems/app/dragDropOverlay.js";
+} from "./editor/systems/app/project/projectManager.js";
+import { initDragDropOverlay } from "./editor/systems/app/drag/dragDropOverlay.js";
 import { Popup } from "./engine/ui/popup/popupTypes.js";
 
 // ── Inicialización ────────────────────────────────────────────────────────────
