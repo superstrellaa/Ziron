@@ -162,9 +162,10 @@ html,
   color: #e5e7eb;
 }
 
+/* No sé por qué pero aquí es necesario poner el important sino no te hace ni caso*/
 #btn-close:hover {
-  background: #dc2626 !important;
-  color: white !important;
+  background: #ef4444 !important;
+  color: #e5e7eb !important;
 }
 
 /* ── Drop overlay (arrastrar archivos desde el SO) ── */
@@ -253,7 +254,7 @@ html,
 
 .ctx-separator {
   height: 1px;
-  background: var(--color-border, #2a2a4e);
+  background: #2a2a4e;
   margin: 4px 0;
 }
 
