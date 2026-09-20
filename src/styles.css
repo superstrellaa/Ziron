@@ -19,6 +19,15 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  -webkit-user-select: none; /* Añadido como regla global para toda la app*/
+  user-select: none;
+}
+
+/* Este es para que lo de arriba no se aplique a los elementos de entrada */
+input,
+textarea {
+  -webkit-user-select: text;
+  user-select: text;
 }
 
 body,

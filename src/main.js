@@ -37,7 +37,7 @@ initPopupSystem();
 
 // ── DOM base ──────────────────────────────────────────────────────────────────
 document.querySelector("#app").innerHTML = `
-  <div id="toolbar">
+  <div id="toolbar" data-tauri-drag-region="deep">
     <div id="toolbar-left">
       <i data-lucide="box"></i>
       <span>${t("general.title")}</span>
