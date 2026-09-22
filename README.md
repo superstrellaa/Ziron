@@ -1,16 +1,42 @@
-# ZIRON Studio
+<p align="center">
+  <img src="docs/ICONO/icon.png" width="140" alt="ZIRON Studio">
+</p>
 
-> Lightweight 3D scene prototyping tool built with Tauri, Three.js and Vite.
+<h1 align="center">ZIRON Studio</h1>
+
+<p align="center">
+  <strong>Lightweight 3D scene prototyping tool.</strong><br>
+  Built with Tauri, Three.js and Vite.
+</p>
+
+<p align="center">
+  <a href="https://github.com/superstrellaa/ziron/releases">
+    <img src="https://img.shields.io/github/v/release/superstrellaa/ziron?style=flat-square" alt="Latest Release">
+  </a>
+  <a href="https://github.com/superstrellaa/ziron/blob/main/LICENSE">
+    <img src="https://img.shields.io/github/license/superstrellaa/ziron?style=flat-square" alt="License">
+  </a>
+  <a href="https://github.com/superstrellaa/ziron">
+    <img src="https://img.shields.io/github/stars/superstrellaa/ziron?style=flat-square" alt="GitHub Stars">
+  </a>
+</p>
+
+<p align="center">
+  <img src="docs/captura5.png" alt="ZIRON Studio editor">
+</p>
+
+---
 
 ## Screenshots
 
-|                        |                        |
-| :--------------------: | :--------------------: |
-| ![](docs/captura1.png) | ![](docs/captura2.png) |
-| ![](docs/captura3.png) | ![](docs/captura4.png) |
+<p align="center">
+  <img src="docs/captura1.png" width="49%" alt="ZIRON Studio screenshot 1">
+  <img src="docs/captura2.png" width="49%" alt="ZIRON Studio screenshot 2">
+</p>
 
 <p align="center">
-  <img src="docs/captura5.png" />
+  <img src="docs/captura3.png" width="49%" alt="ZIRON Studio screenshot 3">
+  <img src="docs/captura4.png" width="49%" alt="ZIRON Studio screenshot 4">
 </p>
 
 ---
@@ -23,7 +49,7 @@ Instead of being a full game engine, ZIRON aims to provide a clean and modern wo
 
 Built with Tauri and Three.js, it combines native desktop performance with a fast WebGL-based renderer and an editor-first workflow.
 
-No Electron. No browser tabs. Just a lean native editor focused on creativity and iteration.
+**No Electron. No browser tabs. Just a lean native editor focused on creativity and iteration.**
 
 ---
 
@@ -31,16 +57,16 @@ No Electron. No browser tabs. Just a lean native editor focused on creativity an
 
 ZIRON Studio is designed around one core idea:
 
-> Create visually interesting 3D scenes as fast as possible.
+> **Create visually interesting 3D scenes as fast as possible.**
 
 The project focuses on:
 
-- scene composition
-- visual prototyping
-- stylized rendering
-- creative workflows
-- lightweight tooling
-- fast iteration
+- Scene composition
+- Visual prototyping
+- Stylized rendering
+- Creative workflows
+- Lightweight tooling
+- Fast iteration
 
 Rather than competing with large-scale engines, ZIRON aims to be a focused and enjoyable creative tool.
 
@@ -48,12 +74,12 @@ Rather than competing with large-scale engines, ZIRON aims to be a focused and e
 
 ## Stack
 
-| Layer            | Technology                           |
-| ---------------- | ------------------------------------ |
-| Desktop shell    | [Tauri v2](https://tauri.app) (Rust) |
-| 3D renderer      | [Three.js](https://threejs.org)      |
-| Frontend tooling | [Vite](https://vitejs.dev)           |
-| UI icons         | [Lucide](https://lucide.dev)         |
+| Layer            | Technology                            |
+| ---------------- | ------------------------------------- |
+| Desktop shell    | [Tauri v2](https://tauri.app/) (Rust) |
+| 3D renderer      | [Three.js](https://threejs.org/)      |
+| Frontend tooling | [Vite](https://vitejs.dev/)           |
+| UI icons         | [Lucide](https://lucide.dev/)         |
 
 ---
 
@@ -106,31 +132,15 @@ Rather than competing with large-scale engines, ZIRON aims to be a focused and e
 
 ---
 
-## Planned Direction
-
-The current focus of ZIRON Studio is improving the scene creation workflow and visual iteration speed.
-
-Planned areas include:
-
-- GLTF asset importing
-- Stylized rendering pipelines
-- Toon/cel shading
-- Better lighting tools
-- Post-processing effects
-- Scene presets
-- Camera tools
-- Rendering utilities
-- Asset organization improvements
-
----
-
 ## Getting Started
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org) 18+
-- [Rust](https://rustup.rs)
+- [Node.js](https://nodejs.org/) 18+
+- [Rust](https://rustup.rs/)
 - Tauri CLI
+
+Install the Tauri CLI with:
 
 ```bash
 cargo install tauri-cli
@@ -139,18 +149,24 @@ cargo install tauri-cli
 ### Install
 
 ```bash
-git clone https://github.com/superstrellaa/ziron
+git clone https://github.com/superstrellaa/ziron.git
+
 cd ziron
+
 npm install
 ```
 
 ### Development
+
+Run ZIRON Studio in development mode:
 
 ```bash
 npm run tauri dev
 ```
 
 ### Build
+
+Create a production build:
 
 ```bash
 npm run tauri build
@@ -191,4 +207,4 @@ The goal is not to become an all-in-one AAA engine, but to create a fast, enjoya
 
 ## License
 
-[MIT](LICENSE)
+ZIRON Studio is licensed under the [MIT License](LICENSE).
