@@ -11,14 +11,14 @@
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2",
-    "vite": "^8.2.2"
+    "vite": "^8.3.0"
   },
   "dependencies": {
     "@tauri-apps/api": "2.10.1",
-    "@tauri-apps/plugin-clipboard-manager": "^2.3.2",
+    "@tauri-apps/plugin-clipboard-manager": "^2.3.3",
     "@tauri-apps/plugin-process": "^2.3.1",
-    "lucide": "^1.37.0",
+    "lucide": "^1.47.0",
     "tauri-plugin-drpc": "^1.0.3",
-    "three": "^0.185.1"
+    "three": "^0.186.0"
   }
 }
