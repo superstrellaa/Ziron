@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/ICONO/icon.png" width="140" alt="ZIRON Studio">
+  <img src="docs/ICONO/icon-background.png" width="140" alt="ZIRON Studio">
 </p>
 
 <h1 align="center">ZIRON Studio</h1>
