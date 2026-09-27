@@ -20,8 +20,16 @@ export function initWindowManager(getActiveViewport) {
     await checkDirtyAndThen(() => appWindow.close());
   });
 
-  onKeybind(["_BLOCK_FIND", "_BLOCK_PRINT", "_BLOCK_GOTO"], (e) =>
-    e.preventDefault(),
+  onKeybind(
+    [
+      "_BLOCK_FIND",
+      "_BLOCK_PRINT",
+      "_BLOCK_GOTO",
+      "_BLOCK_DOWNLOADS",
+      "_BLOCK_DEVTOOLS_SEARCH",
+      "_BLOCK_CARET_BROWSING",
+    ],
+    (e) => e.preventDefault(),
   );
 
   onKeybind(["_BLOCK_SELECT_ALL"], (e) => {

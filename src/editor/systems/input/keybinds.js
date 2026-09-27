@@ -29,6 +29,9 @@ export const KEYBINDS = {
   _BLOCK_PRINT: { key: "p", ctrl: true, shift: false, alt: false },
   _BLOCK_GOTO: { key: "g", ctrl: true, shift: false, alt: false },
   _BLOCK_SELECT_ALL: { key: "a", ctrl: true, shift: false, alt: false },
+  _BLOCK_DOWNLOADS: { key: "j", ctrl: true, shift: false, alt: false },
+  _BLOCK_DEVTOOLS_SEARCH: { key: "F3", ctrl: false, shift: false, alt: false },
+  _BLOCK_CARET_BROWSING: { key: "F7", ctrl: false, shift: false, alt: false },
 };
 
 /**
