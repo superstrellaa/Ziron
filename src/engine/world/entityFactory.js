@@ -26,7 +26,7 @@ export function buildEntity(type, options = {}, nextId) {
 
     const entity = {
       id,
-      name: options.name ?? `Camera_${id}`,
+      name: capitalize(options.name ?? `Camera_${id}`),
       type,
       mesh,
       active: options.active ?? true,
@@ -55,7 +55,7 @@ export function buildEntity(type, options = {}, nextId) {
 
   const entity = {
     id,
-    name: options.name ?? `${type}_${id}`,
+    name: capitalize(options.name ?? `${type}_${id}`),
     type,
     mesh,
     active: options.active ?? true,
