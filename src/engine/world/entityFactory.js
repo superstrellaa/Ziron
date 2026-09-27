@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { logger } from "../core/logger.js";
 import { Toast } from "../ui/toasts/toastTypes.js";
+import { createCameraGizmoMesh } from "./cameraEntity.js";
 
 const GEOMETRIES = {
   cube: () => new THREE.BoxGeometry(1, 1, 1),
@@ -12,10 +13,28 @@ const GEOMETRIES = {
 };
 
 export function isKnownType(type) {
-  return type in GEOMETRIES;
+  return type in GEOMETRIES || type === "camera";
 }
 
 export function buildEntity(type, options = {}, nextId) {
+  const id = options.id ?? nextId;
+
+  if (type === "camera") {
+    const mesh = createCameraGizmoMesh();
+    mesh.position.y = options.y ?? 1;
+    if (options.position) mesh.position.copy(options.position);
+
+    const entity = {
+      id,
+      name: options.name ?? `Camera_${id}`,
+      type,
+      mesh,
+      active: options.active ?? true,
+    };
+    if (!entity.active) mesh.visible = false;
+    return entity;
+  }
+
   const geoFactory = GEOMETRIES[type];
   if (!geoFactory && type !== "sun") {
     logger.warn("EntityFactory", `Unknown entity type "${type}"`);
@@ -28,8 +47,6 @@ export function buildEntity(type, options = {}, nextId) {
     color: options.color ?? 0xa78bfa,
   });
   const mesh = new THREE.Mesh(geo, mat);
-
-  const id = options.id ?? nextId;
 
   mesh.castShadow = true;
   mesh.receiveShadow = true;
@@ -45,4 +62,8 @@ export function buildEntity(type, options = {}, nextId) {
   };
   if (!entity.active) mesh.visible = false;
   return entity;
+}
+
+function capitalize(str) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
 }

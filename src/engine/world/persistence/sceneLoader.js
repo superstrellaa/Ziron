@@ -28,6 +28,7 @@ async function _loadRegularEntities(regularEntities, sceneManager, onProgress) {
   const items = regularEntities.map((e) => ({
     type: e.type,
     options: {
+      id: e.id,
       name: e.name,
       color: e.color ? parseInt(e.color.replace("#", ""), 16) : undefined,
       active: e.active ?? true,

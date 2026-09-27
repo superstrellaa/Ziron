@@ -86,6 +86,8 @@ export default {
     cylinder: "Cilindro",
     plane: "Plano",
     cone: "Cono",
+    technicalObject: "Objetos Técnicos",
+    camera: "Cámara",
   },
   transform: {
     translate: "Mover (W)",

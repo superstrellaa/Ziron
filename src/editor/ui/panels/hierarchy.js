@@ -5,6 +5,7 @@ import {
   Package,
   Sun,
   TriangleAlert,
+  Video,
 } from "lucide";
 import { t } from "../../../engine/i18n/i18n.js";
 import { onKeybind } from "../../systems/input/keybinds.js";
@@ -17,6 +18,7 @@ import { registerDropZone } from "../../systems/app/drag/internalDrag.js";
 
 const ENTITY_ICONS = {
   sun: "sun",
+  camera: "video",
   model: "package",
 };
 
@@ -128,7 +130,7 @@ export function createHierarchy(
 
     if (dirty) {
       createIcons({
-        icons: { Box, Package, Sun, TriangleAlert },
+        icons: { Box, Package, Sun, TriangleAlert, Video },
         attrs: { width: 12, height: 12, stroke: "#cccccc" },
       });
     }
