@@ -22,9 +22,7 @@ function getMenuStructure() {
         [t("contextMenu.plane")]: "plane",
         [t("contextMenu.cone")]: "cone",
       },
-      [t("contextMenu.technicalObject")]: {
-        [t("contextMenu.camera")]: "camera",
-      },
+      [t("contextMenu.camera")]: "camera",
     },
   };
 }
