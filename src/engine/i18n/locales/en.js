@@ -120,6 +120,7 @@ export default {
       fov: "FOV",
       near: "Near",
       far: "Far",
+      centerToCamera: "Align to View",
     },
     texture: {
       empty: "No texture assigned",

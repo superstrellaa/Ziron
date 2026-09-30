@@ -1,3 +1,5 @@
+import { GenericCommand } from "../history/commands.js";
+
 export const COMPONENTS = [
   {
     id: "model",
@@ -63,6 +65,40 @@ export const COMPONENTS = [
           entity.components ??= {};
           entity.components.camera ??= {};
           entity.components.camera.far = value;
+        },
+      },
+      {
+        id: "centerToCameraSeparator",
+        type: "separator",
+      },
+      {
+        id: "centerToCamera",
+        type: "button",
+        labelKey: "components.camera.centerToCamera",
+        action: (entity, ctx) => {
+          const vc = ctx.viewportCamera;
+          if (!vc) return;
+
+          const fromPos = entity.mesh.position.clone();
+          const fromQuat = entity.mesh.quaternion.clone();
+          const toPos = vc.position.clone();
+          const toQuat = vc.quaternion.clone();
+
+          if (toPos.equals(fromPos) && toQuat.equals(fromQuat)) return;
+
+          const cmd = GenericCommand(
+            "CenterCameraToView",
+            () => {
+              entity.mesh.position.copy(toPos);
+              entity.mesh.quaternion.copy(toQuat);
+            },
+            () => {
+              entity.mesh.position.copy(fromPos);
+              entity.mesh.quaternion.copy(fromQuat);
+            },
+          );
+          cmd.execute();
+          ctx.history().push(cmd);
         },
       },
     ],

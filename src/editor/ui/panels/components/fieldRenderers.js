@@ -7,6 +7,8 @@ import { applyModelTexture } from "../../../../engine/world/model/modelTexture.j
 export const FIELD_RENDERERS = {
   texture: renderTextureField,
   number: renderNumberField,
+  button: renderButtonField,
+  separator: renderSeparatorField,
 };
 
 function renderTextureField(field, entity, container, ctx) {
@@ -127,4 +129,23 @@ function renderNumberField(field, entity, container, ctx) {
   });
 
   container.appendChild(wrapper);
+}
+
+function renderButtonField(field, entity, container, ctx) {
+  const wrapper = document.createElement("div");
+  wrapper.className = "comp-field comp-field-button";
+
+  wrapper.innerHTML = `<button type="button" class="comp-action-btn">${t(field.labelKey)}</button>`;
+
+  wrapper
+    .querySelector(".comp-action-btn")
+    .addEventListener("click", () => field.action(entity, ctx));
+
+  container.appendChild(wrapper);
+}
+
+function renderSeparatorField(field, entity, container, ctx) {
+  const hr = document.createElement("div");
+  hr.className = "comp-separator";
+  container.appendChild(hr);
 }

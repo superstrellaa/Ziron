@@ -94,6 +94,7 @@ export async function createViewport(container, projectData) {
     sceneManager,
     () => history,
     projectData,
+    camera,
   );
   topArea.appendChild(container.querySelector("#properties"));
 

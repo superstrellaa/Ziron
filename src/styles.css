@@ -1611,6 +1611,37 @@ body.internal-dragging * {
   text-align: right;
 }
 
+.comp-separator {
+  border-top: 1px solid #1e1e30;
+  margin: 4px 0;
+}
+
+.comp-field-button {
+  display: flex;
+  justify-content: center;
+}
+
+.comp-action-btn {
+  background: #080c18;
+  border: 1px solid #2a2a3e;
+  border-radius: 4px;
+  color: #9ca3af;
+  font-size: 11px;
+  padding: 6px 0;
+  width: 80%;
+  cursor: pointer;
+  font-family: "Geist", sans-serif;
+  text-align: center;
+  transition:
+    border-color 0.15s,
+    color 0.15s;
+}
+
+.comp-action-btn:hover {
+  border-color: #7c5cbf;
+  color: #ffffff;
+}
+
 /* ── Asset Picker ── */
 #asset-picker-overlay {
   position: fixed;

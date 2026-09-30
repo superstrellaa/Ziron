@@ -15,6 +15,7 @@ export function createProperties(
   sceneManager,
   history,
   projectData,
+  camera, // esto deberia ser viewportCamera, pero se me ha olvidado y me da pereza cambiarlo, luego se lo pasa la referencia igual
 ) {
   const panel = document.createElement("div");
   panel.id = "properties";
@@ -410,6 +411,7 @@ export function createProperties(
       renderComponents(entity, body.querySelector("#prop-components"), {
         projectData,
         history,
+        viewportCamera: camera,
       });
     }
 

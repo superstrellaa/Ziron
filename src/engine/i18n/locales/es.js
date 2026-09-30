@@ -122,6 +122,7 @@ export default {
       fov: "FOV",
       near: "Cercano",
       far: "Lejano",
+      centerToCamera: "Alinear a Vista",
     },
     texture: {
       empty: "Sin textura asignada",
