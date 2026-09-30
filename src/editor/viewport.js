@@ -19,7 +19,7 @@ import { createAssetsPanel } from "./ui/panels/assets/assetsPanel.js";
 import { createAutoSave } from "./systems/persistence/autoSave.js";
 import { activateScene } from "./systems/app/selectionContext.js";
 import { CreateModelCommand } from "../engine/history/commands.js";
-import { createCameraFrustumSystem } from "./scene/cameraFrustumSystem.js";
+import { createCameraFrustumSystem } from "./scene/cameraGizmo/cameraFrustumSystem.js";
 
 export async function createViewport(container, projectData) {
   // Creación de DOM
