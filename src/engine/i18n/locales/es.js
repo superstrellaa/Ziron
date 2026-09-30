@@ -117,6 +117,12 @@ export default {
   },
   components: {
     model: { title: "Modelo", texture: "Textura" },
+    camera: {
+      title: "Cámara",
+      fov: "FOV",
+      near: "Cercano",
+      far: "Lejano",
+    },
     texture: {
       empty: "Sin textura asignada",
       pickTip: "Click para seleccionar una textura",

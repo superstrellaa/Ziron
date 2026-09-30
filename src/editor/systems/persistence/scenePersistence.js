@@ -23,13 +23,16 @@ export async function saveScene(
       scale: mesh.scale.toArray(),
       active: entity.active ?? true,
     };
+    if (entity.type === "model" || entity.type === "camera") {
+      base.components = entity.components ?? {};
+    }
     if (entity.type === "model") {
       base.modelPath = entity.modelPath;
-      base.components = entity.components ?? {};
     }
     if (
       entity.type !== "sun" &&
       entity.type !== "model" &&
+      entity.type !== "camera" &&
       mesh.material?.color
     ) {
       base.color = "#" + mesh.material.color.getHexString();

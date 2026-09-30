@@ -1,7 +1,7 @@
 import { t } from "../../../../engine/i18n/i18n.js";
 import { getComponentsFor } from "../../../../engine/components/componentRegistry.js";
 import { FIELD_RENDERERS } from "./fieldRenderers.js";
-import { createIcons, Box } from "lucide";
+import { createIcons, Box, Video } from "lucide";
 
 export function renderComponents(entity, container, ctx) {
   container.innerHTML = "";
@@ -36,7 +36,7 @@ export function renderComponents(entity, container, ctx) {
   }
 
   createIcons({
-    icons: { Box },
+    icons: { Box, Video },
     attrs: { width: 13, height: 13 },
     root: container,
   });

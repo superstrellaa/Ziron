@@ -1,6 +1,13 @@
 import * as THREE from "three";
 
-export function createRenderLoop(renderer, camera, scene, flyControls, sun) {
+export function createRenderLoop(
+  renderer,
+  camera,
+  scene,
+  flyControls,
+  sun,
+  onTick = null,
+) {
   const infiniteGrid = scene.children.find((c) => c.userData.isInfiniteGrid);
   const _lastCamPos = new THREE.Vector3(Infinity, Infinity, Infinity);
   const _GRID_THRESHOLD = 0.001;
@@ -24,6 +31,7 @@ export function createRenderLoop(renderer, camera, scene, flyControls, sun) {
     _rafId = requestAnimationFrame(tick);
 
     flyControls.update();
+    onTick?.();
 
     if (!sun.entity.mesh.quaternion.equals(_lastSunQuat)) {
       _sunDirty = true;

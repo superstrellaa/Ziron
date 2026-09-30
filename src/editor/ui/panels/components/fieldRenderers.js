@@ -6,6 +6,7 @@ import { applyModelTexture } from "../../../../engine/world/model/modelTexture.j
 
 export const FIELD_RENDERERS = {
   texture: renderTextureField,
+  number: renderNumberField,
 };
 
 function renderTextureField(field, entity, container, ctx) {
@@ -56,6 +57,74 @@ function renderTextureField(field, entity, container, ctx) {
       cmd.execute();
       ctx.history().push(cmd);
     });
+
+  container.appendChild(wrapper);
+}
+
+function renderNumberField(field, entity, container, ctx) {
+  const wrapper = document.createElement("div");
+  wrapper.className = "comp-field comp-field-number";
+
+  const value = field.get(entity);
+
+  wrapper.innerHTML = `
+    <label class="comp-field-label">${t(field.labelKey)}</label>
+    <input
+      class="prop-input comp-number-input"
+      type="number"
+      value="${value}"
+      ${field.min != null ? `min="${field.min}"` : ""}
+      ${field.max != null ? `max="${field.max}"` : ""}
+      step="${field.step ?? 1}"
+      autocomplete="off"
+      spellcheck="false"
+    />
+  `;
+
+  const input = wrapper.querySelector("input");
+
+  input.addEventListener("focus", () => input.select());
+
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      input.blur();
+    } else if (e.key === "Escape") {
+      e.preventDefault();
+      input.value = field.get(entity);
+      input.blur();
+    }
+  });
+
+  input.addEventListener("blur", () => {
+    let next = parseFloat(input.value);
+    if (isNaN(next)) {
+      input.value = field.get(entity);
+      return;
+    }
+    if (field.min != null) next = Math.max(field.min, next);
+    if (field.max != null) next = Math.min(field.max, next);
+
+    const from = field.get(entity);
+    if (next === from) {
+      input.value = next;
+      return;
+    }
+
+    const cmd = GenericCommand(
+      `Set${field.id}`,
+      () => {
+        field.set(entity, next);
+        ctx.onChange?.();
+      },
+      () => {
+        field.set(entity, from);
+        ctx.onChange?.();
+      },
+    );
+    cmd.execute();
+    ctx.history().push(cmd);
+  });
 
   container.appendChild(wrapper);
 }

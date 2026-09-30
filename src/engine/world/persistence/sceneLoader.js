@@ -39,6 +39,7 @@ async function _loadRegularEntities(regularEntities, sceneManager, onProgress) {
       scale: e.scale,
       active: e.active ?? true,
     },
+    _savedComponents: e.components ?? null,
   }));
 
   return sceneManager.addBatch(
@@ -50,6 +51,7 @@ async function _loadRegularEntities(regularEntities, sceneManager, onProgress) {
       entity.mesh.scale.fromArray(t.scale);
       entity.mesh.visible = t.active;
       if (!t.active) sceneManager.setActive(entity.id, false);
+      if (item._savedComponents) entity.components = item._savedComponents;
     },
     onProgress,
   );

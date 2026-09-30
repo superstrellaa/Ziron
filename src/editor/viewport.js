@@ -19,6 +19,7 @@ import { createAssetsPanel } from "./ui/panels/assets/assetsPanel.js";
 import { createAutoSave } from "./systems/persistence/autoSave.js";
 import { activateScene } from "./systems/app/selectionContext.js";
 import { CreateModelCommand } from "../engine/history/commands.js";
+import { createCameraFrustumSystem } from "./scene/cameraFrustumSystem.js";
 
 export async function createViewport(container, projectData) {
   // Creación de DOM
@@ -49,6 +50,12 @@ export async function createViewport(container, projectData) {
     gizmo,
     flyControls,
   );
+
+  const cameraFrustumSystem = createCameraFrustumSystem();
+  selection.onChange((single, multi) => {
+    const active = multi?.length > 0 ? multi : single ? [single] : [];
+    cameraFrustumSystem.sync(active);
+  });
 
   // ── Callback compartido de añadir modelo ────────────────────────────────
   async function addModelToScene(absolutePath, modelPath, name) {
@@ -144,6 +151,7 @@ export async function createViewport(container, projectData) {
     scene,
     flyControls,
     sun,
+    () => cameraFrustumSystem.tick(),
   );
   renderLoop.start();
 
@@ -156,6 +164,7 @@ export async function createViewport(container, projectData) {
       renderLoop.stop();
       destroyEvents();
       destroyDragDrop();
+      cameraFrustumSystem.clear();
     },
     // esto es para obtener si hay cambios
     isDirty: () => history.isDirty(),

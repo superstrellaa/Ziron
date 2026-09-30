@@ -1595,6 +1595,22 @@ body.internal-dragging * {
   white-space: nowrap;
 }
 
+.comp-field-number {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.comp-field-number .comp-field-label {
+  margin-bottom: 0;
+}
+
+.comp-number-input {
+  width: 64px;
+  text-align: right;
+}
+
 /* ── Asset Picker ── */
 #asset-picker-overlay {
   position: fixed;

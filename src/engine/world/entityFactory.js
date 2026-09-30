@@ -30,6 +30,9 @@ export function buildEntity(type, options = {}, nextId) {
       type,
       mesh,
       active: options.active ?? true,
+      components: {
+        camera: { fov: 50, near: 0.1, far: 1000 },
+      },
     };
     if (!entity.active) mesh.visible = false;
     return entity;
