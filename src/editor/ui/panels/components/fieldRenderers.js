@@ -1,5 +1,9 @@
 import { t } from "../../../../engine/i18n/i18n.js";
-import { createIcons, Image } from "lucide";
+import {
+  createIcons,
+  Image,
+  TrianglesCenterlineDashedHorizontal,
+} from "lucide";
 import { openAssetPicker } from "../../../../engine/ui/assetPicker/assetPicker.js";
 import { GenericCommand } from "../../../../engine/history/commands.js";
 import { applyModelTexture } from "../../../../engine/world/model/modelTexture.js";
@@ -142,7 +146,23 @@ function renderButtonField(field, entity, container, ctx) {
   const wrapper = document.createElement("div");
   wrapper.className = "comp-field comp-field-button";
 
-  wrapper.innerHTML = `<button type="button" class="comp-action-btn" ${tooltipAttr(field)}>${t(field.labelKey)}</button>`;
+  const iconAttr = field.icon
+    ? `<i data-lucide="${field.icon}" class="comp-action-btn-icon"></i>`
+    : "";
+
+  wrapper.innerHTML = `
+    <button type="button" class="comp-action-btn" ${tooltipAttr(field)}>
+      ${iconAttr}<span>${t(field.labelKey)}</span>
+    </button>
+  `;
+
+  if (field.icon) {
+    createIcons({
+      icons: { TrianglesCenterlineDashedHorizontal },
+      attrs: { width: 13, height: 13 },
+      root: wrapper,
+    });
+  }
 
   wrapper
     .querySelector(".comp-action-btn")

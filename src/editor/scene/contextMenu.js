@@ -1,5 +1,15 @@
 import * as THREE from "three";
-import { createIcons, ChevronRight } from "lucide";
+import {
+  createIcons,
+  ChevronRight,
+  Box,
+  CircleDashed,
+  Cylinder,
+  Cone,
+  Layers2,
+  Video,
+  RectangleVertical,
+} from "lucide";
 import { t } from "../../engine/i18n/i18n.js";
 import {
   CreateCommand,
@@ -10,6 +20,16 @@ import {
   registerOpenMenu,
   clearActiveMenu,
 } from "../../engine/ui/contextMenuRegistry.js";
+
+const TYPE_ICONS = {
+  cube: "box",
+  sphere: "circle-dashed",
+  capsule: "rectangle-vertical",
+  cylinder: "cylinder",
+  cone: "cone",
+  plane: "layers-2",
+  camera: "video",
+};
 
 function getMenuStructure() {
   return {
@@ -193,8 +213,17 @@ function showMenu(x, y, sceneManager, history, selection, hitEntity) {
   if (rect.bottom > window.innerHeight) menu.style.top = y - rect.height + "px";
 
   createIcons({
-    icons: { ChevronRight },
-    attrs: { width: 12, height: 12, stroke: "#6b7280" },
+    icons: {
+      ChevronRight,
+      Box,
+      CircleDashed,
+      Cylinder,
+      Cone,
+      Layers2,
+      Video,
+      RectangleVertical,
+    },
+    attrs: { width: 12, height: 12, stroke: "#9ca3af" },
     root: menu,
   });
 }
@@ -254,7 +283,8 @@ function buildMenu(structure, sceneManager, history) {
         }, 120);
       });
     } else {
-      li.innerHTML = `<span class="ctx-label">${label}</span>`;
+      const icon = TYPE_ICONS[value];
+      li.innerHTML = `${icon ? `<i data-lucide="${icon}" class="ctx-item-icon"></i>` : ""}<span class="ctx-label">${label}</span>`;
       li.addEventListener("click", () => {
         const cmd = CreateCommand(sceneManager, value, { name: value });
         cmd.execute();

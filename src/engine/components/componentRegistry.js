@@ -79,6 +79,7 @@ export const COMPONENTS = [
         type: "button",
         labelKey: "components.camera.centerToCamera",
         tooltipKey: "components.camera.centerToCameraTip",
+        icon: "triangles-centerline-dashed-horizontal",
         action: (entity, ctx) => {
           const vc = ctx.viewportCamera;
           if (!vc) return;
