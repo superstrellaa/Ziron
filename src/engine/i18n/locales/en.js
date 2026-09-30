@@ -118,9 +118,14 @@ export default {
     camera: {
       title: "Camera",
       fov: "FOV",
+      fovTip: "Vertical field of view of the camera, in degrees",
       near: "Near",
+      nearTip: "Minimum distance from the camera at which rendering starts",
       far: "Far",
+      farTip: "Maximum distance from the camera up to which rendering occurs",
       centerToCamera: "Align to View",
+      centerToCameraTip:
+        "Moves this camera to the exact position and rotation of the current editor view",
     },
     texture: {
       empty: "No texture assigned",

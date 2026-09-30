@@ -31,6 +31,7 @@ export const COMPONENTS = [
         id: "fov",
         type: "number",
         labelKey: "components.camera.fov",
+        tooltipKey: "components.camera.fovTip",
         min: 1,
         max: 179,
         step: 1,
@@ -45,6 +46,7 @@ export const COMPONENTS = [
         id: "near",
         type: "number",
         labelKey: "components.camera.near",
+        tooltipKey: "components.camera.nearTip",
         min: 0.01,
         step: 0.01,
         get: (entity) => entity.components?.camera?.near ?? 0.1,
@@ -58,6 +60,7 @@ export const COMPONENTS = [
         id: "far",
         type: "number",
         labelKey: "components.camera.far",
+        tooltipKey: "components.camera.farTip",
         min: 1,
         step: 10,
         get: (entity) => entity.components?.camera?.far ?? 1000,
@@ -75,6 +78,7 @@ export const COMPONENTS = [
         id: "centerToCamera",
         type: "button",
         labelKey: "components.camera.centerToCamera",
+        tooltipKey: "components.camera.centerToCameraTip",
         action: (entity, ctx) => {
           const vc = ctx.viewportCamera;
           if (!vc) return;

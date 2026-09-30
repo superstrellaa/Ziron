@@ -11,15 +11,22 @@ export const FIELD_RENDERERS = {
   separator: renderSeparatorField,
 };
 
+function tooltipAttr(field) {
+  return field.tooltipKey ? `data-tooltip="${t(field.tooltipKey)}"` : "";
+}
+
 function renderTextureField(field, entity, container, ctx) {
   const wrapper = document.createElement("div");
   wrapper.className = "comp-field comp-field-texture";
 
   const value = field.get(entity);
+  const tip = field.tooltipKey
+    ? t(field.tooltipKey)
+    : t("components.texture.pickTip");
 
   wrapper.innerHTML = `
     <label class="comp-field-label">${t(field.labelKey)}</label>
-    <div class="comp-texture-slot" data-tooltip="${t("components.texture.pickTip")}">
+    <div class="comp-texture-slot" data-tooltip="${tip}">
       <i data-lucide="image" class="comp-texture-icon"></i>
       <span class="comp-texture-name">${value ?? t("components.texture.empty")}</span>
     </div>
@@ -70,7 +77,7 @@ function renderNumberField(field, entity, container, ctx) {
   const value = field.get(entity);
 
   wrapper.innerHTML = `
-    <label class="comp-field-label">${t(field.labelKey)}</label>
+    <label class="comp-field-label" ${tooltipAttr(field)}>${t(field.labelKey)}</label>
     <input
       class="prop-input comp-number-input"
       type="number"
@@ -135,7 +142,7 @@ function renderButtonField(field, entity, container, ctx) {
   const wrapper = document.createElement("div");
   wrapper.className = "comp-field comp-field-button";
 
-  wrapper.innerHTML = `<button type="button" class="comp-action-btn">${t(field.labelKey)}</button>`;
+  wrapper.innerHTML = `<button type="button" class="comp-action-btn" ${tooltipAttr(field)}>${t(field.labelKey)}</button>`;
 
   wrapper
     .querySelector(".comp-action-btn")

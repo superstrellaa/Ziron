@@ -120,9 +120,15 @@ export default {
     camera: {
       title: "Cámara",
       fov: "FOV",
+      fovTip: "Campo de visión vertical de la cámara, en grados",
       near: "Cercano",
+      nearTip:
+        "Distancia mínima desde la cámara a partir de la cual se renderiza",
       far: "Lejano",
+      farTip: "Distancia máxima desde la cámara hasta la que se renderiza",
       centerToCamera: "Alinear a Vista",
+      centerToCameraTip:
+        "Mueve esta cámara a la posición y rotación exactas de la vista actual del editor",
     },
     texture: {
       empty: "Sin textura asignada",
