@@ -28,6 +28,7 @@ export function createCameraFrustumHelper() {
   line.renderOrder = 999;
   line.frustumCulled = false;
   line.raycast = () => {}; // que no interfiera con la selección por click
+  line.layers.set(1); // capa 1: gizmo de cámara (excluida de la preview)
 
   const _prev = { fov: null, near: null, far: null };
 

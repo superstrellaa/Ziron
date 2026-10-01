@@ -21,6 +21,8 @@ import { activateScene } from "./systems/app/selectionContext.js";
 import { CreateModelCommand } from "../engine/history/commands.js";
 import { createCameraFrustumSystem } from "./scene/cameraGizmo/cameraFrustumSystem.js";
 import { createCameraScaleLock } from "./scene/cameraGizmo/cameraScaleLock.js";
+import { createCameraPreviewSystem } from "./scene/cameraGizmo/cameraPreviewSystem.js";
+import { createCameraPreviewPanel } from "./scene/cameraGizmo/cameraPreviewPanel.js";
 
 export async function createViewport(container, projectData) {
   // Creación de DOM
@@ -41,7 +43,11 @@ export async function createViewport(container, projectData) {
   const flyControls = createFlyCamera(camera, viewportEl);
   const gizmo = createGizmo(camera, renderer.domElement, scene, flyControls);
 
-  createTransformToolbar(viewportEl, gizmo, flyControls);
+  const transformToolbar = createTransformToolbar(
+    viewportEl,
+    gizmo,
+    flyControls,
+  );
 
   const selection = createSelectionSystem(
     camera,
@@ -54,10 +60,29 @@ export async function createViewport(container, projectData) {
 
   const cameraFrustumSystem = createCameraFrustumSystem();
   const cameraScaleLock = createCameraScaleLock(sceneManager);
+  const cameraPreview = createCameraPreviewSystem(scene, [
+    gizmo.gizmo.getHelper(),
+  ]);
+  const previewPanel = createCameraPreviewPanel(viewportEl);
+  cameraPreview.attach(previewPanel.canvasWrap);
 
   selection.onChange((single, multi) => {
     const active = multi?.length > 0 ? multi : single ? [single] : [];
     cameraFrustumSystem.sync(active);
+
+    const isSingleCamera =
+      single && (!multi || multi.length === 0) && single.type === "camera";
+
+    cameraPreview.setEntity(isSingleCamera ? single : null);
+
+    if (isSingleCamera) {
+      previewPanel.show();
+      cameraPreview.resize();
+      transformToolbar.lockCorner("bottom-right");
+    } else {
+      previewPanel.hide();
+      transformToolbar.unlockCorner();
+    }
   });
 
   // ── Callback compartido de añadir modelo ────────────────────────────────
@@ -158,6 +183,7 @@ export async function createViewport(container, projectData) {
     () => {
       cameraFrustumSystem.tick();
       cameraScaleLock.tick();
+      cameraPreview.tick();
     },
   );
   renderLoop.start();
@@ -172,6 +198,7 @@ export async function createViewport(container, projectData) {
       destroyEvents();
       destroyDragDrop();
       cameraFrustumSystem.clear();
+      cameraPreview.dispose();
     },
     // esto es para obtener si hay cambios
     isDirty: () => history.isDirty(),

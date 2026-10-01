@@ -99,6 +99,7 @@ export async function createSunEntity(scene, sceneManager, updateSky) {
     }),
   );
   gizmoSprite.scale.set(1.2, 1.2, 1.2);
+  gizmoSprite.layers.set(1); // capa 1: gizmo de cámara (excluida de la preview)
   hitMesh.add(gizmoSprite);
 
   const sunTex = makeCircleTexture(128, "#fffbe8", "rgba(255,240,120,0.35)");

@@ -17,8 +17,14 @@ export async function createScene(renderer, projectData, onProgress = null) {
 
   const { skyMesh, updateSky } = createProceduralSky();
   scene.add(skyMesh);
-  scene.add(createInfiniteGrid());
-  scene.add(new THREE.AxesHelper(2));
+
+  const grid = createInfiniteGrid();
+  scene.add(grid);
+
+  const axes = new THREE.AxesHelper(2);
+  axes.layers.set(1);
+  scene.add(axes);
+
   scene.add(new THREE.AmbientLight(0xffffff, 0.15));
 
   const sceneManager = createSceneManager(scene);

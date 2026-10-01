@@ -93,6 +93,9 @@ export default {
     scale: "Scale (R)",
     handle: "Drag / Snap position",
   },
+  viewport: {
+    cameraPreview: "Camera Preview",
+  },
   hierarchy: {
     header: "Scene",
     modelNotFound: "Model file not found",

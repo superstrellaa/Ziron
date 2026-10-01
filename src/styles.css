@@ -63,7 +63,8 @@ html,
 .project-card-name,
 #properties-title,
 .prop-label,
-.prop-section-label {
+.prop-section-label,
+#cp-title {
   font-family: "Geist", sans-serif;
 }
 
@@ -385,6 +386,61 @@ body.internal-dragging * {
 .tt-btn.active {
   background: #2a1f4e;
   color: #a78bfa;
+}
+
+/* ── Camera Preview Panel ── */
+#camera-preview-panel {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  background: #12121f;
+  border: 1px solid #2a2a3e;
+  border-radius: 8px;
+  padding: 6px;
+
+  z-index: 100;
+  user-select: none;
+}
+
+#cp-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 2px;
+}
+
+#cp-header i {
+  width: 12px;
+  height: 12px;
+  color: #6b7280;
+  flex-shrink: 0;
+}
+
+#cp-title {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: #6b7280;
+}
+
+#cp-canvas-wrap {
+  width: 240px;
+  height: 135px;
+  border-radius: 4px;
+  overflow: hidden;
+  background: #000;
+}
+
+#cp-canvas-wrap canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
 /* ── Tooltip ── */

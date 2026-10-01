@@ -48,5 +48,6 @@ export function createInfiniteGrid() {
   const mesh = new THREE.Mesh(new THREE.PlaneGeometry(600, 600), material);
   mesh.rotation.x = -Math.PI / 2;
   mesh.userData.isInfiniteGrid = true;
+  mesh.layers.set(1); // capa 1: grid (excluida de la preview)
   return mesh;
 }

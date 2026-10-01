@@ -70,6 +70,7 @@ export function createCameraGizmoMesh() {
     }),
   );
   sprite.scale.set(0.6, 0.6, 0.6);
+  sprite.layers.set(1); // capa 1: gizmo de cámara (excluida de la preview)
   group.add(sprite);
 
   return group;

@@ -18,6 +18,7 @@ const MODES = [
 
 const CORNERS = ["top-left", "top-right", "bottom-left", "bottom-right"];
 const MARGIN = 12;
+const FALLBACK_CORNER = "top-left";
 
 const CONFIG_KEY = "ui.transform_toolbar_corner";
 const DEFAULT_CORNER = "top-left";
@@ -34,6 +35,9 @@ function persistCorner(corner) {
 export function createTransformToolbar(container, gizmo, flyControls) {
   let currentMode = "translate";
   let currentCorner = loadSavedCorner();
+
+  let lockedCorner = null;
+  let preLockCorner = null;
 
   let dragging = false;
   let didMove = false;
@@ -130,8 +134,15 @@ export function createTransformToolbar(container, gizmo, flyControls) {
     widget.style.transition = "transform 0.18s cubic-bezier(0.22, 1, 0.36, 1)";
 
     if (!didMove) {
-      const idx = CORNERS.indexOf(currentCorner);
-      currentCorner = CORNERS[(idx + 1) % CORNERS.length];
+      let idx = CORNERS.indexOf(currentCorner);
+      let next;
+      do {
+        idx = (idx + 1) % CORNERS.length;
+        next = CORNERS[idx];
+      } while (next === lockedCorner);
+
+      currentCorner = next;
+      preLockCorner = null;
       applyCorner(currentCorner);
       persistCorner(currentCorner);
       return;
@@ -148,8 +159,11 @@ export function createTransformToolbar(container, gizmo, flyControls) {
     const onLeft = cx < W / 2;
     const onTop = cy < H / 2;
 
-    currentCorner = `${onTop ? "top" : "bottom"}-${onLeft ? "left" : "right"}`;
+    let detected = `${onTop ? "top" : "bottom"}-${onLeft ? "left" : "right"}`;
+    if (detected === lockedCorner) detected = FALLBACK_CORNER;
 
+    currentCorner = detected;
+    preLockCorner = null;
     applyCorner(currentCorner);
     persistCorner(currentCorner);
   });
@@ -187,5 +201,23 @@ export function createTransformToolbar(container, gizmo, flyControls) {
     logger.info("TransformToolbar", `Mode changed to "${currentMode}"`);
   }
 
-  return widget;
+  function lockCorner(corner) {
+    lockedCorner = corner;
+    if (currentCorner === corner) {
+      preLockCorner = currentCorner;
+      currentCorner = FALLBACK_CORNER;
+      applyCorner(currentCorner); // animado por defecto
+    }
+  }
+
+  function unlockCorner() {
+    lockedCorner = null;
+    if (preLockCorner !== null) {
+      currentCorner = preLockCorner;
+      preLockCorner = null;
+      applyCorner(currentCorner);
+    }
+  }
+
+  return { element: widget, lockCorner, unlockCorner };
 }

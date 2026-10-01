@@ -3,7 +3,9 @@ import { TransformControls } from "three/addons/controls/TransformControls.js";
 export function createGizmo(camera, domElement, scene, flyControls) {
   const gizmo = new TransformControls(camera, domElement);
   gizmo.setMode("translate");
-  scene.add(gizmo.getHelper());
+
+  const helper = gizmo.getHelper();
+  scene.add(helper);
 
   let isDragging = false;
 

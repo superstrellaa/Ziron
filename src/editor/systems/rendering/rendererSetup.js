@@ -10,6 +10,7 @@ export function createRenderer(container) {
   const camera = new THREE.PerspectiveCamera(60, 1, 0.1, 1000);
   camera.position.set(5, 4, 7);
   camera.lookAt(0, 0, 0);
+  camera.layers.enable(1); // capa 1: chrome de editor (excluida de la preview)
 
   function resize() {
     const w = container.clientWidth;

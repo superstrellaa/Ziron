@@ -95,6 +95,9 @@ export default {
     scale: "Escalar (R)",
     handle: "Arrastrar / Ajustar posición",
   },
+  viewport: {
+    cameraPreview: "Vista Previa",
+  },
   hierarchy: {
     header: "Escena",
     modelNotFound: "Archivo de modelo no encontrado",
