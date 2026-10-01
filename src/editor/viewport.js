@@ -20,6 +20,7 @@ import { createAutoSave } from "./systems/persistence/autoSave.js";
 import { activateScene } from "./systems/app/selectionContext.js";
 import { CreateModelCommand } from "../engine/history/commands.js";
 import { createCameraFrustumSystem } from "./scene/cameraGizmo/cameraFrustumSystem.js";
+import { createCameraScaleLock } from "./scene/cameraGizmo/cameraScaleLock.js";
 
 export async function createViewport(container, projectData) {
   // Creación de DOM
@@ -52,6 +53,8 @@ export async function createViewport(container, projectData) {
   );
 
   const cameraFrustumSystem = createCameraFrustumSystem();
+  const cameraScaleLock = createCameraScaleLock(sceneManager);
+
   selection.onChange((single, multi) => {
     const active = multi?.length > 0 ? multi : single ? [single] : [];
     cameraFrustumSystem.sync(active);
@@ -152,7 +155,10 @@ export async function createViewport(container, projectData) {
     scene,
     flyControls,
     sun,
-    () => cameraFrustumSystem.tick(),
+    () => {
+      cameraFrustumSystem.tick();
+      cameraScaleLock.tick();
+    },
   );
   renderLoop.start();
 
