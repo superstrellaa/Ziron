@@ -205,6 +205,20 @@ export const Toast = {
       messageKey: "toasts.failedToLoadModel.message",
       ...extra,
     }),
+  failedToRenderScene: (extra) =>
+    pushToast({
+      type: "error",
+      titleKey: "toasts.failedToRenderScene.title",
+      messageKey: "toasts.failedToRenderScene.message",
+      ...extra,
+    }),
+  renderSuccess: (extra) =>
+    pushToast({
+      type: "info",
+      titleKey: "toasts.renderSuccess.title",
+      messageKey: "toasts.renderSuccess.message",
+      ...extra,
+    }),
 
   info: (title, message, duration) =>
     pushToast({ type: "info", title, message, duration }),

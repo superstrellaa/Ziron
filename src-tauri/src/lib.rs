@@ -2,6 +2,7 @@ mod logger;
 mod cursor;
 mod config;
 mod project;
+mod render;
 
 use tauri::Manager;
 
@@ -114,7 +115,8 @@ pub fn run() {
             project::rename_asset_file,
             project::copy_asset_file,
             project::list_assets_by_extension,
-            project::pick_texture_files
+            project::pick_texture_files,
+            render::save_render_png
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

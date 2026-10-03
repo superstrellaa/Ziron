@@ -132,6 +132,9 @@ export default {
       centerToCamera: "Alinear a Vista",
       centerToCameraTip:
         "Mueve esta cámara a la posición y rotación exactas de la vista actual del editor",
+      renderCamera: "Renderizar",
+      renderCameraTip:
+        "Captura una foto en alta resolución desde esta cámara y la guarda como PNG",
     },
     texture: {
       empty: "Sin textura asignada",
@@ -262,6 +265,14 @@ export default {
     failedToLoadModel: {
       title: "Error al Cargar Modelo",
       message: "No se pudo cargar el modelo.",
+    },
+    failedToRenderScene: {
+      title: "Error al Renderizar Escena",
+      message: "No se pudo renderizar la escena.",
+    },
+    renderSuccess: {
+      title: "Renderizado Exitoso",
+      message: "La imagen ha sido renderizada y guardada exitosamente.",
     },
   },
   popups: {

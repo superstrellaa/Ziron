@@ -23,6 +23,7 @@ import { createCameraFrustumSystem } from "./scene/cameraGizmo/cameraFrustumSyst
 import { createCameraScaleLock } from "./scene/cameraGizmo/cameraScaleLock.js";
 import { createCameraPreviewSystem } from "./scene/cameraGizmo/cameraPreviewSystem.js";
 import { createCameraPreviewPanel } from "./scene/cameraGizmo/cameraPreviewPanel.js";
+import { createCameraRenderCapture } from "./scene/cameraGizmo/cameraRenderCapture.js";
 
 export async function createViewport(container, projectData) {
   // Creación de DOM
@@ -60,9 +61,17 @@ export async function createViewport(container, projectData) {
 
   const cameraFrustumSystem = createCameraFrustumSystem();
   const cameraScaleLock = createCameraScaleLock(sceneManager);
-  const cameraPreview = createCameraPreviewSystem(renderer, scene, [
-    gizmo.gizmo.getHelper(),
-  ]);
+  const hiddenDuringRender = [gizmo.gizmo.getHelper()];
+  const cameraPreview = createCameraPreviewSystem(
+    renderer,
+    scene,
+    hiddenDuringRender,
+  );
+  const cameraRenderCapture = createCameraRenderCapture(
+    renderer,
+    scene,
+    hiddenDuringRender,
+  );
   const previewPanel = createCameraPreviewPanel(viewportEl);
   cameraPreview.attach(previewPanel.canvasWrap);
 
@@ -123,6 +132,7 @@ export async function createViewport(container, projectData) {
     () => history,
     projectData,
     camera,
+    cameraRenderCapture,
   );
   topArea.appendChild(container.querySelector("#properties"));
 

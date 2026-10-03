@@ -3,6 +3,7 @@ import {
   createIcons,
   Image,
   TrianglesCenterlineDashedHorizontal,
+  ScanBox,
 } from "lucide";
 import { openAssetPicker } from "../../../../engine/ui/assetPicker/assetPicker.js";
 import { GenericCommand } from "../../../../engine/history/commands.js";
@@ -12,6 +13,7 @@ export const FIELD_RENDERERS = {
   texture: renderTextureField,
   number: renderNumberField,
   button: renderButtonField,
+  buttonRow: renderButtonRowField,
   separator: renderSeparatorField,
 };
 
@@ -146,29 +148,39 @@ function renderButtonField(field, entity, container, ctx) {
   const wrapper = document.createElement("div");
   wrapper.className = "comp-field comp-field-button";
 
-  const iconAttr = field.icon
-    ? `<i data-lucide="${field.icon}" class="comp-action-btn-icon"></i>`
-    : "";
-
-  wrapper.innerHTML = `
-    <button type="button" class="comp-action-btn" ${tooltipAttr(field)}>
-      ${iconAttr}<span>${t(field.labelKey)}</span>
-    </button>
-  `;
-
-  if (field.icon) {
-    createIcons({
-      icons: { TrianglesCenterlineDashedHorizontal },
-      attrs: { width: 13, height: 13 },
-      root: wrapper,
-    });
-  }
+  wrapper.innerHTML = `<button type="button" class="comp-action-btn" ${tooltipAttr(field)}>${t(field.labelKey)}</button>`;
 
   wrapper
     .querySelector(".comp-action-btn")
     .addEventListener("click", () => field.action(entity, ctx));
 
   container.appendChild(wrapper);
+}
+
+function renderButtonRowField(field, entity, container, ctx) {
+  const wrapper = document.createElement("div");
+  wrapper.className = "comp-field comp-field-button-row";
+
+  for (const btn of field.buttons) {
+    const iconAttr = btn.icon
+      ? `<i data-lucide="${btn.icon}" class="comp-action-btn-icon"></i>`
+      : "";
+    const el = document.createElement("button");
+    el.type = "button";
+    el.className = "comp-action-btn comp-action-btn--row";
+    if (btn.tooltipKey) el.dataset.tooltip = t(btn.tooltipKey);
+    el.innerHTML = `${iconAttr}<span>${t(btn.labelKey)}</span>`;
+    el.addEventListener("click", () => btn.action(entity, ctx));
+    wrapper.appendChild(el);
+  }
+
+  container.appendChild(wrapper);
+
+  createIcons({
+    icons: { TrianglesCenterlineDashedHorizontal, ScanBox },
+    attrs: { width: 13, height: 13 },
+    root: wrapper,
+  });
 }
 
 function renderSeparatorField(field, entity, container, ctx) {

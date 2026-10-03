@@ -129,6 +129,9 @@ export default {
       centerToCamera: "Align to View",
       centerToCameraTip:
         "Moves this camera to the exact position and rotation of the current editor view",
+      renderCamera: "Render",
+      renderCameraTip:
+        "Captures a high-resolution photo from this camera and saves it as PNG",
     },
     texture: {
       empty: "No texture assigned",
@@ -250,6 +253,14 @@ export default {
     failedToLoadModel: {
       title: "Failed to Load Model",
       message: "Could not load the model.",
+    },
+    failedToRenderScene: {
+      title: "Failed to Render Scene",
+      message: "Could not render the scene.",
+    },
+    renderSuccess: {
+      title: "Render Successful",
+      message: "The image has been rendered and saved successfully.",
     },
   },
   popups: {

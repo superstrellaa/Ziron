@@ -437,6 +437,16 @@ body.internal-dragging * {
   outline: 1px solid #2a2a3e;
 }
 
+.comp-field-button-row {
+  display: flex;
+  gap: 8px;
+}
+
+.comp-field-button-row .comp-action-btn {
+  width: auto;
+  flex: 1;
+}
+
 /* ── Tooltip ── */
 #tooltip {
   position: fixed;

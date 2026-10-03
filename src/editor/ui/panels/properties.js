@@ -16,6 +16,7 @@ export function createProperties(
   history,
   projectData,
   camera, // esto deberia ser viewportCamera, pero se me ha olvidado y me da pereza cambiarlo, luego se lo pasa la referencia igual
+  renderCapture,
 ) {
   const panel = document.createElement("div");
   panel.id = "properties";
@@ -412,6 +413,7 @@ export function createProperties(
         projectData,
         history,
         viewportCamera: camera,
+        renderCapture,
       });
     }
 

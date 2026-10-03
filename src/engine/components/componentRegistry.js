@@ -1,4 +1,8 @@
+import { invoke } from "@tauri-apps/api/core";
+import { logger } from "../core/logger.js";
+import { Toast } from "../ui/toasts/toastTypes.js";
 import { GenericCommand } from "../history/commands.js";
+import { blobToBase64 } from "../../editor/scene/cameraGizmo/cameraRenderCapture.js";
 
 export const COMPONENTS = [
   {
@@ -75,36 +79,70 @@ export const COMPONENTS = [
         type: "separator",
       },
       {
-        id: "centerToCamera",
-        type: "button",
-        labelKey: "components.camera.centerToCamera",
-        tooltipKey: "components.camera.centerToCameraTip",
-        icon: "triangles-centerline-dashed-horizontal",
-        action: (entity, ctx) => {
-          const vc = ctx.viewportCamera;
-          if (!vc) return;
+        id: "cameraActions",
+        type: "buttonRow",
+        buttons: [
+          {
+            id: "centerToCamera",
+            labelKey: "components.camera.centerToCamera",
+            tooltipKey: "components.camera.centerToCameraTip",
+            icon: "triangles-centerline-dashed-horizontal",
+            action: (entity, ctx) => {
+              const vc = ctx.viewportCamera;
+              if (!vc) return;
 
-          const fromPos = entity.mesh.position.clone();
-          const fromQuat = entity.mesh.quaternion.clone();
-          const toPos = vc.position.clone();
-          const toQuat = vc.quaternion.clone();
+              const fromPos = entity.mesh.position.clone();
+              const fromQuat = entity.mesh.quaternion.clone();
+              const toPos = vc.position.clone();
+              const toQuat = vc.quaternion.clone();
 
-          if (toPos.equals(fromPos) && toQuat.equals(fromQuat)) return;
+              if (toPos.equals(fromPos) && toQuat.equals(fromQuat)) return;
 
-          const cmd = GenericCommand(
-            "CenterCameraToView",
-            () => {
-              entity.mesh.position.copy(toPos);
-              entity.mesh.quaternion.copy(toQuat);
+              const cmd = GenericCommand(
+                "CenterCameraToView",
+                () => {
+                  entity.mesh.position.copy(toPos);
+                  entity.mesh.quaternion.copy(toQuat);
+                },
+                () => {
+                  entity.mesh.position.copy(fromPos);
+                  entity.mesh.quaternion.copy(fromQuat);
+                },
+              );
+              cmd.execute();
+              ctx.history().push(cmd);
             },
-            () => {
-              entity.mesh.position.copy(fromPos);
-              entity.mesh.quaternion.copy(fromQuat);
+          },
+          {
+            id: "renderCamera",
+            labelKey: "components.camera.renderCamera",
+            tooltipKey: "components.camera.renderCameraTip",
+            icon: "scan-box",
+            action: async (entity, ctx) => {
+              if (!ctx.renderCapture) return;
+              try {
+                const blob = await ctx.renderCapture.capture(entity);
+                if (!blob) return;
+
+                const base64 = await blobToBase64(blob);
+                const defaultName = `${entity.name || "render"}.png`;
+
+                const saved = await invoke("save_render_png", {
+                  defaultName,
+                  dataBase64: base64,
+                });
+
+                if (saved) {
+                  logger.info("CameraRender", `Render saved → ${saved}`);
+                  Toast.renderSuccess();
+                }
+              } catch (e) {
+                logger.warn("CameraRender", `Failed to capture render: ${e}`);
+                Toast.failedToRenderScene();
+              }
             },
-          );
-          cmd.execute();
-          ctx.history().push(cmd);
-        },
+          },
+        ],
       },
     ],
   },
