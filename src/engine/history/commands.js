@@ -98,14 +98,23 @@ export function DuplicateCommand(sceneManager, sourceEntity, onCreated) {
         entity.mesh.position
           .copy(sourceEntity.mesh.position)
           .add(new THREE.Vector3(1, 0, 0));
+        entity.components = structuredClone(sourceEntity.components ?? {});
       } else {
+        const hasColor = !!sourceEntity.mesh.material?.color;
+
         entity = sceneManager.add(sourceEntity.type, {
           name: sourceEntity.name + " (copy)",
-          color: sourceEntity.mesh.material.color.getHex(),
+          color: hasColor
+            ? sourceEntity.mesh.material.color.getHex()
+            : undefined,
           position: sourceEntity.mesh.position
             .clone()
             .add(new THREE.Vector3(1, 0, 0)),
         });
+
+        if (sourceEntity.components) {
+          entity.components = structuredClone(sourceEntity.components);
+        }
       }
       entity.mesh.quaternion.copy(sourceEntity.mesh.quaternion);
       entity.mesh.scale.copy(sourceEntity.mesh.scale);
@@ -244,12 +253,19 @@ export function MultiDuplicateCommand(sceneManager, entities, onCreated) {
           entity.mesh.position
             .copy(e.mesh.position)
             .add(new THREE.Vector3(1, 0, 0));
+          entity.components = structuredClone(e.components ?? {});
         } else {
+          const hasColor = !!e.mesh.material?.color;
+
           entity = sceneManager.add(e.type, {
             name: e.name + " (copy)",
-            color: e.mesh.material.color.getHex(),
+            color: hasColor ? e.mesh.material.color.getHex() : undefined,
             position: e.mesh.position.clone().add(new THREE.Vector3(1, 0, 0)),
           });
+
+          if (e.components) {
+            entity.components = structuredClone(e.components);
+          }
         }
         entity.mesh.quaternion.copy(e.mesh.quaternion);
         entity.mesh.scale.copy(e.mesh.scale);
