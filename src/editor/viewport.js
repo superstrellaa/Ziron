@@ -60,7 +60,7 @@ export async function createViewport(container, projectData) {
 
   const cameraFrustumSystem = createCameraFrustumSystem();
   const cameraScaleLock = createCameraScaleLock(sceneManager);
-  const cameraPreview = createCameraPreviewSystem(scene, [
+  const cameraPreview = createCameraPreviewSystem(renderer, scene, [
     gizmo.gizmo.getHelper(),
   ]);
   const previewPanel = createCameraPreviewPanel(viewportEl);
@@ -185,6 +185,7 @@ export async function createViewport(container, projectData) {
       cameraScaleLock.tick();
       cameraPreview.tick();
     },
+    () => cameraPreview.render(),
   );
   renderLoop.start();
 

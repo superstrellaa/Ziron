@@ -7,6 +7,7 @@ export function createRenderLoop(
   flyControls,
   sun,
   onTick = null,
+  onAfterRender = null,
 ) {
   const infiniteGrid = scene.children.find((c) => c.userData.isInfiniteGrid);
   const _lastCamPos = new THREE.Vector3(Infinity, Infinity, Infinity);
@@ -54,6 +55,7 @@ export function createRenderLoop(
     }
 
     renderer.render(scene, camera);
+    onAfterRender?.();
   }
 
   function start() {

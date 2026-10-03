@@ -398,11 +398,6 @@ body.internal-dragging * {
   flex-direction: column;
   gap: 6px;
 
-  background: #12121f;
-  border: 1px solid #2a2a3e;
-  border-radius: 8px;
-  padding: 6px;
-
   z-index: 100;
   user-select: none;
 }
@@ -411,7 +406,11 @@ body.internal-dragging * {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 0 2px;
+  width: fit-content;
+  padding: 4px 6px;
+  background: #12121f;
+  border: 1px solid #2a2a3e;
+  border-radius: 6px;
 }
 
 #cp-header i {
@@ -434,13 +433,8 @@ body.internal-dragging * {
   height: 135px;
   border-radius: 4px;
   overflow: hidden;
-  background: #000;
-}
-
-#cp-canvas-wrap canvas {
-  display: block;
-  width: 100%;
-  height: 100%;
+  background: transparent;
+  outline: 1px solid #2a2a3e;
 }
 
 /* ── Tooltip ── */
