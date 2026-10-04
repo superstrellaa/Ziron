@@ -44,6 +44,10 @@ export function createSceneManager(scene) {
     const entity = _build(type, options);
     if (!entity) return null;
 
+    entity.hierarchyOrder = registry.consumeHierarchyOrder(
+      options.hierarchyOrder ?? null,
+    );
+
     scene.add(entity.mesh);
     registry.set(entity);
     _emit("onAdd", entity);
@@ -59,6 +63,10 @@ export function createSceneManager(scene) {
     const entity = _build(type, options);
     if (!entity) return null;
 
+    entity.hierarchyOrder = registry.consumeHierarchyOrder(
+      options.hierarchyOrder ?? null,
+    );
+
     scene.add(entity.mesh);
     registry.insertAt(index, entity);
     _emit("onAdd", entity);
@@ -67,6 +75,9 @@ export function createSceneManager(scene) {
 
   function addRaw(entity) {
     entity.active = entity.active ?? true;
+    entity.hierarchyOrder = registry.consumeHierarchyOrder(
+      entity.hierarchyOrder ?? null,
+    );
     registry.set(entity);
     _emit("onAdd", entity);
     logger.info("SceneManager", `Added raw "${entity.name}" (id:${entity.id})`);
@@ -84,6 +95,9 @@ export function createSceneManager(scene) {
       _absolutePath: absolutePath,
       mesh: group,
       active: options.active ?? true,
+      hierarchyOrder: registry.consumeHierarchyOrder(
+        options.hierarchyOrder ?? null,
+      ),
     };
 
     try {
@@ -152,6 +166,10 @@ export function createSceneManager(scene) {
       for (const item of chunk) {
         const entity = _build(item.type, item.options ?? {});
         if (!entity) continue;
+
+        entity.hierarchyOrder = registry.consumeHierarchyOrder(
+          item.options?.hierarchyOrder ?? null,
+        );
 
         scene.add(entity.mesh);
         item.index != null
@@ -223,6 +241,14 @@ export function createSceneManager(scene) {
     return true;
   }
 
+  function setHierarchyOrder(id, order) {
+    const entity = registry.get(id);
+    if (!entity) return false;
+    entity.hierarchyOrder = registry.consumeHierarchyOrder(order);
+    _emit("onUpdate", entity);
+    return true;
+  }
+
   // ── Queries ───────────────────────────────────────────────────────────────
 
   function on(event, callback) {
@@ -245,11 +271,13 @@ export function createSceneManager(scene) {
     // mutaciones
     rename,
     setActive,
+    setHierarchyOrder,
     // queries
     getAll: () => registry.getAll(),
     getById: (id) => registry.get(id),
     indexOf: (id) => registry.indexOf(id),
     reindexIds: () => registry.reindex(),
+    compactHierarchyOrders: () => registry.compactHierarchyOrders(),
     on,
   };
 }

@@ -3,6 +3,7 @@ import { logger } from "../core/logger.js";
 export function createEntityRegistry() {
   const entities = new Map();
   let nextId = 1;
+  let nextHierarchyOrder = 1;
 
   function consumeId(requestedId = null) {
     if (requestedId != null) {
@@ -10,6 +11,16 @@ export function createEntityRegistry() {
       return requestedId;
     }
     return nextId++;
+  }
+
+  function consumeHierarchyOrder(requestedOrder = null) {
+    if (requestedOrder != null) {
+      if (requestedOrder >= nextHierarchyOrder) {
+        nextHierarchyOrder = requestedOrder + 1;
+      }
+      return requestedOrder;
+    }
+    return nextHierarchyOrder++;
   }
 
   function set(entity) {
@@ -66,12 +77,29 @@ export function createEntityRegistry() {
     logger.info("EntityRegistry", `Reindexed, nextId → ${nextId}`);
   }
 
+  function compactHierarchyOrders() {
+    const sorted = [...entities.values()].sort(
+      (a, b) => (a.hierarchyOrder ?? 0) - (b.hierarchyOrder ?? 0),
+    );
+
+    sorted.forEach((entity, i) => {
+      entity.hierarchyOrder = i + 1;
+    });
+    nextHierarchyOrder = sorted.length + 1;
+
+    logger.info(
+      "EntityRegistry",
+      `Hierarchy orders compacted, nextHierarchyOrder → ${nextHierarchyOrder}`,
+    );
+  }
+
   function getNextId() {
     return nextId;
   }
 
   return {
     consumeId,
+    consumeHierarchyOrder,
     set,
     insertAt,
     remove,
@@ -79,6 +107,7 @@ export function createEntityRegistry() {
     getAll,
     indexOf,
     reindex,
+    compactHierarchyOrders,
     getNextId,
   };
 }

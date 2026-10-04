@@ -78,7 +78,7 @@ export function createHierarchy(
   const rowMap = new Map();
 
   function render() {
-    const entities = sceneManager.getAll();
+    const entities = getOrderedEntities();
 
     for (const [id, row] of rowMap) {
       if (!entities.find((e) => e.id === id)) {
@@ -146,6 +146,12 @@ export function createHierarchy(
 
   function resolveTemplateName(template, index) {
     return template.replace(/\{id\}/g, index + 1);
+  }
+
+  function getOrderedEntities() {
+    return [...sceneManager.getAll()].sort(
+      (a, b) => (a.hierarchyOrder ?? 0) - (b.hierarchyOrder ?? 0),
+    );
   }
 
   // registrar paranoias para que el rename funcione
@@ -227,9 +233,7 @@ export function createHierarchy(
     if (multiEditing !== null) return;
 
     const idSet = new Set(ids);
-    const orderedEntities = sceneManager
-      .getAll()
-      .filter((e) => idSet.has(e.id));
+    const orderedEntities = getOrderedEntities().filter((e) => idSet.has(e.id));
     if (orderedEntities.length === 0) return;
 
     const topEntity = orderedEntities[0];
@@ -328,7 +332,7 @@ export function createHierarchy(
     const entity = sceneManager.getById(id);
     if (!entity) return;
 
-    const entities = sceneManager.getAll();
+    const entities = getOrderedEntities();
 
     // al hacer doble click hacer rename, algo de UX por favor
     list.addEventListener("dblclick", (e) => {

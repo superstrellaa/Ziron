@@ -132,6 +132,7 @@ export function DeleteCommand(sceneManager, entity) {
     type: entity.type,
     name: entity.name,
     active: entity.active ?? true,
+    hierarchyOrder: entity.hierarchyOrder,
     position: entity.mesh.position.clone(),
     quaternion: entity.mesh.quaternion.clone(),
     scale: entity.mesh.scale.clone(),
@@ -157,6 +158,7 @@ export function DeleteCommand(sceneManager, entity) {
             name: snapshot.name,
             active: snapshot.active,
             index: snapshot.index,
+            hierarchyOrder: snapshot.hierarchyOrder,
           },
         );
       } else {
@@ -166,6 +168,7 @@ export function DeleteCommand(sceneManager, entity) {
           color: snapshot.color,
           position: snapshot.position,
           active: snapshot.active,
+          hierarchyOrder: snapshot.hierarchyOrder,
         });
       }
 
@@ -184,6 +187,7 @@ export function MultiDeleteCommand(sceneManager, entities) {
     type: e.type,
     name: e.name,
     active: e.active ?? true,
+    hierarchyOrder: e.hierarchyOrder,
     position: e.mesh.position.clone(),
     quaternion: e.mesh.quaternion.clone(),
     scale: e.mesh.scale.clone(),
@@ -204,7 +208,13 @@ export function MultiDeleteCommand(sceneManager, entities) {
           const entity = await sceneManager.addModel(
             s._absolutePath,
             s.modelPath,
-            { id: s.id, name: s.name, active: s.active, index: s.index },
+            {
+              id: s.id,
+              name: s.name,
+              active: s.active,
+              index: s.index,
+              hierarchyOrder: s.hierarchyOrder,
+            },
           );
           entity.mesh.position.copy(s.position);
           entity.mesh.quaternion.copy(s.quaternion);
@@ -223,6 +233,7 @@ export function MultiDeleteCommand(sceneManager, entities) {
             color: s.color,
             position: s.position,
             active: s.active,
+            hierarchyOrder: s.hierarchyOrder,
           },
           index: s.index,
           _source: s,

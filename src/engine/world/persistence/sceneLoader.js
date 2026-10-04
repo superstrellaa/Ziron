@@ -19,7 +19,7 @@ export async function loadSavedEntities(
     onProgress,
   );
   await _loadModelEntities(modelEntities, sceneManager, projectData, added);
-  _restoreSun(savedSun, sun);
+  _restoreSun(savedSun, sun, sceneManager);
 
   return added;
 }
@@ -32,6 +32,7 @@ async function _loadRegularEntities(regularEntities, sceneManager, onProgress) {
       name: e.name,
       color: e.color ? parseInt(e.color.replace("#", ""), 16) : undefined,
       active: e.active ?? true,
+      hierarchyOrder: e.hierarchyOrder,
     },
     _savedTransform: {
       position: e.position,
@@ -69,6 +70,7 @@ async function _loadModelEntities(
       id: e.id,
       name: e.name,
       active: e.active ?? true,
+      hierarchyOrder: e.hierarchyOrder,
     });
     entity.components = e.components ?? {};
 
@@ -85,7 +87,7 @@ async function _loadModelEntities(
   }
 }
 
-function _restoreSun(savedSun, sun) {
+function _restoreSun(savedSun, sun, sceneManager) {
   if (!savedSun) return;
   sun.entity.mesh.rotation.set(
     savedSun.rotation[0],
@@ -93,5 +95,8 @@ function _restoreSun(savedSun, sun) {
     savedSun.rotation[2],
   );
   sun.entity.mesh.position.fromArray(savedSun.position);
+  if (savedSun.hierarchyOrder != null) {
+    sceneManager.setHierarchyOrder(sun.entity.id, savedSun.hierarchyOrder);
+  }
   sun.update();
 }

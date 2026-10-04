@@ -10,7 +10,8 @@ export async function saveScene(
   sceneName = "main",
   toast = true,
 ) {
-  sceneManager.reindexIds(); // al guardar, cambiar todos los IDs a algo organizado para facilitar lecturas visuales y carga
+  sceneManager.reindexIds(); // ids internos: orden organizado por lectura
+  sceneManager.compactHierarchyOrders(); // orden visual de jerarquía: sin huecos
 
   const entities = sceneManager.getAll().map((entity) => {
     const { mesh } = entity;
@@ -18,6 +19,7 @@ export async function saveScene(
       id: entity.id,
       name: entity.name,
       type: entity.type,
+      hierarchyOrder: entity.hierarchyOrder ?? 0,
       position: mesh.position.toArray(),
       rotation: mesh.rotation.toArray().slice(0, 3),
       scale: mesh.scale.toArray(),
