@@ -16,6 +16,7 @@ pub fn run() {
         .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_drpc::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .setup(|app| {
             let args: Vec<String> = std::env::args().collect();
             fn is_project_file(s: &str) -> bool {
