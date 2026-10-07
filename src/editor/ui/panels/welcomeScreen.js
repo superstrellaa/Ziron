@@ -123,7 +123,7 @@ function renderNewProjectPanel(content, el, onProjectReady, onCancel) {
     <div id="new-project-panel">
       <div class="np-header">
         <h3>${t("welcome.newProjectPanel.title")}</h3>
-        <button class="np-close-btn" id="np-close" title="Close">
+        <button class="np-close-btn" id="np-close" data-tooltip="${t("welcome.newProjectPanel.closeBtnTooltip")}">
           <i data-lucide="x"></i>
         </button>
       </div>

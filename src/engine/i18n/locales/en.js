@@ -34,6 +34,7 @@ export default {
       browseBtn: "Browse",
       createBtn: "Create Project",
       preview: "Will be created at:",
+      closeBtnTooltip: "Close",
     },
   },
   settings: {
