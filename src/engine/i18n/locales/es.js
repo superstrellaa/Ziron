@@ -60,6 +60,13 @@ export default {
     autosaveIntervalDesc:
       "Con qué frecuencia guardar la escena automáticamente",
     browse: "Examinar",
+    keybindGroups: {
+      general: "General",
+      history: "Historial",
+      entities: "Entidades",
+      tools: "Herramientas",
+      selection: "Selección",
+    },
   },
   keybind: {
     save: "Guardar",
@@ -71,6 +78,10 @@ export default {
     paste: "Pegar",
     rename: "Renombrar",
     settings: "Abrir Ajustes",
+    translate: "Mover",
+    rotate: "Rotar",
+    scale: "Escalar",
+    selectAdd: "Añadir a la selección",
   },
   contextMenu: {
     add: "Añadir",

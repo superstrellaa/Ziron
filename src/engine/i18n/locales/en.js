@@ -58,6 +58,13 @@ export default {
     autosaveInterval: "Autosave interval",
     autosaveIntervalDesc: "How often to auto-save the scene",
     browse: "Browse",
+    keybindGroups: {
+      general: "General",
+      history: "History",
+      entities: "Entities",
+      tools: "Tools",
+      selection: "Selection",
+    },
   },
   keybind: {
     save: "Save",
@@ -69,6 +76,10 @@ export default {
     paste: "Paste",
     rename: "Rename",
     settings: "Open Settings",
+    translate: "Move",
+    rotate: "Rotate",
+    scale: "Scale",
+    selectAdd: "Add to selection",
   },
   contextMenu: {
     add: "Add",

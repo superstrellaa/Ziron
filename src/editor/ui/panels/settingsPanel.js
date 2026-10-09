@@ -15,6 +15,7 @@ import {
   saveConfig,
   getConfig,
 } from "../../systems/persistence/config.js";
+import { KEYBINDS } from "../../systems/input/keybinds.js";
 import { checkDirtyAndThen } from "../../systems/app/windowManager.js";
 import { Popup } from "../../../engine/ui/popup/popupTypes.js";
 import { relaunch } from "@tauri-apps/plugin-process";
@@ -23,6 +24,48 @@ import { Toast } from "../../../engine/ui/toasts/toastTypes.js";
 import { getActiveViewport } from "../../systems/app/project/projectManager.js";
 
 let _activePanel = null;
+
+const DROPDOWN_GAP = 4;
+const DROPDOWN_MARGIN = 8;
+
+const KEYBIND_GROUPS = [
+  {
+    titleKey: "settings.keybindGroups.general",
+    actions: [
+      ["SAVE", "keybind.save"],
+      ["OPEN_SETTINGS", "keybind.settings"],
+    ],
+  },
+  {
+    titleKey: "settings.keybindGroups.history",
+    actions: [
+      ["UNDO", "keybind.undo"],
+      ["REDO", "keybind.redo"],
+    ],
+  },
+  {
+    titleKey: "settings.keybindGroups.entities",
+    actions: [
+      ["DUPLICATE", "keybind.duplicate"],
+      ["DELETE", "keybind.delete"],
+      ["COPY", "keybind.copy"],
+      ["PASTE", "keybind.paste"],
+      ["RENAME", "keybind.rename"],
+    ],
+  },
+  {
+    titleKey: "settings.keybindGroups.tools",
+    actions: [
+      ["TOOL_TRANSLATE", "keybind.translate"],
+      ["TOOL_ROTATE", "keybind.rotate"],
+      ["TOOL_SCALE", "keybind.scale"],
+    ],
+  },
+  {
+    titleKey: "settings.keybindGroups.selection",
+    actions: [["SELECT_ADD", "keybind.selectAdd"]],
+  },
+];
 
 export function isSettingsOpen() {
   return _activePanel !== null;
@@ -340,17 +383,51 @@ function _renderGeneral(container) {
 }
 
 function _initDropdowns(root) {
-  root.querySelectorAll(".settings-dropdown").forEach((dropdown) => {
+  const overlay = root.closest("#settings-overlay");
+  const scroller = root.closest("#settings-content");
+  const dropdowns = root.querySelectorAll(".settings-dropdown");
+
+  function closeAll() {
+    dropdowns.forEach((d) => d.classList.remove("open"));
+  }
+
+  function positionList(dropdown) {
+    const btn = dropdown.querySelector(".settings-dropdown-btn");
+    const list = dropdown.querySelector(".settings-dropdown-list");
+    const rect = btn.getBoundingClientRect();
+
+    list.style.minWidth = `${rect.width}px`;
+    list.style.maxHeight = "";
+    const naturalHeight = list.offsetHeight;
+
+    const spaceBelow =
+      window.innerHeight - rect.bottom - DROPDOWN_GAP - DROPDOWN_MARGIN;
+    const spaceAbove = rect.top - DROPDOWN_GAP - DROPDOWN_MARGIN;
+    const openUp = naturalHeight > spaceBelow && spaceAbove > spaceBelow;
+
+    const maxH = Math.max(80, openUp ? spaceAbove : spaceBelow);
+    list.style.maxHeight = `${maxH}px`;
+
+    const height = Math.min(naturalHeight, maxH);
+    const width = list.offsetWidth;
+
+    list.style.top = `${openUp ? rect.top - DROPDOWN_GAP - height : rect.bottom + DROPDOWN_GAP}px`;
+    list.style.left = `${Math.max(DROPDOWN_MARGIN, rect.right - width)}px`;
+  }
+
+  dropdowns.forEach((dropdown) => {
     const btn = dropdown.querySelector(".settings-dropdown-btn");
     const list = dropdown.querySelector(".settings-dropdown-list");
     const labelEl = dropdown.querySelector(".settings-dropdown-label");
 
     btn.addEventListener("click", (e) => {
       e.stopPropagation();
-      dropdown.classList.toggle("open");
-      root.querySelectorAll(".settings-dropdown").forEach((other) => {
-        if (other !== dropdown) other.classList.remove("open");
-      });
+      const willOpen = !dropdown.classList.contains("open");
+      closeAll();
+      if (willOpen) {
+        dropdown.classList.add("open");
+        positionList(dropdown);
+      }
     });
 
     list.querySelectorAll(".settings-dropdown-item").forEach((item) => {
@@ -363,7 +440,6 @@ function _initDropdowns(root) {
         labelEl.textContent = label;
         dropdown.classList.remove("open");
 
-        // Limpiar todos los checks y activos
         list.querySelectorAll(".settings-dropdown-item").forEach((i) => {
           i.classList.remove("active");
           const check = i.querySelector(".settings-dropdown-item-check");
@@ -375,46 +451,57 @@ function _initDropdowns(root) {
         if (check) check.textContent = "✓";
       });
     });
-
-    document.addEventListener("click", () => {
-      dropdown.classList.remove("open");
-    });
   });
+
+  // La lista es fixed, así que no sigue al scroll: se cierra si el contenido se mueve
+  overlay?.addEventListener("click", closeAll);
+  scroller?.addEventListener("scroll", closeAll, { passive: true });
+  window.addEventListener("resize", closeAll);
+}
+
+function _esc(s) {
+  return s.replace(
+    /[&<>"]/g,
+    (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c],
+  );
+}
+
+function _formatKey(key) {
+  if (key === " ") return "Space";
+  if (key.length === 1) return key.toUpperCase();
+  return key.charAt(0).toUpperCase() + key.slice(1);
+}
+
+function _bindToParts(bind) {
+  const parts = [];
+  if (bind.ctrl) parts.push("Ctrl");
+  if (bind.alt) parts.push("Alt");
+  if (bind.shift) parts.push("Shift");
+  const main = _formatKey(bind.key);
+  if (!parts.includes(main)) parts.push(main);
+  return parts;
 }
 
 function _renderKeybinds(container) {
-  const keybinds = get("editor.keybinds") ?? {};
+  container.innerHTML = KEYBIND_GROUPS.map(({ titleKey, actions }) => {
+    const cards = actions
+      .filter(([action]) => KEYBINDS[action])
+      .map(([action, labelKey]) => {
+        const keys = _bindToParts(KEYBINDS[action])
+          .map((k) => `<kbd class="kb-key">${_esc(k)}</kbd>`)
+          .join('<span class="kb-plus">+</span>');
+        return `
+          <div class="kb-card" data-action="${action}">
+            <span class="kb-label">${t(labelKey)}</span>
+            <span class="kb-keys">${keys}</span>
+          </div>`;
+      })
+      .join("");
 
-  const defaults = {
-    SAVE: "Ctrl+S",
-    UNDO: "Ctrl+Z",
-    REDO: "Ctrl+Y",
-    DUPLICATE: "Ctrl+D",
-    DELETE: "Delete",
-    COPY: "Ctrl+C",
-    PASTE: "Ctrl+V",
-    RENAME: "F2",
-    SETTINGS: "Ctrl+,",
-  };
-
-  const rows = Object.entries(defaults)
-    .map(([action, fallback]) => {
-      const current = keybinds[action] ?? fallback;
-      return `
-      <div class="settings-row">
-        <div class="settings-row-info">
-          <span class="settings-row-label">${t(`keybind.${action.toLowerCase()}`) ?? action}</span>
-        </div>
-        <kbd class="settings-kbd" data-action="${action}">${current}</kbd>
-      </div>
-    `;
-    })
-    .join("");
-
-  container.innerHTML = `
-    <div class="settings-group">
-      <div class="settings-group-title">${t("settings.groupKeybinds")}</div>
-      ${rows}
-    </div>
-  `;
+    return `
+      <div class="settings-group">
+        <div class="settings-group-title">${t(titleKey)}</div>
+        <div class="kb-grid">${cards}</div>
+      </div>`;
+  }).join("");
 }
