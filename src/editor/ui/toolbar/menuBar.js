@@ -126,6 +126,14 @@ export function initMenuBar({ onLoadProject, onNewProject, onCloseProject }) {
 
   onKeybind("OPEN_SETTINGS", () => {
     openSettings();
+    // auto deseleccionar cualquier input que este en foco porque sino bugea
+    const activeEl = document.activeElement;
+    if (
+      activeEl &&
+      (activeEl.tagName === "INPUT" || activeEl.tagName === "TEXTAREA")
+    ) {
+      activeEl.blur();
+    }
   });
 }
 
