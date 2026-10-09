@@ -131,7 +131,8 @@ export function openSettings() {
   _renderGeneral(overlay.querySelector("#settings-section-general"));
   _renderKeybinds(overlay.querySelector("#settings-section-keybinds"));
   _setupNav(overlay);
-  _setupActions(overlay);
+  const dirty = _setupDirtyTracking(overlay);
+  _setupActions(overlay, dirty);
 }
 
 function _setupNav(overlay) {
@@ -152,25 +153,54 @@ function _setupNav(overlay) {
   });
 }
 
-function _setupActions(overlay) {
+function _setupActions(overlay, dirty) {
+  const win = overlay.querySelector("#settings-window");
+
+  function closeOpenDropdowns() {
+    const open = overlay.querySelectorAll(".settings-dropdown.open");
+    open.forEach((d) => d.classList.remove("open"));
+    return open.length > 0;
+  }
+
   function close() {
+    document.removeEventListener("keydown", onEsc);
     overlay.remove();
     _activePanel = null;
   }
+
+  function shake() {
+    closeOpenDropdowns();
+    win.classList.remove("shake");
+    void win.offsetWidth; // reinicia la animación si ya estaba temblando
+    win.classList.add("shake");
+  }
+
+  function requestClose() {
+    if (dirty.isDirty()) {
+      shake();
+      return;
+    }
+    close();
+  }
+
+  function onEsc(e) {
+    if (e.key !== "Escape") return;
+    if (closeOpenDropdowns()) return; // el primer Escape solo cierra el dropdown
+    requestClose();
+  }
+
+  win.addEventListener("animationend", (e) => {
+    if (e.target === win) win.classList.remove("shake");
+  });
 
   overlay.querySelector("#settings-close").addEventListener("click", close);
   overlay.querySelector("#settings-cancel").addEventListener("click", close);
 
   overlay.addEventListener("mousedown", (e) => {
-    if (e.target === overlay) close();
+    if (e.target === overlay) requestClose();
   });
 
-  document.addEventListener("keydown", function onEsc(e) {
-    if (e.key === "Escape") {
-      close();
-      document.removeEventListener("keydown", onEsc);
-    }
-  });
+  document.addEventListener("keydown", onEsc);
 
   overlay
     .querySelector("#settings-save")
@@ -183,20 +213,7 @@ function _setupActions(overlay) {
       // ── Recoger todos los valores de los controles ────────────────────────────
       const elements = overlay.querySelectorAll("[data-config-key]");
       for (const el of elements) {
-        const key = el.dataset.configKey;
-        let value;
-
-        if (el.classList.contains("settings-dropdown")) {
-          value = Number.isNaN(Number(el.dataset.value))
-            ? el.dataset.value
-            : Number(el.dataset.value);
-        } else if (el.type === "checkbox") {
-          value = el.checked;
-        } else {
-          value = el.value;
-        }
-
-        setNoSave(key, value);
+        setNoSave(el.dataset.configKey, _readValue(el));
       }
 
       // Folder pendiente
@@ -377,6 +394,9 @@ function _renderGeneral(container) {
       if (!folder) return;
       _pendingFolder = folder;
       container.querySelector("#settings-folder-preview").textContent = folder;
+      container.dispatchEvent(
+        new CustomEvent("settings:change", { bubbles: true }),
+      );
     });
 
   container._getPendingFolder = () => _pendingFolder;
@@ -437,6 +457,9 @@ function _initDropdowns(root) {
           item.childNodes[item.childNodes.length - 1].textContent.trim();
 
         dropdown.dataset.value = value;
+        dropdown.dispatchEvent(
+          new CustomEvent("settings:change", { bubbles: true }),
+        );
         labelEl.textContent = label;
         dropdown.classList.remove("open");
 
@@ -504,4 +527,59 @@ function _renderKeybinds(container) {
         <div class="kb-grid">${cards}</div>
       </div>`;
   }).join("");
+}
+
+// Nuevo para hacer sistema de dirty
+function _readValue(el) {
+  if (el.classList.contains("settings-dropdown")) {
+    return Number.isNaN(Number(el.dataset.value))
+      ? el.dataset.value
+      : Number(el.dataset.value);
+  }
+  if (el.type === "checkbox") return el.checked;
+  return el.value;
+}
+
+function _setupDirtyTracking(overlay) {
+  const entries = [];
+
+  function addEntry(row, changed) {
+    const label = row?.querySelector(".settings-row-label");
+    if (!label) return;
+    const mark = document.createElement("span");
+    mark.className = "settings-dirty-mark";
+    mark.setAttribute("aria-hidden", "true");
+    mark.textContent = "*";
+    label.appendChild(mark);
+    entries.push({ mark, changed });
+  }
+
+  // Línea base = valor del control justo tras renderizar (misma lectura que al guardar)
+  overlay.querySelectorAll("[data-config-key]").forEach((el) => {
+    const base = _readValue(el);
+    addEntry(el.closest(".settings-row"), () => _readValue(el) !== base);
+  });
+
+  // La carpeta de proyectos no es un control con data-config-key
+  const generalSection = overlay.querySelector("#settings-section-general");
+  const folderRow = overlay
+    .querySelector("#settings-browse-folder")
+    ?.closest(".settings-row");
+  const folderBase = get("editor.projects_folder") || "";
+  addEntry(folderRow, () => {
+    const pending = generalSection?._getPendingFolder?.();
+    return pending != null && pending !== folderBase;
+  });
+
+  function refresh() {
+    for (const { mark, changed } of entries) {
+      mark.classList.toggle("is-visible", changed());
+    }
+  }
+
+  ["input", "change", "settings:change"].forEach((evt) =>
+    overlay.addEventListener(evt, refresh),
+  );
+
+  return { isDirty: () => entries.some((e) => e.changed()) };
 }
