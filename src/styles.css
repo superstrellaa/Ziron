@@ -1032,6 +1032,7 @@ body.internal-dragging * {
 .settings-dropdown-btn {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 6px;
   background: #0e0e1a;
   border: 1px solid #2a2a3e;
@@ -1053,13 +1054,12 @@ body.internal-dragging * {
   color: #e5e7eb;
 }
 
-.settings-dropdown-btn i {
-  margin-left: auto;
-  transition: transform 0.15s;
+.settings-dropdown-btn svg {
   flex-shrink: 0;
+  transition: transform 0.15s;
 }
 
-.settings-dropdown.open .settings-dropdown-btn i {
+.settings-dropdown.open .settings-dropdown-btn svg {
   transform: rotate(180deg);
 }
 
