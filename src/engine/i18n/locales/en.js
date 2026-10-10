@@ -42,6 +42,7 @@ export default {
     categoryEditor: "Editor",
     general: "General",
     keybinds: "Keybinds",
+    updater: "Updater",
     cancel: "Cancel",
     save: "Save changes",
     groupInterface: "Interface",
@@ -65,6 +66,33 @@ export default {
       tools: "Tools",
       selection: "Selection",
     },
+  },
+  updater: {
+    installed: "Installed",
+    check: "Check for updates",
+    checkTip:
+      "Runs automatically when you open this tab; use it to force a new check",
+    history: "Previous release notes",
+    historyTip: "See what changed in earlier versions",
+    status: {
+      checking: "Checking for updates...",
+      upToDate: "You're up to date",
+      available: "An update is available",
+      error: "Couldn't check for updates",
+    },
+    bannerTitle: "New version available",
+    download: "Download",
+    downloadTip: "Downloads only; you choose when to install",
+    downloading: "Downloading...",
+    install: "Install and restart",
+    installTip:
+      "Closes the editor, installs, and reopens it. Warns about unsaved changes",
+    installing: "Installing...",
+    currentNotes: "Release notes for this version",
+    previousNotes: "Previous versions",
+    notesLoading: "Loading notes...",
+    notesUnavailable: "Couldn't load the notes. Are you offline?",
+    noNotes: "No notes for this version.",
   },
   keybind: {
     save: "Save",
@@ -273,6 +301,30 @@ export default {
     renderSuccess: {
       title: "Render Successful",
       message: "The image has been rendered and saved successfully.",
+    },
+    updateAvailable: {
+      title: "Update Available",
+      message: "A new version of ZIRON Studio is ready to download.",
+    },
+    updateUpToDate: {
+      title: "You're Up to Date",
+      message: "You already have the latest version of ZIRON Studio.",
+    },
+    updateDownloaded: {
+      title: "Download Complete",
+      message: "The update is ready to install.",
+    },
+    updateCheckFailed: {
+      title: "Update Check Failed",
+      message: "Could not check for a new version.",
+    },
+    updateDownloadFailed: {
+      title: "Download Failed",
+      message: "Could not download the update.",
+    },
+    updateInstallFailed: {
+      title: "Install Failed",
+      message: "Could not install the update.",
     },
   },
   popups: {

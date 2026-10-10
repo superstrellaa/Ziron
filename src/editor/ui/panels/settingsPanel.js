@@ -4,9 +4,11 @@ import {
   X,
   SlidersHorizontal,
   Keyboard,
+  RotateCwClock,
   ChevronDown,
   Check,
 } from "lucide";
+import { createUpdaterTab } from "./settingsUpdaterTab.js";
 import { t } from "../../../engine/i18n/i18n.js";
 import {
   get,
@@ -102,11 +104,16 @@ export function openSettings() {
             <i data-lucide="keyboard"></i>
             ${t("settings.keybinds")}
           </button>
+          <button class="settings-nav-item" data-section="updater">
+            <i data-lucide="rotate-cw-clock"></i>
+            ${t("settings.updater")}
+          </button>
         </div>
 
         <div id="settings-content">
           <div id="settings-section-general" class="settings-section"></div>
           <div id="settings-section-keybinds" class="settings-section" style="display:none;"></div>
+          <div id="settings-section-updater" class="settings-section" style="display:none;"></div>
         </div>
 
       </div>
@@ -123,19 +130,31 @@ export function openSettings() {
   _activePanel = overlay;
 
   createIcons({
-    icons: { Settings, X, SlidersHorizontal, Keyboard, ChevronDown, Check },
+    icons: {
+      Settings,
+      X,
+      SlidersHorizontal,
+      Keyboard,
+      RotateCwClock,
+      ChevronDown,
+      Check,
+    },
     attrs: { width: 14, height: 14, stroke: "#cccccc" },
     root: overlay,
   });
 
   _renderGeneral(overlay.querySelector("#settings-section-general"));
   _renderKeybinds(overlay.querySelector("#settings-section-keybinds"));
-  _setupNav(overlay);
+  const updaterTab = createUpdaterTab(
+    overlay.querySelector("#settings-section-updater"),
+    overlay.querySelector('.settings-nav-item[data-section="updater"]'),
+  );
+  _setupNav(overlay, updaterTab);
   const dirty = _setupDirtyTracking(overlay);
-  _setupActions(overlay, dirty);
+  _setupActions(overlay, dirty, updaterTab);
 }
 
-function _setupNav(overlay) {
+function _setupNav(overlay, updaterTab) {
   const navItems = overlay.querySelectorAll(".settings-nav-item");
   const sections = overlay.querySelectorAll(".settings-section");
 
@@ -149,11 +168,13 @@ function _setupNav(overlay) {
         s.style.display =
           s.id === `settings-section-${target}` ? "flex" : "none";
       });
+
+      if (target === "updater") updaterTab.onShow();
     });
   });
 }
 
-function _setupActions(overlay, dirty) {
+function _setupActions(overlay, dirty, updaterTab) {
   const win = overlay.querySelector("#settings-window");
 
   function closeOpenDropdowns() {
@@ -164,6 +185,7 @@ function _setupActions(overlay, dirty) {
 
   function close() {
     document.removeEventListener("keydown", onEsc);
+    updaterTab.destroy();
     overlay.remove();
     _activePanel = null;
   }
@@ -193,7 +215,9 @@ function _setupActions(overlay, dirty) {
     if (e.target === win) win.classList.remove("shake");
   });
 
-  overlay.querySelector("#settings-close").addEventListener("click", close);
+  overlay
+    .querySelector("#settings-close")
+    .addEventListener("click", requestClose);
   overlay.querySelector("#settings-cancel").addEventListener("click", close);
 
   overlay.addEventListener("mousedown", (e) => {

@@ -219,6 +219,51 @@ export const Toast = {
       messageKey: "toasts.renderSuccess.message",
       ...extra,
     }),
+  updateAvailable: (extra) =>
+    pushToast({
+      type: "info",
+      titleKey: "toasts.updateAvailable.title",
+      messageKey: "toasts.updateAvailable.message",
+      duration: 4000,
+      ...extra,
+    }),
+  updateUpToDate: (extra) =>
+    pushToast({
+      type: "info",
+      titleKey: "toasts.updateUpToDate.title",
+      messageKey: "toasts.updateUpToDate.message",
+      duration: 2500,
+      ...extra,
+    }),
+  updateDownloaded: (extra) =>
+    pushToast({
+      type: "info",
+      titleKey: "toasts.updateDownloaded.title",
+      messageKey: "toasts.updateDownloaded.message",
+      duration: 4000,
+      ...extra,
+    }),
+  updateCheckFailed: (extra) =>
+    pushToast({
+      type: "error",
+      titleKey: "toasts.updateCheckFailed.title",
+      messageKey: "toasts.updateCheckFailed.message",
+      ...extra,
+    }),
+  updateDownloadFailed: (extra) =>
+    pushToast({
+      type: "error",
+      titleKey: "toasts.updateDownloadFailed.title",
+      messageKey: "toasts.updateDownloadFailed.message",
+      ...extra,
+    }),
+  updateInstallFailed: (extra) =>
+    pushToast({
+      type: "error",
+      titleKey: "toasts.updateInstallFailed.title",
+      messageKey: "toasts.updateInstallFailed.message",
+      ...extra,
+    }),
 
   info: (title, message, duration) =>
     pushToast({ type: "info", title, message, duration }),

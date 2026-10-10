@@ -43,6 +43,7 @@ export default {
     categoryEditor: "Editor",
     general: "General",
     keybinds: "Atajos de Teclado",
+    updater: "Actualizador",
     cancel: "Cancelar",
     save: "Guardar cambios",
     groupInterface: "Interfaz",
@@ -67,6 +68,33 @@ export default {
       tools: "Herramientas",
       selection: "Selección",
     },
+  },
+  updater: {
+    installed: "Instalada",
+    check: "Buscar nueva versión",
+    checkTip:
+      "Se busca sola al abrir esta pestaña; úsalo para forzar otra consulta",
+    history: "Ver notas anteriores",
+    historyTip: "Consulta qué cambió en versiones anteriores",
+    status: {
+      checking: "Buscando actualizaciones...",
+      upToDate: "Estás al día",
+      available: "Hay una actualización disponible",
+      error: "No se pudo comprobar si hay actualizaciones",
+    },
+    bannerTitle: "Nueva versión disponible",
+    download: "Descargar",
+    downloadTip: "Solo descarga; instalas cuando tú quieras",
+    downloading: "Descargando...",
+    install: "Instalar y reiniciar",
+    installTip:
+      "Cierra el editor, instala y lo reabre. Avisa si hay cambios sin guardar",
+    installing: "Instalando...",
+    currentNotes: "Notas de esta versión",
+    previousNotes: "Versiones anteriores",
+    notesLoading: "Cargando notas...",
+    notesUnavailable: "No se pudieron cargar las notas. ¿Sin conexión?",
+    noNotes: "Sin notas para esta versión.",
   },
   keybind: {
     save: "Guardar",
@@ -285,6 +313,30 @@ export default {
     renderSuccess: {
       title: "Renderizado Exitoso",
       message: "La imagen ha sido renderizada y guardada exitosamente.",
+    },
+    updateAvailable: {
+      title: "Actualización Disponible",
+      message: "Hay una nueva versión de ZIRON Studio lista para descargar.",
+    },
+    updateUpToDate: {
+      title: "Estás al Día",
+      message: "Ya tienes la última versión de ZIRON Studio.",
+    },
+    updateDownloaded: {
+      title: "Descarga Completa",
+      message: "La actualización está lista para instalarse.",
+    },
+    updateCheckFailed: {
+      title: "Error al Buscar Actualizaciones",
+      message: "No se pudo comprobar si hay una nueva versión.",
+    },
+    updateDownloadFailed: {
+      title: "Error al Descargar",
+      message: "No se pudo descargar la actualización.",
+    },
+    updateInstallFailed: {
+      title: "Error al Instalar",
+      message: "No se pudo instalar la actualización.",
     },
   },
   popups: {
