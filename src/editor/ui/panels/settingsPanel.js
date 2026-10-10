@@ -145,12 +145,17 @@ export function openSettings() {
 
   _renderGeneral(overlay.querySelector("#settings-section-general"));
   _renderKeybinds(overlay.querySelector("#settings-section-keybinds"));
+  const dirty = _setupDirtyTracking(overlay);
   const updaterTab = createUpdaterTab(
     overlay.querySelector("#settings-section-updater"),
     overlay.querySelector('.settings-nav-item[data-section="updater"]'),
+    {
+      persistSettings: async () => {
+        if (dirty.isDirty()) await _persistSettings(overlay);
+      },
+    },
   );
   _setupNav(overlay, updaterTab);
-  const dirty = _setupDirtyTracking(overlay);
   _setupActions(overlay, dirty, updaterTab);
 }
 
@@ -229,37 +234,19 @@ function _setupActions(overlay, dirty, updaterTab) {
   overlay
     .querySelector("#settings-save")
     .addEventListener("click", async () => {
-      // ── ANTES del guardado — capturar estado previo ───────────────────────────
       const previousLocale = get("editor.locale");
       const prevAutoSave = get("editor.auto_save");
       const prevInterval = get("editor.auto_save_interval");
 
-      // ── Recoger todos los valores de los controles ────────────────────────────
-      const elements = overlay.querySelectorAll("[data-config-key]");
-      for (const el of elements) {
-        setNoSave(el.dataset.configKey, _readValue(el));
-      }
-
-      // Folder pendiente
-      const generalSection = overlay.querySelector("#settings-section-general");
-      const pendingFolder = generalSection?._getPendingFolder?.();
-      if (pendingFolder != null)
-        setNoSave("editor.projects_folder", pendingFolder);
-
-      // ── GUARDAR ───────────────────────────────────────────────────────────────
-      await saveConfig();
+      await _persistSettings(overlay);
       Toast.settingsSaved();
 
-      // ── DESPUÉS del guardado — reaccionar a cambios ───────────────────────────
-
-      // Autosave: reiniciar si cambió el toggle o el intervalo
       const newAutoSave = getConfig()?.editor?.auto_save;
       const newInterval = getConfig()?.editor?.auto_save_interval;
       if (newAutoSave !== prevAutoSave || newInterval !== prevInterval) {
         getActiveViewport()?.restartAutoSave?.();
       }
 
-      // Locale: pedir reinicio si cambió
       const newLocale = getConfig()?.editor?.locale;
       const localeChanged = newLocale && newLocale !== previousLocale;
 
@@ -268,10 +255,13 @@ function _setupActions(overlay, dirty, updaterTab) {
       if (localeChanged) {
         const result = await Popup.restartRequired();
         if (result === "restart") {
-          await checkDirtyAndThen(async () => {
-            await invoke("save_window_state").catch(() => {});
-            await relaunch();
-          });
+          await checkDirtyAndThen(
+            async () => {
+              await invoke("save_window_state").catch(() => {});
+              await relaunch();
+            },
+            { action: "restart" },
+          );
         }
       }
     });
@@ -606,4 +596,18 @@ function _setupDirtyTracking(overlay) {
   );
 
   return { isDirty: () => entries.some((e) => e.changed()) };
+}
+
+async function _persistSettings(overlay) {
+  const elements = overlay.querySelectorAll("[data-config-key]");
+  for (const el of elements) {
+    setNoSave(el.dataset.configKey, _readValue(el));
+  }
+
+  const pendingFolder = overlay
+    .querySelector("#settings-section-general")
+    ?._getPendingFolder?.();
+  if (pendingFolder != null) setNoSave("editor.projects_folder", pendingFolder);
+
+  await saveConfig();
 }

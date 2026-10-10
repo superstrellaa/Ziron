@@ -17,7 +17,7 @@ export function initWindowManager(getActiveViewport) {
     .addEventListener("click", () => appWindow.toggleMaximize());
 
   document.getElementById("btn-close").addEventListener("click", async () => {
-    await checkDirtyAndThen(() => appWindow.close());
+    await checkDirtyAndThen(() => appWindow.close(), { action: "close" });
   });
 
   onKeybind(
@@ -44,10 +44,10 @@ export function initWindowManager(getActiveViewport) {
   window.addEventListener("contextmenu", (e) => e.preventDefault());
 }
 
-export async function checkDirtyAndThen(fn) {
+export async function checkDirtyAndThen(fn, { action = "continue" } = {}) {
   const vp = _getActiveViewport?.();
   if (vp?.isDirty()) {
-    const result = await Popup.unsavedScene();
+    const result = await Popup.unsavedScene(action);
     if (result === "cancel") return;
     if (result === "save") await vp.triggerSave();
   }

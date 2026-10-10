@@ -1,26 +1,35 @@
 import { t } from "../../i18n/i18n.js";
 import { openPopup } from "./popup.js";
 
+const UNSAVED_LABELS = {
+  close: {
+    discard: "popups.buttons.discardAndClose",
+    save: "popups.buttons.saveAndClose",
+  },
+  restart: {
+    discard: "popups.buttons.discardAndRestart",
+    save: "popups.buttons.saveAndRestart",
+  },
+  continue: {
+    discard: "popups.buttons.discardAndContinue",
+    save: "popups.buttons.saveAndContinue",
+  },
+};
+
 export const Popup = {
-  unsavedScene: () =>
-    openPopup({
+  unsavedScene: (action = "continue") => {
+    const labels = UNSAVED_LABELS[action] ?? UNSAVED_LABELS.continue;
+    return openPopup({
       type: "warning",
       titleKey: "popups.unsavedScene.title",
       messageKey: "popups.unsavedScene.message",
       buttons: [
         { id: "cancel", labelKey: "popups.buttons.cancel", variant: "default" },
-        {
-          id: "discard",
-          labelKey: "popups.buttons.discardAndClose",
-          variant: "danger",
-        },
-        {
-          id: "save",
-          labelKey: "popups.buttons.saveAndContinue",
-          variant: "primary",
-        },
+        { id: "discard", labelKey: labels.discard, variant: "danger" },
+        { id: "save", labelKey: labels.save, variant: "primary" },
       ],
-    }),
+    });
+  },
 
   versionMismatch: (projectVersion, engineVersion) =>
     openPopup({

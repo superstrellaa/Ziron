@@ -25,6 +25,7 @@ import {
   renderMarkdown,
   escapeHtml,
 } from "../../systems/app/updater/releaseNotes.js";
+import { logger } from "../../../engine/core/logger.js";
 
 const ICONS = {
   RefreshCw,
@@ -97,7 +98,7 @@ function setNotes(target, markdown) {
   else target.textContent = t("updater.noNotes");
 }
 
-export function createUpdaterTab(container, navBtn) {
+export function createUpdaterTab(container, navBtn, hooks = {}) {
   container.innerHTML = `
     <div class="upd-card">
       <img class="upd-icon" src="/images/icon.png" alt="" draggable="false" />
@@ -246,7 +247,21 @@ export function createUpdaterTab(container, navBtn) {
     const { phase } = getState();
     if (phase === "available") downloadUpdate();
     else if (phase === "downloaded") {
-      checkDirtyAndThen(() => installUpdate());
+      checkDirtyAndThen(
+        async () => {
+          try {
+            await hooks.persistSettings?.();
+          } catch (e) {
+            // un fallo guardando ajustes no debe impedir la actualización
+            logger.warn(
+              "Updater",
+              `Could not persist settings before restart: ${e}`,
+            );
+          }
+          await installUpdate();
+        },
+        { action: "restart" },
+      );
     }
   });
 
