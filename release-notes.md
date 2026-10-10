@@ -1,5 +1,3 @@
-# Esto es un titulo
+# esto es un titulo antiguo
 
-## Subtitulo
-
-Segunda versión de prueba 1.0.0 para probar el funcionamiento del updater
+de vuelta a la 0.0.0
