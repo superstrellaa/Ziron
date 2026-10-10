@@ -1,6 +1,6 @@
 [package]
 name = "ziron-studio"
-version = "1.0.0"
+version = "0.0.0"
 description = "ZIRON Studio — 3D Scene Prototyping"
 authors = ["superstrellaa"]
 edition = "2021"
