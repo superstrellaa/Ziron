@@ -1,4 +1,5 @@
 import { withRetry } from "./retry.js";
+import { logger } from "../../../../engine/core/logger.js";
 
 const REPO = "superstrellaa/Ziron";
 const API = `https://api.github.com/repos/${REPO}`;
@@ -9,7 +10,14 @@ const cache = new Map();
 
 async function cached(key, loader, fresh = false) {
   const hit = cache.get(key);
-  if (!fresh && hit && Date.now() - hit.at < CACHE_TTL) return hit.value;
+  if (!fresh && hit && Date.now() - hit.at < CACHE_TTL) {
+    logger.debug("Updater", `GitHub cache hit: ${key}`);
+    return hit.value;
+  }
+  logger.debug(
+    "Updater",
+    `GitHub fetch: ${key}${fresh ? " (forced fresh)" : ""}`,
+  );
   const value = await loader();
   cache.set(key, { value, at: Date.now() });
   return value;

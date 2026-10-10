@@ -241,16 +241,28 @@ export function createUpdaterTab(container, navBtn, hooks = {}) {
 
   const unsubscribe = subscribe(render);
 
-  el.check.addEventListener("click", () => checkForUpdates());
+  el.check.addEventListener("click", () => {
+    logger.debug("Updater", "Manual update check requested");
+    checkForUpdates({ trigger: "manual" });
+  });
 
   el.action.addEventListener("click", () => {
     const { phase } = getState();
-    if (phase === "available") downloadUpdate();
-    else if (phase === "downloaded") {
+    if (phase === "available") {
+      logger.info("Updater", "Download requested by user");
+      downloadUpdate();
+    } else if (phase === "downloaded") {
+      logger.info("Updater", "Install requested by user");
       checkDirtyAndThen(
         async () => {
           try {
-            await hooks.persistSettings?.();
+            const saved = await hooks.persistSettings?.();
+            if (saved) {
+              logger.info(
+                "Updater",
+                "Pending settings auto-saved before restart",
+              );
+            }
           } catch (e) {
             // un fallo guardando ajustes no debe impedir la actualización
             logger.warn(
@@ -300,7 +312,12 @@ export function createUpdaterTab(container, navBtn, hooks = {}) {
         )
         .join("");
       historyLoaded = true;
-    } catch {
+      logger.debug(
+        "Updater",
+        `Release history loaded (${releases.length} releases)`,
+      );
+    } catch (e) {
+      logger.warn("Updater", `Could not load release history: ${e}`);
       el.historyList.textContent = t("updater.notesUnavailable");
     }
   });
@@ -310,10 +327,13 @@ export function createUpdaterTab(container, navBtn, hooks = {}) {
     if (currentNotesLoaded) return;
     el.currentNotes.textContent = t("updater.notesLoading");
     try {
-      const release = await fetchReleaseByVersion(await ensureVersion());
+      const version = await ensureVersion();
+      const release = await fetchReleaseByVersion(version);
       setNotes(el.currentNotes, release.notes);
       currentNotesLoaded = true;
-    } catch {
+      logger.debug("Updater", `Release notes loaded for v${version}`);
+    } catch (e) {
+      logger.warn("Updater", `Could not load current release notes: ${e}`);
       el.currentNotes.textContent = t("updater.notesUnavailable");
     }
   }
@@ -321,7 +341,8 @@ export function createUpdaterTab(container, navBtn, hooks = {}) {
   return {
     // se llama cada vez que el usuario entra en la pestaña
     onShow() {
-      checkForUpdates();
+      logger.debug("Updater", "Updater tab opened");
+      checkForUpdates({ trigger: "tab-open" });
       loadCurrentNotes();
     },
     destroy() {
