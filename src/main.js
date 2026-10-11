@@ -83,7 +83,7 @@ if (launchProject) {
     logger.error(
       `Failed to load launch project from argument: ${launchProject} | Error: ${err}`,
     );
-    Popup.error(
+    await Popup.error(
       "Failed to load project from argument: " +
         (typeof err === "string" ? err : (err?.message ?? String(err))),
     );
