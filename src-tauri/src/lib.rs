@@ -8,6 +8,27 @@ use tauri::Manager;
 
 struct LaunchProject(Option<String>);
 
+fn resolve_launch_path(raw: &str) -> Option<String> {
+    let path = std::path::Path::new(raw);
+    let abs = std::path::absolute(path).ok()?;
+
+    if abs.exists() {
+        return Some(abs.to_string_lossy().to_string());
+    }
+    if path.is_absolute() {
+        return Some(raw.to_string());
+    }
+
+    logger::log(
+        "WARN".to_string(),
+        "launch".to_string(),
+        format!("Ignoring launch argument that can't be resolved: {raw}"),
+        None,
+        None,
+    );
+    None
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -24,7 +45,6 @@ pub fn run() {
                 lower.ends_with(".ziron.project") || lower.ends_with(".ziron.scene")
             }
 
-
             let project = args.windows(2)
                 .find(|pair| pair[0] == "--project" && is_project_file(&pair[1]))
                 .map(|pair| pair[1].clone())
@@ -32,7 +52,8 @@ pub fn run() {
                     args.iter().skip(1)
                         .find(|a| is_project_file(a))
                         .cloned()
-                });
+                })
+                .and_then(|p| resolve_launch_path(&p));
 
             app.manage(LaunchProject(project));
 
