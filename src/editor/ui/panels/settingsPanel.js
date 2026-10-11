@@ -73,7 +73,7 @@ export function isSettingsOpen() {
   return _activePanel !== null;
 }
 
-export function openSettings() {
+export function openSettings(options = {}) {
   if (_activePanel) return;
 
   const overlay = document.createElement("div");
@@ -155,28 +155,33 @@ export function openSettings() {
       },
     },
   );
-  _setupNav(overlay, updaterTab);
+  const nav = _setupNav(overlay, updaterTab);
   _setupActions(overlay, dirty, updaterTab);
+
+  if (options.section) {
+    nav.show(options.section, { skipCheck: options.skipAutoCheck });
+  }
 }
 
 function _setupNav(overlay, updaterTab) {
   const navItems = overlay.querySelectorAll(".settings-nav-item");
   const sections = overlay.querySelectorAll(".settings-section");
 
-  navItems.forEach((btn) => {
-    btn.addEventListener("click", () => {
-      navItems.forEach((b) => b.classList.remove("active"));
-      btn.classList.add("active");
-
-      const target = btn.dataset.section;
-      sections.forEach((s) => {
-        s.style.display =
-          s.id === `settings-section-${target}` ? "flex" : "none";
-      });
-
-      if (target === "updater") updaterTab.onShow();
+  function show(target, { skipCheck = false } = {}) {
+    navItems.forEach((b) =>
+      b.classList.toggle("active", b.dataset.section === target),
+    );
+    sections.forEach((s) => {
+      s.style.display = s.id === `settings-section-${target}` ? "flex" : "none";
     });
-  });
+    if (target === "updater") updaterTab.onShow({ skipCheck });
+  }
+
+  navItems.forEach((btn) =>
+    btn.addEventListener("click", () => show(btn.dataset.section)),
+  );
+
+  return { show };
 }
 
 function _setupActions(overlay, dirty, updaterTab) {

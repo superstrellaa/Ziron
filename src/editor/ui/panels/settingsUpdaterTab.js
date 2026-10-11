@@ -340,9 +340,12 @@ export function createUpdaterTab(container, navBtn, hooks = {}) {
 
   return {
     // se llama cada vez que el usuario entra en la pestaña
-    onShow() {
-      logger.debug("Updater", "Updater tab opened");
-      checkForUpdates({ trigger: "tab-open" });
+    onShow({ skipCheck = false } = {}) {
+      logger.debug(
+        "Updater",
+        `Updater tab opened${skipCheck ? " (check skipped)" : ""}`,
+      );
+      if (!skipCheck) checkForUpdates({ trigger: "tab-open" });
       loadCurrentNotes();
     },
     destroy() {

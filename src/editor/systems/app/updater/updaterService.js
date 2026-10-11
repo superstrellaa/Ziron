@@ -57,7 +57,7 @@ function parseVersion(v) {
     .map((n) => parseInt(n, 10) || 0);
 }
 
-function isNewer(a, b) {
+export function isNewer(a, b) {
   const A = parseVersion(a);
   const B = parseVersion(b);
   for (let i = 0; i < Math.max(A.length, B.length); i++) {
@@ -75,7 +75,7 @@ function formatBytes(n) {
 
 let checking = null;
 
-export function checkForUpdates({ trigger = "manual" } = {}) {
+export function checkForUpdates({ trigger = "manual", silent = false } = {}) {
   if (checking) {
     logger.debug(
       LOG,
@@ -83,13 +83,13 @@ export function checkForUpdates({ trigger = "manual" } = {}) {
     );
     return checking;
   }
-  checking = runCheck(trigger).finally(() => {
+  checking = runCheck(trigger, silent).finally(() => {
     checking = null;
   });
   return checking;
 }
 
-async function runCheck(trigger) {
+async function runCheck(trigger, silent) {
   // no pisar una descarga/instalación en curso
   if (LOCKED_PHASES.includes(state.phase)) {
     logger.debug(
@@ -98,6 +98,11 @@ async function runCheck(trigger) {
     );
     return;
   }
+
+  // sistema para mostrar los toasts al no estar silenciado
+  const toast = (name) => {
+    if (!silent) Toast[name]();
+  };
 
   const startedAt = performance.now();
   const took = () => `${Math.round(performance.now() - startedAt)}ms`;
@@ -131,14 +136,14 @@ async function runCheck(trigger) {
           source: "updater",
         },
       });
-      Toast.updateAvailable();
+      toast("updateAvailable");
     } else {
       logger.info(
         LOG,
         `No update available via updater plugin (current: v${currentVersion}, took ${took()})`,
       );
       setState({ phase: "up-to-date", update: null, info: null });
-      Toast.updateUpToDate();
+      toast("updateUpToDate");
     }
     return;
   } catch (e) {
@@ -161,19 +166,19 @@ async function runCheck(trigger) {
         update: null,
         info: { ...latest, source: "github" },
       });
-      Toast.updateAvailable();
+      toast("updateAvailable");
     } else {
       logger.info(
         LOG,
         `Up to date according to GitHub API (latest: v${latest.version}, current: v${currentVersion}, took ${took()})`,
       );
       setState({ phase: "up-to-date", update: null, info: null });
-      Toast.updateUpToDate();
+      toast("updateUpToDate");
     }
   } catch (e) {
     logger.error(LOG, `Update check failed: ${errorMessage(e)}`);
     setState({ phase: "error", error: errorMessage(e) });
-    Toast.updateCheckFailed();
+    toast("updateCheckFailed");
   }
 }
 

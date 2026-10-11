@@ -108,6 +108,30 @@ export const Popup = {
       ],
     }),
 
+  updateAvailable: (version) =>
+    openPopup({
+      type: "info",
+      title: t("popups.updateAvailable.title").replaceAll("{version}", version),
+      message: t("popups.updateAvailable.message").replaceAll(
+        "{version}",
+        version,
+      ),
+      buttons: [
+        {
+          id: "dismiss",
+          labelKey: "popups.buttons.dontShowAgain",
+          variant: "default",
+        },
+        {
+          id: "later",
+          labelKey: "popups.buttons.updateLater",
+          variant: "default",
+        },
+        { id: "update", labelKey: "popups.buttons.update", variant: "primary" },
+      ],
+      keybinds: { Escape: "later" },
+    }),
+
   /**
    * Error genérico con opción de copiar el mensaje
    * Resuelve con: "close"

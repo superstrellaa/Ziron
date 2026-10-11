@@ -24,6 +24,7 @@ import {
 } from "./editor/systems/app/project/projectManager.js";
 import { initDragDropOverlay } from "./editor/systems/app/drag/dragDropOverlay.js";
 import { Popup } from "./engine/ui/popup/popupTypes.js";
+import { startStartupUpdateCheck } from "./editor/systems/app/updater/startupUpdates.js";
 
 // ── Inicialización ────────────────────────────────────────────────────────────
 await logger.init();
@@ -63,6 +64,9 @@ initWindowManager(getActiveViewport);
 initProjectMenuBar();
 initDragDropOverlay();
 
+// esto busca actualizaciones en segundo plano, ahora después muestra el popup, sigue bajando
+const startupUpdates = startStartupUpdateCheck();
+
 // ── Arranque ──────────────────────────────────────────────────────────────────
 const launchProject = await invoke("get_launch_project").catch(() => null);
 
@@ -87,3 +91,5 @@ if (launchProject) {
 } else {
   createWelcomeScreen(getWorkspace(), checkVersionAndLoad);
 }
+
+await startupUpdates.promptIfAvailable();

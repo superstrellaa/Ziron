@@ -356,6 +356,11 @@ export default {
       message:
         "This file type isn't supported. You can import 3D models (.glb, .gltf, .obj, .fbx) or images (.png, .jpg, .jpeg, .webp).",
     },
+    updateAvailable: {
+      title: "Update {version} available",
+      message:
+        "A new version of ZIRON Studio ({version}) is available. Updating is optional: you can stay on your current version as long as you like.",
+    },
     error: {
       title: "An error occurred",
     },
@@ -375,6 +380,9 @@ export default {
       later: "Later",
       restart: "Restart",
       delete: "Delete",
+      updateLater: "Update Later",
+      update: "Update",
+      dontShowAgain: "Don't Show Again",
     },
   },
 };

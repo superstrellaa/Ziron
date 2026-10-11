@@ -48,6 +48,7 @@ fn default_config() -> Value {
         "ui": {
             "transform_toolbar_corner": "top-left"
         },
+        "versions_discarded": [],
         "window": {
             "width": 800,
             "height": 600,
