@@ -162,6 +162,23 @@ usuario al repositorio.
 
 ## Reglas de implementacion
 
+- Prioriza una robustez de nivel de producto: anticipa fallos previsibles en
+  operaciones asincronas, IPC, archivos, red y rendering; valida precondiciones
+  y resultados, y ofrece una recuperacion o alternativa segura cuando conserve
+  el significado de la accion y los datos del usuario. No añadas redundancia
+  cosmetica ni cambies silenciosamente a un resultado distinto.
+- Reintenta solo fallos transitorios y operaciones repetibles sin efectos
+  secundarios duplicados; limita los intentos y usa esperas progresivas cuando
+  corresponda. No repitas operaciones destructivas o no idempotentes sin un
+  mecanismo que evite duplicarlas.
+- Si no existe una recuperacion segura o esta falla, conserva el error y su
+  contexto en el logger y comunica el fallo con `Toast`, `Popup` u otro canal
+  adecuado y localizado. No ocultes errores con `catch` vacios, valores de
+  exito inventados ni retornos silenciosos; el usuario debe saber si la accion
+  no se completo y que alternativa tiene.
+- Restaura el estado temporal y libera recursos aunque falle una operacion
+  (por ejemplo, con `finally`); comprueba tanto la ruta de exito como la de
+  fallo al validar cambios de recuperacion.
 - Usa los patrones y APIs existentes antes de crear otra capa de estado o
   persistencia.
 - Cambios de escena deben pasar por `sceneManager`; no manipules directamente
