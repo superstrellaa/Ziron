@@ -105,6 +105,7 @@ export function openPopup({
         if (!buttonId) return;
         e.preventDefault();
         e.stopPropagation();
+        if (e.repeat) return; // tecla mantenida: se traga, pero no actúa
         if (buttons.some((b) => b.id === buttonId)) {
           close(buttonId);
         }
