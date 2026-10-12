@@ -222,8 +222,8 @@ usuario al repositorio.
   el historial correspondientes.
 - Usa `t()` y los locales de `src/engine/i18n/locales/` para texto visible.
   Si agregas una clave, añade las traducciones de `en.js` y `es.js`.
-- Usa el logger estructurado (`src/engine/core/logger.js`) para diagnostico.
-  Evita introducir `console.log` permanente.
+- Usa el logger estructurado (`src/engine/core/logger.js`) para la mayoría de situaciones y/o casos.
+  Evita usar `console.log` a toda costa, siempre intenta usar sí o sí el logger y loggearlo todo.
 - Conserva los keybinds configurables: no asumas que los valores por defecto
   son los valores actuales del usuario.
 - Sigue el estilo existente: ES modules, comillas dobles en JavaScript,
