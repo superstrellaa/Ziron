@@ -17,6 +17,7 @@ import { logger } from "../../../engine/core/logger.js";
 import { Toast } from "../../../engine/ui/toasts/toastTypes.js";
 import { EDITOR_VERSION } from "../../systems/app/project/versionManager.js";
 import { Popup } from "../../../engine/ui/popup/popupTypes.js";
+import { openSettings } from "./settingsPanel.js"; // esto es para el "easteregg" que hay al darle click al mini texto de abajo del sidebar
 
 export async function createWelcomeScreen(
   container,
@@ -109,6 +110,11 @@ export async function createWelcomeScreen(
           (typeof e === "string" ? e : (e?.message ?? String(e))),
       );
     }
+  });
+
+  // yy... aquí esta el easteregg que decia arriba
+  el.querySelector("#welcome-sidebar-bottom").addEventListener("click", () => {
+    openSettings({ section: "updater" });
   });
 
   // Mostrar recientes por defecto a menos que le haya dao al boton de nuevo proyecto desde el toolbar
