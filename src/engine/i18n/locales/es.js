@@ -25,7 +25,7 @@ export default {
     minutesAgo: "Hace {n} minutos",
     hoursAgo: "Hace {n} horas",
     daysAgo: "Hace {n} días",
-    version: "ZIRON Studio — Desarrollo Temprano",
+    version: "ZIRON Studio — Acceso Anticipado",
     newProjectPanel: {
       title: "Nuevo Proyecto",
       nameLabel: "Nombre del Proyecto",

@@ -1,22 +1,69 @@
-# ZIRON Studio — Credits
+# ZIRON Studio — Third-Party Credits
 
-## Open Source Libraries
+This file lists the project's direct dependencies and bundled assets. Refer to
+each upstream project for its full license text and notices; transitive
+dependencies may have additional notices.
 
-- **Three.js** — 3D rendering engine
-  License: MIT — https://github.com/mrdoob/three.js/blob/dev/LICENSE
+## Application and rendering
 
-- **Tauri** — Desktop application framework
-  License: MIT — https://github.com/tauri-apps/tauri/blob/dev/LICENSE_MIT
+- **Tauri** — Desktop application framework and Rust plugins for dialogs,
+  opening files and URLs, clipboard access, process management, and updates.
+  License: MIT or Apache-2.0.
+  https://github.com/tauri-apps/tauri
+  https://github.com/tauri-apps/plugins-workspace
 
-- **Vite** — Frontend build tool
-  License: MIT — https://github.com/vitejs/vite/blob/main/LICENSE
+- **Three.js** — 3D rendering engine.
+  License: MIT.
+  https://github.com/mrdoob/three.js
 
-## Assets & Icons
+- **tauri-plugin-drpc** — Tauri Discord Rich Presence plugin.
+  License: GPL-3.0-only.
+  https://github.com/smokingplaya/tauri-plugin-drpc
 
-- **Lucide Icons**
-  License: ISC — https://github.com/lucide-icons/lucide/blob/main/LICENSE
-  Source: https://lucide.dev
+Because this GPL-3.0-only plugin is included in the application, review its
+license requirements when distributing the MIT-licensed application and its
+binaries.
 
-- **Geist Font**
-  License: SIL Open Font License 1.1 — https://github.com/vercel/geist-font/blob/main/LICENSE.txt
-  Source: https://vercel.com/font
+## Rust libraries
+
+- **Serde** and **serde_json** — Serialization and JSON support.
+  License: MIT or Apache-2.0.
+  https://github.com/serde-rs/serde
+
+- **Chrono** — Date and time library.
+  License: MIT or Apache-2.0.
+  https://github.com/chronotope/chrono
+
+- **rand** — Random number generation.
+  License: MIT or Apache-2.0.
+  https://github.com/rust-random/rand
+
+- **once_cell** — Single-assignment cells and lazy initialization.
+  License: MIT or Apache-2.0.
+  https://github.com/matklad/once_cell
+
+- **base64** — Base64 encoding and decoding.
+  License: MIT or Apache-2.0.
+  https://github.com/marshallpierce/rust-base64
+
+## Frontend tools and libraries
+
+- **Vite** — Frontend build tool.
+  License: MIT.
+  https://github.com/vitejs/vite
+
+- **Lucide** — Interface icons.
+  License: ISC.
+  https://github.com/lucide-icons/lucide
+
+- **Tauri JavaScript API and plugins** — Frontend bindings for Tauri and its
+  clipboard, process, and updater plugins.
+  License: MIT or Apache-2.0.
+  https://github.com/tauri-apps/tauri
+  https://github.com/tauri-apps/plugins-workspace
+
+## Fonts
+
+- **Geist** — Typeface used in the application interface.
+  License: SIL Open Font License 1.1.
+  https://github.com/vercel/geist-font

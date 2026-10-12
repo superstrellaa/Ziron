@@ -24,7 +24,7 @@ export default {
     minutesAgo: "{n} minutes ago",
     hoursAgo: "{n} hours ago",
     daysAgo: "{n} days ago",
-    version: "ZIRON Studio — Early Dev",
+    version: "ZIRON Studio — Early Access",
     newProjectPanel: {
       title: "New Project",
       nameLabel: "Project Name",
