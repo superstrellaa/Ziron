@@ -9,6 +9,7 @@ import {
 import { writeText } from "@tauri-apps/plugin-clipboard-manager";
 import { t } from "../../i18n/i18n.js";
 import { Toast } from "../toasts/toastTypes.js";
+import { logger } from "../../core/logger.js";
 
 let overlay = null;
 let currentResolve = null;
@@ -83,11 +84,14 @@ export function openPopup({
         const btnDef = buttons.find((b) => b.id === id);
         if (btnDef?.copyText != null) {
           try {
-            console.log("Copying:", btnDef.copyText);
+            logger.info("popup", `Copying to clipboard: ${btnDef.copyText}`);
             await writeText(String(btnDef.copyText));
             Toast.contentCopied();
           } catch (err) {
-            console.error("Clipboard failed:", err);
+            logger.error(
+              "popup",
+              `Failed to copy to clipboard: ${btnDef.copyText}`,
+            );
           }
         }
 

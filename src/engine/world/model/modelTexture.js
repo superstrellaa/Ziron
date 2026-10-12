@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { convertFileSrc } from "@tauri-apps/api/core";
 import { Toast } from "../../ui/toasts/toastTypes";
 import { Popup } from "../../ui/popup/popupTypes";
+import { logger } from "../../core/logger.js";
 
 THREE.Cache.enabled = true; // evita recargar la misma textura varias veces
 const _loader = new THREE.TextureLoader();
@@ -21,7 +22,7 @@ export async function applyModelTexture(entity, projectData, relativePath) {
   try {
     texture = await _loader.loadAsync(url);
   } catch (e) {
-    console.warn("[ModelTexture] Failed to load texture:", e);
+    logger.warn("ModelTexture", `Failed to load texture: ${url}`, e);
     Toast.failedToLoadTexture();
     Popup.error(
       "Failed to load texture: " +
