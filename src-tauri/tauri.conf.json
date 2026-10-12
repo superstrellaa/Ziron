@@ -46,7 +46,7 @@
       {
         "ext": ["ziron.project"],
         "name": "ZIRON Project",
-        "description": "ZIRON Engine Project File",
+        "description": "ZIRON Studio Project File",
         "mimeType": "application/x-ziron-project",
         "role": "Editor"
       }
