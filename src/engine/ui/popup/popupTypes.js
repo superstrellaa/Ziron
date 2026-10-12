@@ -28,6 +28,7 @@ export const Popup = {
         { id: "discard", labelKey: labels.discard, variant: "danger" },
         { id: "save", labelKey: labels.save, variant: "primary" },
       ],
+      keybinds: { Escape: "cancel", Enter: "save" },
     });
   },
 
@@ -50,6 +51,7 @@ export const Popup = {
           variant: "primary",
         },
       ],
+      keybinds: { Escape: "cancel" },
     }),
 
   restartRequired: () =>
@@ -65,6 +67,7 @@ export const Popup = {
           variant: "primary",
         },
       ],
+      keybinds: { Escape: "later", Enter: "restart" },
     }),
 
   deleteFolderConfirm: (folderName) =>
@@ -106,6 +109,7 @@ export const Popup = {
       buttons: [
         { id: "close", labelKey: "popups.buttons.close", variant: "primary" },
       ],
+      keybinds: { Escape: "close", Enter: "close" },
     }),
 
   updateAvailable: (version) =>
@@ -129,7 +133,7 @@ export const Popup = {
         },
         { id: "update", labelKey: "popups.buttons.update", variant: "primary" },
       ],
-      keybinds: { Escape: "later" },
+      keybinds: { Escape: "later", Enter: "update" },
     }),
 
   /**
@@ -150,13 +154,14 @@ export const Popup = {
         },
         { id: "close", labelKey: "popups.buttons.close", variant: "primary" },
       ],
+      keybinds: { Escape: "close" },
     }),
 
   /**
    * Confirmación genérica
    * Resuelve con: "confirm" | "cancel"
    */
-  confirm: (titleKey, messageKey) =>
+  confirm: (titleKey, messageKey, keybinds = { Escape: "cancel" }) =>
     openPopup({
       type: "warning",
       titleKey,
@@ -169,5 +174,6 @@ export const Popup = {
           variant: "primary",
         },
       ],
+      keybinds,
     }),
 };
