@@ -314,6 +314,11 @@ export default {
       title: "Renderizado Exitoso",
       message: "La imagen ha sido renderizada y guardada exitosamente.",
     },
+    renderFileLocked: {
+      title: "No se pudo guardar el render",
+      message:
+        "El PNG está abierto o bloqueado por otra aplicación. Ciérralo o guarda el render con otro nombre e inténtalo de nuevo.",
+    },
     updateAvailable: {
       title: "Actualización Disponible",
       message: "Hay una nueva versión de ZIRON Studio lista para descargar.",

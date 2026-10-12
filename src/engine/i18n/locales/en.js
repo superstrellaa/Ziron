@@ -302,6 +302,11 @@ export default {
       title: "Render Successful",
       message: "The image has been rendered and saved successfully.",
     },
+    renderFileLocked: {
+      title: "Could not save render",
+      message:
+        "The PNG is open or locked by another application. Close it or save the render with a different name, then try again.",
+    },
     updateAvailable: {
       title: "Update Available",
       message: "A new version of ZIRON Studio is ready to download.",

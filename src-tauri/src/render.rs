@@ -1,6 +1,15 @@
 use base64::{engine::general_purpose::STANDARD, Engine as _};
 use std::sync::{Arc, Mutex};
 
+fn render_file_write_error(error: std::io::Error) -> String {
+    #[cfg(windows)]
+    if error.raw_os_error() == Some(1224) {
+        return format!("render_file_locked: {error}");
+    }
+
+    error.to_string()
+}
+
 #[tauri::command]
 pub async fn save_render_png(
     app: tauri::AppHandle,
@@ -27,7 +36,7 @@ pub async fn save_render_png(
     let chosen = rx.recv().map_err(|e| e.to_string())?;
 
     if let Some(path_str) = &chosen {
-        std::fs::write(path_str, &bytes).map_err(|e| e.to_string())?;
+        std::fs::write(path_str, &bytes).map_err(render_file_write_error)?;
     }
 
     Ok(chosen)

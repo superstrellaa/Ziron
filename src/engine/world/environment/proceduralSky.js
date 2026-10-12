@@ -21,6 +21,12 @@ const fragmentShader = `
   vec3 dayZenith     = vec3(0.20, 0.38, 0.72);
   vec3 dayHorizon    = vec3(0.58, 0.72, 0.95);
 
+  vec3 srgbToLinear(vec3 color) {
+    vec3 lower = color / 12.92;
+    vec3 higher = pow((color + 0.055) / 1.055, vec3(2.4));
+    return mix(higher, lower, lessThanEqual(color, vec3(0.04045)));
+  }
+
   vec3 skyColorAt(float alt, vec3 dir) {
     float y = normalize(dir).y;
 
@@ -48,7 +54,9 @@ const fragmentShader = `
 
   void main() {
     vec3 col = skyColorAt(uSunAltitude, vWorldDir);
-    gl_FragColor = vec4(col, 1.0);
+    gl_FragColor = vec4(srgbToLinear(col), 1.0);
+    #include <tonemapping_fragment>
+    #include <colorspace_fragment>
   }
 `;
 

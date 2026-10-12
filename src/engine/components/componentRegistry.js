@@ -137,8 +137,17 @@ export const COMPONENTS = [
                   Toast.renderSuccess();
                 }
               } catch (e) {
-                logger.warn("CameraRender", `Failed to capture render: ${e}`);
-                Toast.failedToRenderScene();
+                const errorMessage =
+                  typeof e === "string" ? e : (e?.message ?? String(e));
+                logger.warn(
+                  "CameraRender",
+                  `Failed to capture render: ${errorMessage}`,
+                );
+                if (errorMessage.startsWith("render_file_locked:")) {
+                  Toast.renderFileLocked();
+                } else {
+                  Toast.failedToRenderScene();
+                }
               }
             },
           },

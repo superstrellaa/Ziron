@@ -219,6 +219,14 @@ export const Toast = {
       messageKey: "toasts.renderSuccess.message",
       ...extra,
     }),
+  renderFileLocked: (extra) =>
+    pushToast({
+      type: "error",
+      titleKey: "toasts.renderFileLocked.title",
+      messageKey: "toasts.renderFileLocked.message",
+      duration: 7000,
+      ...extra,
+    }),
   updateAvailable: (extra) =>
     pushToast({
       type: "info",
