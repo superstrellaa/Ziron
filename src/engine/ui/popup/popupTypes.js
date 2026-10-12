@@ -16,7 +16,30 @@ const UNSAVED_LABELS = {
   },
 };
 
+function escapeHtml(text) {
+  return String(text)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;");
+}
+
 export const Popup = {
+  fatalStartupError: (summary, fullText = summary) =>
+    openPopup({
+      type: "error",
+      titleKey: "popups.startupError.title",
+      message: `${t("popups.startupError.message")}<br><br>${escapeHtml(summary)}`,
+      buttons: [
+        {
+          id: "copy",
+          labelKey: "popups.buttons.copyError",
+          copyText: fullText,
+          variant: "default",
+        },
+        { id: "quit", labelKey: "popups.buttons.closeApp", variant: "primary" },
+      ],
+    }),
+
   unsavedScene: (action = "continue") => {
     const labels = UNSAVED_LABELS[action] ?? UNSAVED_LABELS.continue;
     return openPopup({

@@ -10,6 +10,10 @@ import { initAssetPickerSystem } from "./engine/ui/assetPicker/assetPicker.js";
 import { initToastSystem } from "./engine/ui/toasts/toasts.js";
 import { initPopupSystem } from "./engine/ui/popup/popup.js";
 import { invoke } from "@tauri-apps/api/core";
+import {
+  handleFatalStartupError,
+  markPopupReady,
+} from "./editor/systems/app/startupError.js";
 import { createWelcomeScreen } from "./editor/ui/panels/welcomeScreen.js";
 
 import {
@@ -26,18 +30,24 @@ import { initDragDropOverlay } from "./editor/systems/app/drag/dragDropOverlay.j
 import { Popup } from "./engine/ui/popup/popupTypes.js";
 import { startStartupUpdateCheck } from "./editor/systems/app/updater/startupUpdates.js";
 
-// ── Inicialización ────────────────────────────────────────────────────────────
-await logger.init();
-await loadConfig();
-applyConfigKeybinds();
-setLocale(get("editor.locale") ?? "en");
-initTooltipSystem();
-initAssetPickerSystem();
-initToastSystem();
-initPopupSystem();
+async function main() {
+  // esto se envulve en una función para poder usar await en el top level
+  // ── Inicialización ────────────────────────────────────────────────────────────
+  await logger.init();
 
-// ── DOM base ──────────────────────────────────────────────────────────────────
-document.querySelector("#app").innerHTML = `
+  await loadConfig();
+  applyConfigKeybinds();
+  setLocale(get("editor.locale") ?? "en");
+  initPopupSystem();
+
+  markPopupReady(); // para que el sistema de bootstrap lo sepa
+
+  initTooltipSystem();
+  initAssetPickerSystem();
+  initToastSystem();
+
+  // ── DOM base ──────────────────────────────────────────────────────────────────
+  document.querySelector("#app").innerHTML = `
   <div id="toolbar" data-tauri-drag-region="deep">
     <div id="toolbar-left">
       <i data-lucide="box"></i>
@@ -53,43 +63,51 @@ document.querySelector("#app").innerHTML = `
   <div id="workspace"></div>
 `;
 
-createIcons({
-  icons: { Box, Minimize, Maximize, X },
-  attrs: { width: 14, height: 14, stroke: "#cccccc" },
-});
+  createIcons({
+    icons: { Box, Minimize, Maximize, X },
+    attrs: { width: 14, height: 14, stroke: "#cccccc" },
+  });
 
-// ── Sistemas ──────────────────────────────────────────────────────────────────
-initWorkspaceManager();
-initWindowManager(getActiveViewport);
-initProjectMenuBar();
-initDragDropOverlay();
+  // ── Sistemas ──────────────────────────────────────────────────────────────────
+  initWorkspaceManager();
+  initWindowManager(getActiveViewport);
+  initProjectMenuBar();
+  initDragDropOverlay();
 
-// esto busca actualizaciones en segundo plano, ahora después muestra el popup, sigue bajando
-const startupUpdates = startStartupUpdateCheck();
+  // esto busca actualizaciones en segundo plano, ahora después muestra el popup, sigue bajando
+  const startupUpdates = startStartupUpdateCheck();
 
-// ── Arranque ──────────────────────────────────────────────────────────────────
-const launchProject = await invoke("get_launch_project").catch(() => null);
+  // ── Arranque ──────────────────────────────────────────────────────────────────
+  const launchProject = await invoke("get_launch_project").catch((err) => {
+    logger.warn("startup", `get_launch_project failed | Error: ${err}`);
+    return null;
+  });
 
-if (launchProject) {
-  try {
-    const projectData = await invoke("load_project", {
-      projectFile: launchProject,
-    });
-    await checkVersionAndLoad(projectData, () => {
+  if (launchProject) {
+    try {
+      const projectData = await invoke("load_project", {
+        projectFile: launchProject,
+      });
+      await checkVersionAndLoad(projectData, () => {
+        createWelcomeScreen(getWorkspace(), checkVersionAndLoad);
+      });
+    } catch (err) {
       createWelcomeScreen(getWorkspace(), checkVersionAndLoad);
-    });
-  } catch (err) {
+      logger.error(
+        "startup",
+        `Failed to load launch project from argument: ${launchProject} | Error: ${err}`,
+      );
+      await Popup.error(
+        "Failed to load project from argument: " +
+          (typeof err === "string" ? err : (err?.message ?? String(err))),
+      );
+    }
+  } else {
     createWelcomeScreen(getWorkspace(), checkVersionAndLoad);
-    logger.error(
-      `Failed to load launch project from argument: ${launchProject} | Error: ${err}`,
-    );
-    await Popup.error(
-      "Failed to load project from argument: " +
-        (typeof err === "string" ? err : (err?.message ?? String(err))),
-    );
   }
-} else {
-  createWelcomeScreen(getWorkspace(), checkVersionAndLoad);
+
+  await startupUpdates.promptIfAvailable();
 }
 
-await startupUpdates.promptIfAvailable();
+// y aquí esta lo que de que si da error pues adiós app
+main().catch(handleFatalStartupError);

@@ -345,6 +345,11 @@ export default {
     },
   },
   popups: {
+    startupError: {
+      title: "ZIRON Studio no pudo iniciarse",
+      message:
+        "Ocurrió un problema al iniciar el editor. Copia el error para reportarlo, cierra la aplicación e inténtalo de nuevo.",
+    },
     unsavedScene: {
       title: "Cambios No Guardados",
       message: "La escena tiene cambios no guardados. ¿Qué quieres hacer?",
@@ -401,6 +406,7 @@ export default {
       updateLater: "Actualizar más tarde",
       update: "Actualizar",
       dontShowAgain: "No mostrar más",
+      closeApp: "Cerrar aplicación",
     },
   },
 };

@@ -333,6 +333,11 @@ export default {
     },
   },
   popups: {
+    startupError: {
+      title: "ZIRON Studio failed to start",
+      message:
+        "Something went wrong while starting the editor. Copy the error to report it, then close the app and try again.",
+    },
     unsavedScene: {
       title: "Unsaved Changes",
       message: "The scene has unsaved changes. What do you want to do?",
@@ -388,6 +393,7 @@ export default {
       updateLater: "Update Later",
       update: "Update",
       dontShowAgain: "Don't Show Again",
+      closeApp: "Close App",
     },
   },
 };
