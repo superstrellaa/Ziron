@@ -21,7 +21,8 @@ ventana Tauri.
 
 ## Comandos
 
-Requisitos: Node.js 18+, Rust/rustup y las dependencias de Tauri. Instalar
+Requisitos: Node.js 20.19+ o 22.12+, Rust/rustup y las dependencias
+nativas de Tauri para el sistema operativo de desarrollo. Instalar
 dependencias frontend con:
 
 ```bash
@@ -35,7 +36,7 @@ npm run dev       # Vite solamente, util para trabajar en el frontend
 npm run build     # Compilacion frontend a dist/
 npm run preview   # Sirve el build de Vite
 npm run tauri dev # Aplicacion de escritorio en desarrollo
-npm run tauri build # Bundle de produccion, actualmente NSIS en Windows
+npm run tauri build # Bundle de produccion para los targets disponibles en el SO
 ```
 
 Validacion recomendada despues de cambios JavaScript/CSS:
@@ -155,6 +156,29 @@ La carga de modelos admite los formatos documentados actualmente: FBX, OBJ y
 GLB. Las texturas pueden importarse desde el selector o mediante drag and
 drop.
 
+Los proyectos publicados deben seguir abriendose al actualizar el editor.
+Trata los archivos existentes como datos de usuario que hay que preservar:
+
+- Los cambios en el esquema de proyectos, escenas, entidades o componentes
+  deben aceptar los datos antiguos y migrarlos de forma incremental e
+  idempotente. Al cargar una escena, completa los campos nuevos que falten en
+  las entidades aplicables (por ejemplo, añadir la configuracion por defecto
+  de un componente nuevo a cada entidad `sun` antigua), sin reemplazar valores
+  existentes ni eliminar campos desconocidos.
+- Define los valores por defecto en el esquema o en una migracion versionada;
+  aplica solo defaults conocidos y semanticamente validos. Conserva el resto
+  de los datos y guarda el resultado migrado usando el flujo de persistencia
+  existente, sin exigir que el usuario recree su proyecto.
+- Comprueba la migracion con fixtures de proyectos/escenas antiguos, datos
+  parciales, datos actuales y una segunda ejecucion; verifica que carga,
+  guardado y recarga preservan tanto los valores existentes como los campos
+  nuevos. Si no se puede migrar de forma segura, no sobrescribas el original:
+  informa el problema y conserva una alternativa recuperable.
+- No presupongas que una version antigua del editor puede leer campos nuevos
+  escritos por una version posterior. Evita incompatibilidades innecesarias y,
+  si una escritura rompe compatibilidad, usa una version de formato/migracion
+  explicita y protege los datos existentes antes de modificar el proyecto.
+
 La configuracion de usuario se guarda fuera del repositorio, en el directorio
 de datos de la aplicacion Tauri, como `config/config.ziron.json`; los proyectos
 recientes se guardan como `config/recent_projects.json`. No añadas archivos de
@@ -167,6 +191,12 @@ usuario al repositorio.
   y resultados, y ofrece una recuperacion o alternativa segura cuando conserve
   el significado de la accion y los datos del usuario. No añadas redundancia
   cosmetica ni cambies silenciosamente a un resultado distinto.
+- Cada validacion debe proteger una condicion o invariante real y tener una
+  respuesta definida; no añadas comprobaciones o ramas `if` especulativas sin
+  una estrategia de recuperacion. Si falta un dato, usa el default definido
+  por el esquema cuando exista y sea valido. Si el dato es obligatorio y no
+  tiene default seguro, informa claramente que falta o que fallo la operacion
+  y no inventes valores aleatorios, datos de ejemplo ni resultados de exito.
 - Reintenta solo fallos transitorios y operaciones repetibles sin efectos
   secundarios duplicados; limita los intentos y usa esperas progresivas cuando
   corresponda. No repitas operaciones destructivas o no idempotentes sin un
