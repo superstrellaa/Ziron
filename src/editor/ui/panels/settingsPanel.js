@@ -24,6 +24,7 @@ import { relaunch } from "@tauri-apps/plugin-process";
 import { invoke } from "@tauri-apps/api/core";
 import { Toast } from "../../../engine/ui/toasts/toastTypes.js";
 import { getActiveViewport } from "../../systems/app/project/projectManager.js";
+import { logger } from "../../../engine/core/logger.js";
 
 let _activePanel = null;
 
@@ -239,9 +240,10 @@ function _setupActions(overlay, dirty, updaterTab) {
   overlay
     .querySelector("#settings-save")
     .addEventListener("click", async () => {
-      const previousLocale = get("editor.locale");
-      const prevAutoSave = get("editor.auto_save");
-      const prevInterval = get("editor.auto_save_interval");
+      // estos valores devuelven en caso de dar error el valor por defecto por seguridad y filosofía
+      const previousLocale = get("editor.locale") ?? "en";
+      const prevAutoSave = get("editor.auto_save") ?? true;
+      const prevInterval = get("editor.auto_save_interval") ?? 5;
 
       await _persistSettings(overlay);
       Toast.settingsSaved();
@@ -259,15 +261,31 @@ function _setupActions(overlay, dirty, updaterTab) {
 
       if (localeChanged) {
         const result = await Popup.restartRequired();
+        let relaunching = false;
+
         if (result === "restart") {
           await checkDirtyAndThen(
             async () => {
-              await invoke("save_window_state").catch(() => {});
-              await relaunch();
+              await invoke("save_window_state").catch((err) =>
+                logger.warn(
+                  "Settings",
+                  `save_window_state failed | Error: ${err}`,
+                ),
+              );
+              relaunching = true;
+              try {
+                await relaunch();
+              } catch (err) {
+                relaunching = false;
+                logger.error("Settings", `relaunch failed | Error: ${err}`);
+                Toast.generalError();
+              }
             },
             { action: "restart" },
           );
         }
+
+        if (!relaunching) await _revertLocale(previousLocale);
       }
     });
 }
@@ -615,4 +633,13 @@ async function _persistSettings(overlay) {
   if (pendingFolder != null) setNoSave("editor.projects_folder", pendingFolder);
 
   await saveConfig();
+}
+
+// Función para revertir el locale si no se reinicia la app
+async function _revertLocale(runningLocale) {
+  logger.info(
+    "Settings",
+    `Restart not performed, reverting editor.locale to running locale: ${runningLocale}`,
+  );
+  await set("editor.locale", runningLocale);
 }
