@@ -4,14 +4,14 @@ use std::sync::Mutex;
 
 use chrono::Utc;
 use once_cell::sync::Lazy;
-use rand::Rng;
+use rand::RngExt;
 
 use tauri::Manager;
 
 static RUN_ID: Lazy<String> = Lazy::new(|| {
-    let mut rng = rand::thread_rng();
+    let mut rng = rand::rng();
     (0..8)
-        .map(|_| format!("{:X}", rng.gen_range(0..16)))
+        .map(|_| format!("{:X}", rng.random_range(0..16)))
         .collect()
 });
 
