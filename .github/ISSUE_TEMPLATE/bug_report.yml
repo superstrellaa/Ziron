@@ -1,0 +1,58 @@
+name: Bug report
+description: Report a bug that does not fit a more specific category.
+title: "[Bug]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form for a reproducible problem that is not specifically about the backend, frontend, or scene/project data.
+  - type: textarea
+    id: summary
+    attributes:
+      label: Bug summary
+      description: Describe what is broken and where you encountered it.
+      placeholder: A concise description of the problem.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: List the exact actions needed to reproduce the problem.
+      placeholder: |
+        1. Open...
+        2. Select...
+        3. Observe...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What did you expect to happen?
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: What happened instead? Include any error message.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: ZIRON Studio version
+      description: Include the app version or commit, if known.
+      placeholder: e.g. 0.1.0
+  - type: input
+    id: environment
+    attributes:
+      label: Operating system
+      description: Include the OS version and architecture.
+      placeholder: e.g. Windows 11, x64
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Logs or supporting material
+      description: Attach screenshots or relevant logs. Remove personal information and secrets before posting.

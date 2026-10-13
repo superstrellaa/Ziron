@@ -1,0 +1,33 @@
+name: Feature suggestion
+description: Suggest an improvement or a new capability for ZIRON Studio.
+title: "[Feature]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Check existing issues first to avoid duplicates. Focus on the problem you want to solve rather than a specific implementation.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or user need
+      description: What is difficult, missing, or inefficient today?
+      placeholder: As a user, I want...
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe the behavior or capability you would like to see.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Describe any workarounds or alternative solutions you have considered.
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Add relevant examples, sketches, or screenshots.

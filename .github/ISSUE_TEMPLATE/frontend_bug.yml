@@ -1,0 +1,65 @@
+name: Frontend bug
+description: Report a problem in the editor UI, viewport, or frontend behavior.
+title: "[Frontend bug]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form for editor UI, toolbar, panels, viewport rendering, input, or frontend behavior.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Frontend area
+      options:
+        - Editor layout or panels
+        - Viewport or rendering
+        - Toolbar, menus, or dialogs
+        - Selection, gizmos, or camera controls
+        - Keyboard shortcuts or input
+        - Localization or accessibility
+        - Other frontend area
+    validations:
+      required: true
+  - type: textarea
+    id: summary
+    attributes:
+      label: Bug summary
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open...
+        2. Click or press...
+        3. Observe...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: Include console or logger errors, if available.
+    validations:
+      required: true
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots or recording
+      description: Add visual evidence if it helps explain the issue.
+  - type: input
+    id: version
+    attributes:
+      label: ZIRON Studio version
+  - type: input
+    id: environment
+    attributes:
+      label: Operating system and display details
+      placeholder: e.g. Windows 11, 1920x1080, 100% scaling

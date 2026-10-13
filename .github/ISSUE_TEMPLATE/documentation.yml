@@ -1,0 +1,25 @@
+name: Documentation improvement
+description: Report unclear, incorrect, or missing documentation.
+title: "[Docs]: "
+body:
+  - type: input
+    id: location
+    attributes:
+      label: Documentation location
+      description: Link the page or name the file and section, if known.
+  - type: textarea
+    id: problem
+    attributes:
+      label: What needs improvement?
+      description: Explain what is unclear, incorrect, or missing.
+    validations:
+      required: true
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: Suggested improvement
+      description: Describe what would make the documentation more useful.
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context

@@ -1,0 +1,35 @@
+name: Question or help request
+description: Ask how to use ZIRON Studio or get help with a workflow.
+title: "[Question]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Check the README and existing issues first. Do not include private project files, personal information, or secrets.
+  - type: textarea
+    id: goal
+    attributes:
+      label: What are you trying to do?
+      description: Describe the goal or workflow you need help with.
+    validations:
+      required: true
+  - type: textarea
+    id: tried
+    attributes:
+      label: What have you tried?
+      description: Include the steps you followed and what happened.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What would you expect to happen?
+  - type: input
+    id: version
+    attributes:
+      label: ZIRON Studio version
+  - type: input
+    id: environment
+    attributes:
+      label: Operating system
+      placeholder: e.g. Windows 11, x64

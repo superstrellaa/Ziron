@@ -1,0 +1,80 @@
+name: Scene, project, or entity bug
+description: Report a problem with projects, scenes, entities, models, or saved data.
+title: "[Scene/project bug]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form for scene or project creation/loading/saving, entity behavior, model imports, or data compatibility issues.
+        Never attach private project files or credentials. Describe the affected data and whether you have a backup.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Affected area
+      options:
+        - Project creation or opening
+        - Scene loading, saving, or switching
+        - Entity creation, deletion, or editing
+        - Entity transforms, visibility, or selection
+        - Model or asset import
+        - Project or scene data compatibility
+        - Other scene or project area
+    validations:
+      required: true
+  - type: textarea
+    id: summary
+    attributes:
+      label: Bug summary
+      description: Describe what happened and which project, scene, or entity operation was involved.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open or create...
+        2. Select or edit...
+        3. Save or reload...
+        4. Observe...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: Include any error message and whether the problem remains after reopening the project.
+    validations:
+      required: true
+  - type: input
+    id: formats
+    attributes:
+      label: Relevant file or model format
+      description: Do not include private paths or upload project data.
+      placeholder: e.g. .ziron.scene, GLB
+  - type: dropdown
+    id: data_safety
+    attributes:
+      label: Project data status
+      options:
+        - No project data was affected
+        - Data is affected, but I have a backup
+        - Data may be affected and I do not have a backup
+        - Not sure
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: ZIRON Studio version
+  - type: input
+    id: environment
+    attributes:
+      label: Operating system
+      placeholder: e.g. Windows 11, x64

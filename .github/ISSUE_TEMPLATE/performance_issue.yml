@@ -1,0 +1,49 @@
+name: Performance issue
+description: Report slow startup, editing, loading, rendering, or excessive resource use.
+title: "[Performance]: "
+body:
+  - type: dropdown
+    id: area
+    attributes:
+      label: Where does the performance issue occur?
+      options:
+        - Application startup
+        - Opening or saving a project or scene
+        - Viewport rendering or camera movement
+        - Creating or editing entities
+        - Importing or loading models and assets
+        - Memory or CPU usage
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: summary
+    attributes:
+      label: Performance problem
+      description: Describe what feels slow or uses more resources than expected.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open...
+        2. Perform...
+        3. Observe...
+    validations:
+      required: true
+  - type: textarea
+    id: measurements
+    attributes:
+      label: Measurements and project scale
+      description: Include timing, approximate entity/model counts, or resource usage if known.
+  - type: input
+    id: version
+    attributes:
+      label: ZIRON Studio version
+  - type: input
+    id: environment
+    attributes:
+      label: Hardware and operating system
+      placeholder: e.g. CPU, GPU, RAM, Windows version

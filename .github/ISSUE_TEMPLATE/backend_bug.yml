@@ -1,0 +1,66 @@
+name: Backend bug
+description: Report a problem in the Rust, Tauri, IPC, or filesystem layer.
+title: "[Backend bug]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form for native application, Rust, Tauri command, configuration, cursor, or filesystem behavior.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Backend area
+      options:
+        - Tauri command or IPC
+        - Project or scene file operations
+        - Asset or filesystem operations
+        - User configuration or recent projects
+        - Native window or cursor
+        - Startup or application lifecycle
+        - Other backend area
+    validations:
+      required: true
+  - type: textarea
+    id: summary
+    attributes:
+      label: Bug summary
+      description: Describe the backend behavior that is failing.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open...
+        2. Perform...
+        3. Observe...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior and errors
+      description: Include the exact error message and relevant log output, if available.
+    validations:
+      required: true
+  - type: textarea
+    id: project_data
+    attributes:
+      label: Project or file impact
+      description: Say whether project files or user data were changed, lost, or left recoverable. Do not attach private project data.
+  - type: input
+    id: version
+    attributes:
+      label: ZIRON Studio version
+  - type: input
+    id: environment
+    attributes:
+      label: Operating system
+      placeholder: e.g. Windows 11, x64
