@@ -1,6 +1,10 @@
 import "./styles.css";
 import { createIcons, Box, Minimize, Maximize, X } from "lucide";
-import { loadConfig, get } from "./editor/systems/persistence/config.js";
+import {
+  loadConfig,
+  get,
+  usedFallbackConfig,
+} from "./editor/systems/persistence/config.js";
 import { applyConfigKeybinds } from "./editor/systems/input/keybinds.js";
 import { setLocale } from "./engine/i18n/i18n.js";
 import { t } from "./engine/i18n/i18n.js";
@@ -8,6 +12,7 @@ import { logger } from "./engine/core/logger.js";
 import { initTooltipSystem } from "./engine/ui/tooltip.js";
 import { initAssetPickerSystem } from "./engine/ui/assetPicker/assetPicker.js";
 import { initToastSystem } from "./engine/ui/toasts/toasts.js";
+import { Toast } from "./engine/ui/toasts/toastTypes.js";
 import { initPopupSystem } from "./engine/ui/popup/popup.js";
 import { invoke } from "@tauri-apps/api/core";
 import {
@@ -45,6 +50,8 @@ async function main() {
   initTooltipSystem();
   initAssetPickerSystem();
   initToastSystem();
+
+  if (usedFallbackConfig()) Toast.failedToLoadConfig(); // si hubo un error al cargar la config, avisamos al usuario
 
   // ── DOM base ──────────────────────────────────────────────────────────────────
   document.querySelector("#app").innerHTML = `

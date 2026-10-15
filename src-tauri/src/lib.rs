@@ -116,6 +116,7 @@ pub fn run() {
             cursor::recenter_cursor,
             config::load_config,
             config::save_config,
+            config::get_default_config,
             project::create_project,
             project::load_project, 
             project::save_scene,

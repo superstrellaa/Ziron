@@ -231,12 +231,14 @@ export default {
         "Could not update the project to the latest ZIRON Studio version.",
     },
     failedToLoadConfig: {
-      title: "Failed to Load Config",
-      message: "Could not load the main configuration file.",
+      title: "Using Default Config",
+      message:
+        "Your configuration file couldn't be loaded, so default settings are being used for this session.",
     },
     failedToSaveConfig: {
-      title: "Failed to Save Config",
-      message: "Could not save the main configuration file.",
+      title: "Settings Not Saved",
+      message:
+        "Your changes are active for now but couldn't be written to disk. They may be lost when you close ZIRON Studio.",
     },
     failedToLoadAssetTree: {
       title: "Failed to Load Asset Tree",

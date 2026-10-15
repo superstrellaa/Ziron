@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { Timer } from "three";
 import { loadModelFromPath } from "../../../engine/world/model/modelLoader";
-import { convertFileSrc } from "@tauri-apps/api/core";
+import { logger } from "../../../engine/core/logger.js";
 
 let _container = null;
 let _renderer = null;
@@ -13,6 +13,9 @@ let _loadToken = 0;
 
 const W = 200;
 const H = 180;
+
+const ERROR_COLOR = 0xef4444;
+const _loggedFailures = new Set(); // evita un log por cada hover sobre el mismo archivo
 
 export function initModelPreview() {
   _container = document.createElement("div");
@@ -93,6 +96,44 @@ function _clearModel() {
   _currentModel = null;
 }
 
+function _createErrorIndicator() {
+  const group = new THREE.Group();
+
+  const frame = new THREE.LineSegments(
+    new THREE.EdgesGeometry(new THREE.BoxGeometry(1.4, 1.4, 1.4)),
+    new THREE.LineBasicMaterial({ color: ERROR_COLOR }),
+  );
+  group.add(frame);
+
+  const barGeometry = new THREE.BoxGeometry(1.9, 0.14, 0.14);
+  const barMaterial = new THREE.MeshStandardMaterial({
+    color: ERROR_COLOR,
+    emissive: ERROR_COLOR,
+    emissiveIntensity: 0.6,
+  });
+
+  for (const rotZ of [Math.PI / 4, -Math.PI / 4]) {
+    const bar = new THREE.Mesh(barGeometry, barMaterial);
+    bar.rotation.z = rotZ;
+    group.add(bar);
+  }
+
+  return group;
+}
+
+function _startLoop(animate) {
+  const timer = new Timer();
+  let t = 0;
+  function loop() {
+    _rafId = requestAnimationFrame(loop);
+    timer.update();
+    t += timer.getDelta();
+    animate(t);
+    _renderer.render(_scene, _camera);
+  }
+  loop();
+}
+
 function _stopLoop() {
   if (_rafId !== null) {
     cancelAnimationFrame(_rafId);
@@ -103,6 +144,7 @@ function _stopLoop() {
 async function _loadModel(absolutePath) {
   _clearModel();
   _stopLoop();
+  _container.classList.remove("has-error");
 
   const token = ++_loadToken;
 
@@ -134,17 +176,28 @@ async function _loadModel(absolutePath) {
     _scene.add(model);
     _currentModel = model;
 
-    const timer = new Timer();
-    let t = 0;
-    function loop() {
-      _rafId = requestAnimationFrame(loop);
-      timer.update();
-      t += timer.getDelta();
+    _startLoop((t) => {
       model.rotation.y = t * 0.9;
-      _renderer.render(_scene, _camera);
-    }
-    loop();
+    });
   } catch (e) {
-    // silencioso
+    if (token !== _loadToken) return;
+
+    if (!_loggedFailures.has(absolutePath)) {
+      _loggedFailures.add(absolutePath);
+      logger.warn(
+        "ModelPreview",
+        `Failed to load model preview: ${absolutePath} | Error: ${e}`,
+      );
+    }
+
+    const indicator = _createErrorIndicator();
+    _scene.add(indicator);
+    _currentModel = indicator;
+    _container.classList.add("has-error");
+
+    _startLoop((t) => {
+      indicator.rotation.y = t * 0.6;
+      indicator.scale.setScalar(1 + Math.sin(t * 4) * 0.04);
+    });
   }
 }

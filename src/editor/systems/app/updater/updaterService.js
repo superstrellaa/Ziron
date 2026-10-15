@@ -301,7 +301,16 @@ export async function installUpdate() {
   setState({ phase: "installing" });
 
   try {
-    await invoke("save_window_state").catch(() => {});
+    try {
+      await invoke("save_window_state");
+      logger.debug(LOG, "Window state saved before install");
+    } catch (e) {
+      // esto "principalmente" no es crítico, pero bueno
+      logger.warn(
+        LOG,
+        `Could not save window state before install, continuing: ${errorMessage(e)}`,
+      );
+    }
     logger.debug(LOG, "Window state saved before install");
 
     await state.update.install();

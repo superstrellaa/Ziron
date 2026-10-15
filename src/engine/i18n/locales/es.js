@@ -243,12 +243,14 @@ export default {
         "El proyecto no se pudo actualizar a la última versión de ZIRON Studio.",
     },
     failedToLoadConfig: {
-      title: "Error al Cargar Configuración",
-      message: "No se pudo cargar el archivo de configuración principal.",
+      title: "Usando Configuración por Defecto",
+      message:
+        "No se pudo cargar tu archivo de configuración, así que se usan los ajustes por defecto durante esta sesión.",
     },
     failedToSaveConfig: {
-      title: "Error al Guardar Configuración",
-      message: "No se pudo guardar el archivo de configuración principal.",
+      title: "Ajustes No Guardados",
+      message:
+        "Tus cambios están activos por ahora, pero no se pudieron escribir en el disco. Pueden perderse al cerrar ZIRON Studio.",
     },
     failedToLoadAssetTree: {
       title: "Error al Cargar Árbol de Assets",

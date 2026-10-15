@@ -245,8 +245,7 @@ function _setupActions(overlay, dirty, updaterTab) {
       const prevAutoSave = get("editor.auto_save") ?? true;
       const prevInterval = get("editor.auto_save_interval") ?? 5;
 
-      await _persistSettings(overlay);
-      Toast.settingsSaved();
+      if (await _persistSettings(overlay)) Toast.settingsSaved();
 
       const newAutoSave = getConfig()?.editor?.auto_save;
       const newInterval = getConfig()?.editor?.auto_save_interval;
@@ -632,7 +631,7 @@ async function _persistSettings(overlay) {
     ?._getPendingFolder?.();
   if (pendingFolder != null) setNoSave("editor.projects_folder", pendingFolder);
 
-  await saveConfig();
+  return saveConfig();
 }
 
 // Función para revertir el locale si no se reinicia la app

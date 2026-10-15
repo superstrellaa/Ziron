@@ -68,11 +68,26 @@ pub fn load_config(app: tauri::AppHandle) -> Result<Value, String> {
         return Ok(defaults);
     }
 
-    let text = read_to_string(&path).map_err(|e| e.to_string())?;
-    let mut config: Value = serde_json::from_str(&text).map_err(|e| e.to_string())?;
+    let text = read_to_string(&path).map_err(|e| format!("Could not read config file: {e}"))?;
+
+    let parsed = serde_json::from_str::<Value>(&text)
+        .map_err(|e| e.to_string())
+        .and_then(|v| {
+            if v.is_object() { Ok(v) } else { Err("root is not a JSON object".to_string()) }
+        });
+
+    let mut config = match parsed {
+        Ok(v) => v,
+        Err(reason) => {
+            let backup = backup_corrupt_config(&path)?;
+            return Err(format!(
+                "Config file is invalid ({reason}). Original moved to {}",
+                backup.display()
+            ));
+        }
+    };
 
     merge_defaults(&mut config, &default_config());
-
     Ok(config)
 }
 
@@ -118,4 +133,18 @@ pub fn read_config(app: &tauri::AppHandle) -> Value {
 
     merge_defaults(&mut config, &default_config());
     config
+}
+
+#[tauri::command]
+pub fn get_default_config() -> Value {
+    default_config()
+}
+
+fn backup_corrupt_config(path: &std::path::Path) -> Result<std::path::PathBuf, String> {
+    let stamp = chrono::Utc::now().format("%Y%m%d-%H%M%S");
+    let backup = path.with_file_name(format!("config.ziron.json.corrupt-{stamp}"));
+    std::fs::rename(path, &backup).map_err(|e| {
+        format!("Config file is invalid and could not be backed up ({e}); it was left untouched.")
+    })?;
+    Ok(backup)
 }

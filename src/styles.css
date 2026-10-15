@@ -507,6 +507,14 @@ body.internal-dragging * {
   text-overflow: ellipsis;
 }
 
+#model-preview-tooltip.has-error {
+  border-color: #7f1d1d;
+}
+
+#model-preview-tooltip.has-error #model-preview-label {
+  color: #f87171;
+}
+
 #texture-preview-tooltip {
   position: fixed;
   pointer-events: none;

@@ -4,36 +4,66 @@ import { Toast } from "../../../engine/ui/toasts/toastTypes.js";
 import { Popup } from "../../../engine/ui/popup/popupTypes.js";
 
 let _config = null;
+let _usedFallback = false;
+
+function describeError(e) {
+  return typeof e === "string" ? e : (e?.message ?? String(e));
+}
+
+export function usedFallbackConfig() {
+  return _usedFallback;
+}
 
 export async function loadConfig() {
   try {
     _config = await invoke("load_config");
+    _usedFallback = false;
     logger.info("Config", "Config loaded");
     return _config;
   } catch (e) {
-    logger.warn("Config", `Failed to load config: ${e}`);
-    Toast.failedToLoadConfig();
-    Popup.error(
-      "Failed to load config: " +
-        (typeof e === "string" ? e : (e?.message ?? String(e))),
+    _usedFallback = true;
+    logger.error(
+      "Config",
+      `Failed to load config, falling back to defaults | Error: ${describeError(e)}`,
     );
-    return null;
+    try {
+      _config = await invoke("get_default_config");
+      logger.info("Config", "Default config loaded as fallback");
+    } catch (fallbackErr) {
+      _config = null;
+      logger.error(
+        "Config",
+        `Failed to load default config | Error: ${describeError(fallbackErr)}`,
+      );
+    }
+    return _config;
   }
 }
 
 export async function saveConfig() {
-  if (!_config) return;
+  if (!_config) {
+    logger.error("Config", "Cannot save config: no config is loaded");
+    Toast.failedToSaveConfig();
+    return false;
+  }
   try {
     await invoke("save_config", { config: _config });
     logger.info("Config", "Config saved");
+    return true;
   } catch (e) {
-    logger.warn("Config", `Failed to save config: ${e}`);
-    Toast.failedToSaveConfig();
-    Popup.error(
-      "Failed to save config: " +
-        (typeof e === "string" ? e : (e?.message ?? String(e))),
+    logger.error(
+      "Config",
+      `Failed to save config | Error: ${describeError(e)}`,
     );
+    Toast.failedToSaveConfig();
+    Popup.error("Failed to save config: " + describeError(e));
+    return false;
   }
+}
+
+export function set(path, value) {
+  setValue(path, value);
+  return saveConfig();
 }
 
 export function getConfig() {
@@ -43,11 +73,6 @@ export function getConfig() {
 export function get(path) {
   if (!_config) return undefined;
   return path.split(".").reduce((obj, key) => obj?.[key], _config);
-}
-
-export async function set(path, value) {
-  setValue(path, value);
-  await saveConfig();
 }
 
 export function setNoSave(path, value) {
