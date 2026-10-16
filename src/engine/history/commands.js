@@ -1,5 +1,13 @@
 import * as THREE from "three";
 import { EventType } from "./historyManager.js";
+import { applyModelTexture } from "../world/model/modelTexture.js";
+
+// ----------------- FUNCTION AUXILIAR -----------------
+async function applyClonedTexture(entity, projectData) {
+  const texture = entity.components?.model?.texture;
+  if (texture) await applyModelTexture(entity, projectData, texture);
+}
+// -------------------------------------------------------
 
 // ----------- COMANDO GENERICO PARA PARANOIAS -----------
 export function GenericCommand(type, executeFn, undoFn) {
@@ -84,7 +92,12 @@ export function CreateCommand(sceneManager, type, options, onCreated) {
   };
 }
 
-export function DuplicateCommand(sceneManager, sourceEntity, onCreated) {
+export function DuplicateCommand(
+  sceneManager,
+  sourceEntity,
+  onCreated,
+  projectData,
+) {
   let entity = null;
   return {
     type: EventType.CreateObject,
@@ -99,6 +112,7 @@ export function DuplicateCommand(sceneManager, sourceEntity, onCreated) {
           .copy(sourceEntity.mesh.position)
           .add(new THREE.Vector3(1, 0, 0));
         entity.components = structuredClone(sourceEntity.components ?? {});
+        await applyClonedTexture(entity, projectData);
       } else {
         const hasColor = !!sourceEntity.mesh.material?.color;
 
@@ -126,7 +140,7 @@ export function DuplicateCommand(sceneManager, sourceEntity, onCreated) {
   };
 }
 
-export function DeleteCommand(sceneManager, entity) {
+export function DeleteCommand(sceneManager, entity, projectData) {
   const snapshot = {
     id: entity.id,
     type: entity.type,
@@ -161,6 +175,10 @@ export function DeleteCommand(sceneManager, entity) {
             hierarchyOrder: snapshot.hierarchyOrder,
           },
         );
+        if (snapshot.components) {
+          restoredEntity.components = structuredClone(snapshot.components);
+          await applyClonedTexture(restoredEntity, projectData);
+        }
       } else {
         restoredEntity = sceneManager.addAt(snapshot.index, snapshot.type, {
           id: snapshot.id,
@@ -180,7 +198,7 @@ export function DeleteCommand(sceneManager, entity) {
   };
 }
 
-export function MultiDeleteCommand(sceneManager, entities) {
+export function MultiDeleteCommand(sceneManager, entities, projectData) {
   const snapshots = entities.map((e) => ({
     id: e.id,
     entity: e,
@@ -220,6 +238,10 @@ export function MultiDeleteCommand(sceneManager, entities) {
           entity.mesh.quaternion.copy(s.quaternion);
           entity.mesh.scale.copy(s.scale);
           if (!s.active) sceneManager.setActive(entity.id, false);
+          if (s.components) {
+            entity.components = structuredClone(s.components);
+            await applyClonedTexture(entity, projectData);
+          }
         }
       }
 
@@ -248,7 +270,12 @@ export function MultiDeleteCommand(sceneManager, entities) {
   };
 }
 
-export function MultiDuplicateCommand(sceneManager, entities, onCreated) {
+export function MultiDuplicateCommand(
+  sceneManager,
+  entities,
+  onCreated,
+  projectData,
+) {
   let created = [];
   return {
     type: EventType.CreateObject,
@@ -265,6 +292,7 @@ export function MultiDuplicateCommand(sceneManager, entities, onCreated) {
             .copy(e.mesh.position)
             .add(new THREE.Vector3(1, 0, 0));
           entity.components = structuredClone(e.components ?? {});
+          await applyClonedTexture(entity, projectData);
         } else {
           const hasColor = !!e.mesh.material?.color;
 

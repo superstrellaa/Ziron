@@ -209,7 +209,7 @@ export function createProperties(
     const unsubUpdate = (entity) => {
       if (entities.some((e) => e.id === entity.id)) syncCheckbox();
     };
-    sceneManager.on("onUpdate", unsubUpdate);
+    // sceneManager.on("onUpdate", unsubUpdate); esto ya está duplicado más abajo
 
     // cuando intente desactivar el sol indicar visualmente que no se puede el espabilado
     checkbox.addEventListener("mouseenter", () => {

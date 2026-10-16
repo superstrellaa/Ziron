@@ -123,7 +123,12 @@ export async function createViewport(container, projectData) {
   );
   topArea.insertBefore(container.querySelector("#hierarchy"), viewportEl);
 
-  const history = setupHistory(gizmo.gizmo, selection, sceneManager);
+  const history = setupHistory(
+    gizmo.gizmo,
+    selection,
+    sceneManager,
+    projectData,
+  );
 
   const properties = createProperties(
     container,
@@ -148,6 +153,7 @@ export async function createViewport(container, projectData) {
     selection,
     camera,
     flyControls,
+    projectData,
   );
   hierarchy.setContextMenu(ctxMenu);
 

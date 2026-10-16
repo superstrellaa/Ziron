@@ -14,10 +14,15 @@ import { onKeybind } from "../input/keybinds.js";
 import { getClipboard, setClipboard } from "../../scene/contextMenu.js";
 import { getContext } from "../app/selectionContext.js";
 
-export function setupHistory(tc, selection, sceneManager) {
+export function setupHistory(tc, selection, sceneManager, projectData) {
   const history = createHistoryManager();
 
   let _multiSnapshotBefore = null;
+
+  const reselect = (entity) => {
+    selection.deselect();
+    selection.selectEntity(entity);
+  };
 
   onKeybind(
     ["DELETE", "UNDO", "REDO", "DUPLICATE", "COPY", "PASTE"],
@@ -37,7 +42,12 @@ export function setupHistory(tc, selection, sceneManager) {
         if (getContext() !== "scene") return;
         const multiSelected = selection.getMultiSelected();
         if (multiSelected.length > 0) {
-          const cmd = MultiDeleteCommand(sceneManager, multiSelected);
+          const cmd = MultiDeleteCommand(
+            sceneManager,
+            multiSelected,
+            reselect,
+            projectData,
+          );
           cmd.execute();
           history.push(cmd);
           selection.deselect();
@@ -45,7 +55,7 @@ export function setupHistory(tc, selection, sceneManager) {
         }
         const entity = selection.getSelected();
         if (!entity || entity.type === "sun") return;
-        const cmd = DeleteCommand(sceneManager, entity);
+        const cmd = DeleteCommand(sceneManager, entity, reselect, projectData);
         cmd.execute();
         history.push(cmd);
         selection.deselect();
@@ -60,6 +70,7 @@ export function setupHistory(tc, selection, sceneManager) {
             sceneManager,
             multiSelected,
             (created) => selection.selectMultiple(created),
+            projectData,
           );
           await cmd.execute();
           history.push(cmd);
@@ -67,7 +78,12 @@ export function setupHistory(tc, selection, sceneManager) {
         }
         const entity = selection.getSelected();
         if (!entity || entity.type === "sun") return;
-        const cmd = DuplicateCommand(sceneManager, entity);
+        const cmd = DuplicateCommand(
+          sceneManager,
+          entity,
+          reselect,
+          projectData,
+        );
         cmd.execute();
         history.push(cmd);
       }
@@ -83,7 +99,7 @@ export function setupHistory(tc, selection, sceneManager) {
         e.preventDefault();
         const src = getClipboard();
         if (!src) return;
-        const cmd = DuplicateCommand(sceneManager, src);
+        const cmd = DuplicateCommand(sceneManager, src, reselect, projectData);
         cmd.execute();
         history.push(cmd);
       }

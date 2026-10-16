@@ -65,6 +65,7 @@ export function createContextMenu(
   selection,
   camera,
   flyControls,
+  projectData,
 ) {
   let mouseDownX = 0,
     mouseDownY = 0,
@@ -109,7 +110,15 @@ export function createContextMenu(
         selection.selectEntity(hitEntity);
     }
 
-    showMenu(e.clientX, e.clientY, sceneManager, history, selection, hitEntity);
+    showMenu(
+      e.clientX,
+      e.clientY,
+      sceneManager,
+      history,
+      selection,
+      hitEntity,
+      projectData,
+    );
   });
 
   window.addEventListener("mousedown", (e) => {
@@ -122,7 +131,7 @@ export function createContextMenu(
 
   return {
     showAt(x, y, hitEntity = null) {
-      showMenu(x, y, sceneManager, history, selection, hitEntity);
+      showMenu(x, y, sceneManager, history, selection, hitEntity, projectData);
     },
   };
 }
@@ -134,9 +143,22 @@ function closeMenu() {
   clearActiveMenu(closeMenu);
 }
 
-function showMenu(x, y, sceneManager, history, selection, hitEntity) {
+function showMenu(
+  x,
+  y,
+  sceneManager,
+  history,
+  selection,
+  hitEntity,
+  projectData,
+) {
   closeMenu();
   registerOpenMenu(closeMenu);
+
+  const reselect = (entity) => {
+    selection.deselect();
+    selection.selectEntity(entity);
+  };
 
   const menu = document.createElement("div");
   menu.className = "ctx-menu-wrapper";
@@ -152,7 +174,12 @@ function showMenu(x, y, sceneManager, history, selection, hitEntity) {
     ul.appendChild(liCopy);
 
     const liDup = makeItem(t("contextMenu.duplicate"), () => {
-      const cmd = DuplicateCommand(sceneManager, hitEntity);
+      const cmd = DuplicateCommand(
+        sceneManager,
+        hitEntity,
+        reselect,
+        projectData,
+      );
       cmd.execute();
       history.push(cmd);
       closeMenu();
@@ -172,7 +199,12 @@ function showMenu(x, y, sceneManager, history, selection, hitEntity) {
     const liDelete = makeItem(
       t("contextMenu.delete"),
       () => {
-        const cmd = DeleteCommand(sceneManager, hitEntity);
+        const cmd = DeleteCommand(
+          sceneManager,
+          hitEntity,
+          reselect,
+          projectData,
+        );
         cmd.execute();
         history.push(cmd);
         selection.deselect();
@@ -190,7 +222,12 @@ function showMenu(x, y, sceneManager, history, selection, hitEntity) {
     const ulPaste = document.createElement("ul");
     ulPaste.className = "ctx-menu";
     const liPaste = makeItem(t("contextMenu.paste"), () => {
-      const cmd = DuplicateCommand(sceneManager, _clipboard);
+      const cmd = DuplicateCommand(
+        sceneManager,
+        _clipboard,
+        reselect,
+        projectData,
+      );
       cmd.execute();
       history.push(cmd);
       closeMenu();
