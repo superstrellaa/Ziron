@@ -1,11 +1,96 @@
 import * as THREE from "three";
 import { EventType } from "./historyManager.js";
 import { applyModelTexture } from "../world/model/modelTexture.js";
+import { logger } from "../core/logger.js";
+import { Toast } from "../ui/toasts/toastTypes.js";
 
-// ----------------- FUNCTION AUXILIAR -----------------
+// ----------------- FUNCTIONES AUXILIARES -----------------
 async function applyClonedTexture(entity, projectData) {
   const texture = entity.components?.model?.texture;
-  if (texture) await applyModelTexture(entity, projectData, texture);
+  if (!texture) return;
+
+  if (!projectData) {
+    logger.error(
+      "History",
+      `Cannot apply texture "${texture}" to "${entity.name}": projectData was not provided`,
+    );
+    Toast.failedToLoadTexture();
+    return;
+  }
+
+  await applyModelTexture(entity, projectData, texture);
+}
+
+function captureSnapshot(sceneManager, entity) {
+  if (!entity?.mesh) {
+    throw new Error("Cannot snapshot an entity without a mesh");
+  }
+  if (entity.type === "model" && (!entity._absolutePath || !entity.modelPath)) {
+    throw new Error(
+      `Model "${entity.name}" has no source path, so it could not be restored after deleting`,
+    );
+  }
+  const index = sceneManager.indexOf(entity.id);
+  if (index < 0) {
+    throw new Error(
+      `Entity "${entity.name}" (id:${entity.id}) is not in the scene`,
+    );
+  }
+
+  return {
+    id: entity.id,
+    entity,
+    type: entity.type,
+    name: entity.name,
+    active: entity.active ?? true, // default del esquema, igual que al cargar escenas
+    hierarchyOrder: entity.hierarchyOrder, // undefined: el registro asigna uno
+    position: entity.mesh.position.clone(),
+    quaternion: entity.mesh.quaternion.clone(),
+    scale: entity.mesh.scale.clone(),
+    color: entity.mesh.material?.color?.getHex() ?? null, // null = sin color
+    modelPath: entity.modelPath ?? null,
+    index,
+    _absolutePath: entity._absolutePath ?? null,
+    components: entity.components ? structuredClone(entity.components) : null,
+  };
+}
+
+async function restoreEntity(sceneManager, s, projectData) {
+  let entity;
+
+  if (s.type === "model") {
+    entity = await sceneManager.addModel(s._absolutePath, s.modelPath, {
+      id: s.id,
+      name: s.name,
+      active: s.active,
+      index: s.index,
+      hierarchyOrder: s.hierarchyOrder,
+    });
+  } else {
+    entity = sceneManager.addAt(s.index, s.type, {
+      id: s.id,
+      name: s.name,
+      color: s.color,
+      position: s.position,
+      active: s.active,
+      hierarchyOrder: s.hierarchyOrder,
+    });
+    if (!entity) {
+      throw new Error(`Could not recreate "${s.name}" (type: ${s.type})`);
+    }
+  }
+
+  if (s.components) {
+    entity.components = structuredClone(s.components);
+    await applyClonedTexture(entity, projectData);
+  }
+
+  entity.mesh.position.copy(s.position);
+  entity.mesh.quaternion.copy(s.quaternion);
+  entity.mesh.scale.copy(s.scale);
+  if (!s.active) sceneManager.setActive(entity.id, false);
+
+  return entity;
 }
 // -------------------------------------------------------
 
@@ -141,107 +226,48 @@ export function DuplicateCommand(
 }
 
 export function DeleteCommand(sceneManager, entity, projectData) {
-  const snapshot = {
-    id: entity.id,
-    type: entity.type,
-    name: entity.name,
-    active: entity.active ?? true,
-    hierarchyOrder: entity.hierarchyOrder,
-    position: entity.mesh.position.clone(),
-    quaternion: entity.mesh.quaternion.clone(),
-    scale: entity.mesh.scale.clone(),
-    color: entity.mesh.material?.color?.getHex() ?? null,
-    modelPath: entity.modelPath ?? null,
-    index: sceneManager.indexOf(entity.id),
-    _absolutePath: entity._absolutePath ?? null,
-  };
-  let restoredEntity = null;
+  if (entity.type === "sun") throw new Error("The sun cannot be deleted");
+  const snapshot = captureSnapshot(sceneManager, entity);
 
   return {
     type: EventType.DeleteObject,
     execute() {
-      sceneManager.remove(entity.id);
+      if (!sceneManager.remove(entity.id)) {
+        throw new Error(`Could not delete "${entity.name}" (id:${entity.id})`);
+      }
     },
     async undo() {
-      if (snapshot.type === "model") {
-        restoredEntity = await sceneManager.addModel(
-          snapshot._absolutePath,
-          snapshot.modelPath,
-          {
-            id: snapshot.id,
-            name: snapshot.name,
-            active: snapshot.active,
-            index: snapshot.index,
-            hierarchyOrder: snapshot.hierarchyOrder,
-          },
-        );
-        if (snapshot.components) {
-          restoredEntity.components = structuredClone(snapshot.components);
-          await applyClonedTexture(restoredEntity, projectData);
-        }
-      } else {
-        restoredEntity = sceneManager.addAt(snapshot.index, snapshot.type, {
-          id: snapshot.id,
-          name: snapshot.name,
-          color: snapshot.color,
-          position: snapshot.position,
-          active: snapshot.active,
-          hierarchyOrder: snapshot.hierarchyOrder,
-        });
-      }
-
-      restoredEntity.mesh.position.copy(snapshot.position);
-      restoredEntity.mesh.quaternion.copy(snapshot.quaternion);
-      restoredEntity.mesh.scale.copy(snapshot.scale);
-      if (!snapshot.active) sceneManager.setActive(restoredEntity.id, false);
+      await restoreEntity(sceneManager, snapshot, projectData);
     },
   };
 }
 
 export function MultiDeleteCommand(sceneManager, entities, projectData) {
-  const snapshots = entities.map((e) => ({
-    id: e.id,
-    entity: e,
-    type: e.type,
-    name: e.name,
-    active: e.active ?? true,
-    hierarchyOrder: e.hierarchyOrder,
-    position: e.mesh.position.clone(),
-    quaternion: e.mesh.quaternion.clone(),
-    scale: e.mesh.scale.clone(),
-    color: e.mesh.material?.color?.getHex() ?? null,
-    modelPath: e.modelPath ?? null,
-    index: sceneManager.indexOf(e.id),
-    _absolutePath: e._absolutePath ?? null,
-  }));
+  const deletable = entities.filter((e) => e.type !== "sun");
+  if (deletable.length !== entities.length) {
+    logger.warn("History", "The sun was excluded from a multi-delete");
+  }
+  if (deletable.length === 0) throw new Error("Nothing to delete");
+
+  const snapshots = deletable.map((e) => captureSnapshot(sceneManager, e));
 
   return {
     type: EventType.DeleteObject,
     async execute() {
-      await sceneManager.removeBatch(snapshots.map((s) => s.entity.id));
+      await sceneManager.removeBatch(snapshots.map((s) => s.id));
     },
     async undo() {
-      for (const s of snapshots) {
-        if (s.type === "model") {
-          const entity = await sceneManager.addModel(
-            s._absolutePath,
-            s.modelPath,
-            {
-              id: s.id,
-              name: s.name,
-              active: s.active,
-              index: s.index,
-              hierarchyOrder: s.hierarchyOrder,
-            },
+      let failures = 0;
+
+      for (const s of snapshots.filter((s) => s.type === "model")) {
+        try {
+          await restoreEntity(sceneManager, s, projectData);
+        } catch (e) {
+          failures++;
+          logger.error(
+            "History",
+            `Could not restore "${s.name}" | Error: ${e}`,
           );
-          entity.mesh.position.copy(s.position);
-          entity.mesh.quaternion.copy(s.quaternion);
-          entity.mesh.scale.copy(s.scale);
-          if (!s.active) sceneManager.setActive(entity.id, false);
-          if (s.components) {
-            entity.components = structuredClone(s.components);
-            await applyClonedTexture(entity, projectData);
-          }
         }
       }
 
@@ -260,12 +286,24 @@ export function MultiDeleteCommand(sceneManager, entities, projectData) {
           index: s.index,
           _source: s,
         }));
-        await sceneManager.addBatch(items, (entity, item) => {
-          entity.mesh.quaternion.copy(item._source.quaternion);
-          entity.mesh.scale.copy(item._source.scale);
-          if (!item._source.active) sceneManager.setActive(entity.id, false);
-        });
+
+        try {
+          await sceneManager.addBatch(items, (entity, item) => {
+            const src = item._source;
+            entity.mesh.quaternion.copy(src.quaternion);
+            entity.mesh.scale.copy(src.scale);
+            if (src.components) {
+              entity.components = structuredClone(src.components);
+            }
+            if (!src.active) sceneManager.setActive(entity.id, false);
+          });
+        } catch (e) {
+          failures++;
+          logger.error("History", `Could not restore primitives | Error: ${e}`);
+        }
       }
+
+      if (failures > 0) Toast.generalError();
     },
   };
 }
