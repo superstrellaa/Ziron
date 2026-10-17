@@ -4,6 +4,15 @@ import { Toast } from "../ui/toasts/toastTypes.js";
 import { GenericCommand } from "../history/commands.js";
 import { blobToBase64 } from "../../editor/scene/cameraGizmo/cameraRenderCapture.js";
 
+let _renderInProgress = false;
+
+function safeFileName(name) {
+  const cleaned = String(name ?? "")
+    .replace(/[\\/:*?"<>|]/g, "_")
+    .trim();
+  return cleaned || "render";
+}
+
 export const COMPONENTS = [
   {
     id: "model",
@@ -119,35 +128,60 @@ export const COMPONENTS = [
             tooltipKey: "components.camera.renderCameraTip",
             icon: "scan-box",
             action: async (entity, ctx) => {
-              if (!ctx.renderCapture) return;
+              if (_renderInProgress) {
+                logger.debug(
+                  "CameraRender",
+                  "Render requested while another one is running; ignored",
+                );
+                return;
+              }
+              _renderInProgress = true;
+
+              let stage = "capture";
               try {
+                if (!ctx.renderCapture) {
+                  throw new Error("Render capture system is not available");
+                }
+
                 const blob = await ctx.renderCapture.capture(entity);
-                if (!blob) return;
+                if (!blob) {
+                  throw new Error(
+                    `Capture returned no image for "${entity.name}"`,
+                  );
+                }
 
+                stage = "encode";
                 const base64 = await blobToBase64(blob);
-                const defaultName = `${entity.name || "render"}.png`;
 
+                stage = "save";
                 const saved = await invoke("save_render_png", {
-                  defaultName,
+                  defaultName: `${safeFileName(entity.name)}.png`,
                   dataBase64: base64,
                 });
 
                 if (saved) {
                   logger.info("CameraRender", `Render saved → ${saved}`);
                   Toast.renderSuccess();
+                } else {
+                  logger.info(
+                    "CameraRender",
+                    "Render discarded: save dialog cancelled",
+                  );
                 }
               } catch (e) {
                 const errorMessage =
                   typeof e === "string" ? e : (e?.message ?? String(e));
-                logger.warn(
+                logger.error(
                   "CameraRender",
-                  `Failed to capture render: ${errorMessage}`,
+                  `Render failed at stage "${stage}" | Error: ${errorMessage}`,
                 );
                 if (errorMessage.startsWith("render_file_locked:")) {
                   Toast.renderFileLocked();
                 } else {
                   Toast.failedToRenderScene();
                 }
+              } finally {
+                _renderInProgress = false;
               }
             },
           },

@@ -1,7 +1,10 @@
 import * as THREE from "three";
+import { logger } from "../../../engine/core/logger.js";
 
 const SKY_RADIUS = 450;
 const SKY_MARGIN = 50;
+
+const CAMERA_DEFAULTS = { fov: 50, near: 0.1, far: 1000 };
 
 const RESOLUTION = { width: 3840, height: 2160 };
 const LINEAR_TO_SRGB = Uint8Array.from({ length: 256 }, (_, value) => {
@@ -28,12 +31,16 @@ export function createCameraRenderCapture(
   async function capture(entity) {
     if (!entity || entity.type !== "camera") return null;
 
-    const comp = entity.components?.camera;
-    const userFar = comp?.far ?? 1000;
+    const gl = renderer.getContext();
+    if (gl.isContextLost()) {
+      throw new Error("WebGL context is lost; cannot render");
+    }
 
-    captureCamera.fov = comp?.fov ?? 50;
-    captureCamera.near = comp?.near ?? 0.1;
-    captureCamera.far = Math.max(userFar, SKY_RADIUS + SKY_MARGIN);
+    const { fov, near, far } = readCameraSettings(entity.components?.camera);
+
+    captureCamera.fov = fov;
+    captureCamera.near = near;
+    captureCamera.far = far;
     captureCamera.aspect = RESOLUTION.width / RESOLUTION.height;
     captureCamera.updateProjectionMatrix();
 
@@ -80,6 +87,13 @@ export function createCameraRenderCapture(
         RESOLUTION.height,
         pixels,
       );
+
+      if (gl.isContextLost()) {
+        throw new Error("WebGL context was lost during the render");
+      }
+      if (isBlank(pixels)) {
+        throw new Error("Render produced an empty image");
+      }
 
       return pixelsToPngBlob(
         pixels,
@@ -159,4 +173,43 @@ export function blobToBase64(blob) {
     reader.onabort = () => reject(new Error("Reading PNG data was aborted"));
     reader.readAsDataURL(blob);
   });
+}
+
+function pickCameraValue(name, value, min, max) {
+  if (value == null) return CAMERA_DEFAULTS[name];
+  if (Number.isFinite(value) && value >= min && value <= max) return value;
+  logger.warn(
+    "CameraRender",
+    `Invalid camera ${name} (${value}); using default ${CAMERA_DEFAULTS[name]}`,
+  );
+  return CAMERA_DEFAULTS[name];
+}
+
+function readCameraSettings(comp) {
+  const fov = pickCameraValue("fov", comp?.fov, 1, 179);
+  let near = pickCameraValue("near", comp?.near, 0.01, Infinity);
+  const far = Math.max(
+    pickCameraValue("far", comp?.far, 1, Infinity),
+    SKY_RADIUS + SKY_MARGIN,
+  );
+  if (near >= far) {
+    logger.warn(
+      "CameraRender",
+      `Camera near (${near}) is not below far (${far}); using default near`,
+    );
+    near = CAMERA_DEFAULTS.near;
+  }
+  return { fov, near, far };
+}
+
+function isBlank(pixels) {
+  const words = new Uint32Array(
+    pixels.buffer,
+    pixels.byteOffset,
+    pixels.byteLength / 4,
+  );
+  for (let i = 0; i < words.length; i++) {
+    if (words[i] !== 0) return false;
+  }
+  return true;
 }
