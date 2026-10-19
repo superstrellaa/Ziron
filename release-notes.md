@@ -1,59 +1,42 @@
-# ZIRON Studio — Early Access v0.1.0
+# ZIRON Studio — Early Access v0.1.1
 
-The first Early Access release of ZIRON Studio is here. ZIRON Studio is a
-lightweight desktop editor for building and iterating on 3D scenes and visual
-prototypes. This initial release brings together the core scene-editing,
-project, and asset workflows in one focused application.
+This update focuses on reliability when opening projects, editing scenes,
+managing assets, and capturing renders.
 
-## What’s included
+## Improvements
 
-### Build and explore 3D scenes
+- Scene loading now validates saved entity data, keeps usable defaults for
+  invalid optional values, preserves custom and unknown component data, and
+  reports entities that could not be loaded. A recovery backup is created when
+  loading detects data that could otherwise be lost.
+- Project and scene workflows handle failures more clearly. Opening another
+  project checks for unsaved changes, simultaneous project openings are
+  prevented, and failed project loads return to the welcome screen with an
+  error message.
+- User data writes are safer: configuration, project files, and scenes use
+  atomic writes to protect existing files from incomplete saves.
+- Asset operations validate paths, avoid silently overwriting existing files,
+  and give imported files a new name when the destination already contains the
+  same name. Import failures are reported with more useful details.
+- Render capture validates camera settings and image output, detects lost
+  WebGL contexts, and saves PNG files atomically. Errors such as a destination
+  file being locked are reported instead of silently failing.
+- Configuration load and save failures are surfaced, with default settings
+  used when the saved configuration cannot be loaded.
+- Fatal startup errors now show a dialog with an option to copy error details
+  before closing the application.
 
-- A real-time 3D viewport with an infinite grid, procedural sky, and
-  directional sunlight.
-- Fly-camera navigation for moving around and inspecting a scene.
-- Built-in cube, sphere, cylinder, capsule, plane, and cone primitives, plus
-  camera entities.
-- A scene hierarchy for selecting, arranging, renaming, and managing entities.
-- Single selection, multi-selection, and box selection.
-- Translate, rotate, and scale gizmos, with support for transforming multiple
-  selected entities together.
-- A properties inspector for editing names, active state, position, rotation,
-  and scale; compatible edits can be applied to multiple selected entities.
-- Undo and redo for supported scene-editing actions, along with copy, paste,
-  duplicate, and delete workflows.
+## Fixes
 
-### Work with projects and assets
+- Duplicating, copying, pasting, or restoring entities now preserves custom
+  components and reapplies model texture overrides.
+- Changing the interface language and postponing the requested restart no
+  longer leaves the saved language out of sync with the language currently in
+  use.
+- Model previews show a clear placeholder when a model cannot be loaded.
+- Window state and project-opening flows handle failures more safely and
+  report them to the user.
 
-- Create and open ZIRON projects, save and load scenes, and revisit recent
-  projects from the welcome screen.
-- Open a project from the command line or by opening its `.ziron.project` file.
-- Scene serialization in `.ziron.scene` files, with project version
-  compatibility checks.
-- Optional automatic scene saving with a configurable interval, plus a
-  warning and confirmation flow for unsaved changes when closing.
-- An asset browser for organizing project folders and managing imported files.
-- Import FBX, OBJ, glTF, and GLB models, and PNG, JPG, JPEG, and WebP textures.
-- Drag supported files into the editor, preview assets in the browser, and drag
-  models into the viewport to add them to a scene.
-- Choose project textures through the asset picker and apply them to models.
+## Maintenance
 
-### Capture and personalize
-
-- Camera entities with adjustable field of view and clipping distances, a live
-  camera preview, and PNG render capture at 3840 × 2160.
-- English and Spanish interface languages.
-- Configurable keyboard shortcuts and editor settings.
-- Toast notifications, dialogs, tooltips, and structured application logs.
-- An in-app update checker and installer workflow.
-
-## First Early Access release
-
-Version 0.1.0 is the first Early Access release of ZIRON Studio, not a final
-release. It provides the foundation for creating and saving scenes, while the
-editor and its workflows continue to evolve. Features, usability, and project
-compatibility may change as development progresses.
-
-ZIRON Studio is focused on 3D scene prototyping; it is not a complete game
-engine. As with any early version, keep backup copies of important projects and
-report issues or share feedback through the project’s GitHub repository.
+- Updated the Rust `rand` dependency and GitHub Actions workflow dependencies.
