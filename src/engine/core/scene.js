@@ -77,10 +77,13 @@ export async function createScene(renderer, projectData, onProgress = null) {
       const backup = needsBackup(report)
         ? await backupScene(projectData, sceneNameFromFile)
         : null;
+      const loadedCount =
+        added.length +
+        (saved.entities.some((entity) => entity?.type === "sun") ? 1 : 0);
 
       logger.info(
         "Scene",
-        `Loaded ${added.length}/${saved.entities.length} entities (skipped: ${report.skipped.length}, repaired: ${report.repaired.length})`,
+        `Loaded ${loadedCount}/${saved.entities.length} entities (skipped: ${report.skipped.length}, repaired: ${report.repaired.length})`,
       );
       notifyLoadReport(report, backup);
     }
