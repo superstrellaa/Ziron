@@ -13,9 +13,14 @@ import {
 import { onKeybind } from "../input/keybinds.js";
 import { getClipboard, setClipboard } from "../../scene/contextMenu.js";
 import { getContext } from "../app/selectionContext.js";
+import { logger } from "../../../engine/core/logger.js";
+import { createCommandRunner } from "../../../engine/history/commandRunner.js";
+
+const LOG = "History";
 
 export function setupHistory(tc, selection, sceneManager, projectData) {
   const history = createHistoryManager();
+  const runner = createCommandRunner(history);
 
   let _multiSnapshotBefore = null;
 
@@ -24,17 +29,17 @@ export function setupHistory(tc, selection, sceneManager, projectData) {
     selection.selectEntity(entity);
   };
 
-  onKeybind(
+  const unsubKeybinds = onKeybind(
     ["DELETE", "UNDO", "REDO", "DUPLICATE", "COPY", "PASTE"],
     async (e, action) => {
       if (action === "UNDO") {
         e.preventDefault();
-        await history.undo();
+        await runner.step("Undo", () => history.undo());
         return;
       }
       if (action === "REDO") {
         e.preventDefault();
-        await history.redo();
+        await runner.step("Redo", () => history.redo());
         return;
       }
 
@@ -42,23 +47,19 @@ export function setupHistory(tc, selection, sceneManager, projectData) {
         if (getContext() !== "scene") return;
         const multiSelected = selection.getMultiSelected();
         if (multiSelected.length > 0) {
-          const cmd = MultiDeleteCommand(
-            sceneManager,
-            multiSelected,
-            reselect,
-            projectData,
+          if (multiSelected.every((s) => s.type === "sun")) return;
+          const cmd = await runner.run("Multi delete", () =>
+            MultiDeleteCommand(sceneManager, multiSelected, projectData),
           );
-          cmd.execute();
-          history.push(cmd);
-          selection.deselect();
+          if (cmd) selection.deselect();
           return;
         }
         const entity = selection.getSelected();
         if (!entity || entity.type === "sun") return;
-        const cmd = DeleteCommand(sceneManager, entity, reselect, projectData);
-        cmd.execute();
-        history.push(cmd);
-        selection.deselect();
+        const cmd = await runner.run("Delete", () =>
+          DeleteCommand(sceneManager, entity, projectData),
+        );
+        if (cmd) selection.deselect();
         return;
       }
 
@@ -66,26 +67,22 @@ export function setupHistory(tc, selection, sceneManager, projectData) {
         e.preventDefault();
         const multiSelected = selection.getMultiSelected();
         if (multiSelected.length > 0) {
-          const cmd = MultiDuplicateCommand(
-            sceneManager,
-            multiSelected,
-            (created) => selection.selectMultiple(created),
-            projectData,
+          const cmd = await runner.run("Multi duplicate", () =>
+            MultiDuplicateCommand(
+              sceneManager,
+              multiSelected,
+              (created) => selection.selectMultiple(created),
+              projectData,
+            ),
           );
-          await cmd.execute();
-          history.push(cmd);
           return;
         }
         const entity = selection.getSelected();
         if (!entity || entity.type === "sun") return;
-        const cmd = DuplicateCommand(
-          sceneManager,
-          entity,
-          reselect,
-          projectData,
+        await runner.run("Duplicate", () =>
+          DuplicateCommand(sceneManager, entity, reselect, projectData),
         );
-        cmd.execute();
-        history.push(cmd);
+        return;
       }
 
       if (action === "COPY") {
@@ -99,9 +96,9 @@ export function setupHistory(tc, selection, sceneManager, projectData) {
         e.preventDefault();
         const src = getClipboard();
         if (!src) return;
-        const cmd = DuplicateCommand(sceneManager, src, reselect, projectData);
-        cmd.execute();
-        history.push(cmd);
+        await runner.run("Paste", () =>
+          DuplicateCommand(sceneManager, src, reselect, projectData),
+        );
       }
     },
   );
@@ -110,7 +107,7 @@ export function setupHistory(tc, selection, sceneManager, projectData) {
   const _quatBefore = new THREE.Quaternion();
   const _scaleBefore = new THREE.Vector3();
 
-  tc.addEventListener("mouseDown", () => {
+  const onGizmoMouseDown = () => {
     const mesh = tc.object;
     if (!mesh) return;
     _posBefore.copy(mesh.position);
@@ -128,9 +125,9 @@ export function setupHistory(tc, selection, sceneManager, projectData) {
     } else {
       _multiSnapshotBefore = null;
     }
-  });
+  };
 
-  tc.addEventListener("mouseUp", () => {
+  const onGizmoMouseUp = () => {
     const mesh = tc.object;
     if (!mesh) return;
 
@@ -168,7 +165,23 @@ export function setupHistory(tc, selection, sceneManager, projectData) {
         to = mesh.scale.clone();
       if (!from.equals(to)) history.push(ScaleCommand(mesh, from, to));
     }
-  });
+  };
 
-  return history;
+  tc.addEventListener("mouseDown", onGizmoMouseDown);
+  tc.addEventListener("mouseUp", onGizmoMouseUp);
+
+  function destroy() {
+    if (typeof unsubKeybinds === "function") {
+      unsubKeybinds();
+    } else {
+      logger.warn(
+        LOG,
+        "onKeybind did not return an unsubscribe function; history shortcuts were not removed",
+      );
+    }
+    tc.removeEventListener("mouseDown", onGizmoMouseDown);
+    tc.removeEventListener("mouseUp", onGizmoMouseUp);
+  }
+
+  return { history, runner, destroy };
 }

@@ -114,7 +114,7 @@ export function createSceneManager(scene) {
         "SceneManager",
         `Failed to load model "${absolutePath}": ${e}`,
       );
-      Toast.failedToLoadModel();
+      if (!options.silentErrors) Toast.failedToLoadModel();
     }
 
     group.visible = entity.active;
@@ -151,10 +151,16 @@ export function createSceneManager(scene) {
 
   // ── API batch ─────────────────────────────────────────────────────────────
 
-  async function addBatch(items, onEachBuilt = null, onProgress = null) {
+  async function addBatch(
+    items,
+    onEachBuilt = null,
+    onProgress = null,
+    onItemError = null,
+  ) {
     const CHUNK_SIZE = 50;
     const added = [];
     const total = items.length;
+    let processed = 0;
 
     const sorted = [...items].sort(
       (a, b) => (a.index ?? Infinity) - (b.index ?? Infinity),
@@ -164,23 +170,46 @@ export function createSceneManager(scene) {
       const chunk = sorted.slice(i, i + CHUNK_SIZE);
 
       for (const item of chunk) {
-        const entity = _build(item.type, item.options ?? {});
-        if (!entity) continue;
+        processed++;
+        let entity = null;
 
-        entity.hierarchyOrder = registry.consumeHierarchyOrder(
-          item.options?.hierarchyOrder ?? null,
-        );
+        try {
+          entity = _build(item.type, item.options ?? {});
+          if (!entity) throw new Error(`Unknown entity type "${item.type}"`);
 
-        scene.add(entity.mesh);
-        item.index != null
-          ? registry.insertAt(item.index, entity)
-          : registry.set(entity);
+          entity.hierarchyOrder = registry.consumeHierarchyOrder(
+            item.options?.hierarchyOrder ?? null,
+          );
 
-        onEachBuilt?.(entity, item);
+          scene.add(entity.mesh);
+          item.index != null
+            ? registry.insertAt(item.index, entity)
+            : registry.set(entity);
+        } catch (e) {
+          if (entity?.mesh) {
+            scene.remove(entity.mesh);
+            _disposeObject(entity.mesh);
+          }
+          logger.error(
+            "SceneManager",
+            `Batch item (${item.type}) could not be created | Error: ${e}`,
+          );
+          onItemError?.(item, e);
+          continue;
+        }
+
+        try {
+          onEachBuilt?.(entity, item);
+        } catch (e) {
+          logger.warn(
+            "SceneManager",
+            `Post-build setup failed for "${entity.name}" (id:${entity.id}); keeping its defaults | Error: ${e}`,
+          );
+        }
         added.push(entity);
       }
 
-      onProgress?.(Math.min(added.length, total), total);
+      onProgress?.(processed, total);
 
       if (i + CHUNK_SIZE < sorted.length) {
         await new Promise((r) => requestAnimationFrame(r));

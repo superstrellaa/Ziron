@@ -52,12 +52,13 @@ export async function saveScene(
     if (toast) Toast.saveSuccess();
     return true;
   } catch (e) {
-    logger.warn("ScenePersistence", `Failed to save scene: ${e}`);
-    Toast.saveError();
-    Popup.error(
-      "Failed to save scene: " +
-        (typeof e === "string" ? e : (e?.message ?? String(e))),
+    const message = typeof e === "string" ? e : (e?.message ?? String(e));
+    logger.error(
+      "ScenePersistence",
+      `Failed to save scene | Error: ${message}`,
     );
+    Toast.saveError();
+    Popup.error("Failed to save scene: " + message);
     return false;
   }
 }
@@ -69,12 +70,36 @@ export async function loadScene(projectData, sceneName = "main") {
     logger.info("ScenePersistence", `Scene loaded ← ${scenePath}`);
     return sceneData;
   } catch (e) {
-    logger.warn("ScenePersistence", `Failed to load scene: ${e}`);
-    Toast.loadError();
-    Popup.error(
-      "Failed to load scene: " +
-        (typeof e === "string" ? e : (e?.message ?? String(e))),
+    const message = typeof e === "string" ? e : (e?.message ?? String(e));
+
+    if (message.startsWith("scene_not_found:")) {
+      logger.warn(
+        "ScenePersistence",
+        `Scene file not found, a new one will be created: ${scenePath}`,
+      );
+      return null;
+    }
+
+    logger.error(
+      "ScenePersistence",
+      `Failed to load scene | Error: ${message}`,
     );
-    return null;
+    throw e;
+  }
+}
+
+export async function backupScene(projectData, sceneName = "main") {
+  const scenePath = `${projectData._folder}/scenes/${sceneName}.ziron.scene`;
+  try {
+    const backupPath = await invoke("backup_scene", { scenePath });
+    logger.info("ScenePersistence", `Scene backup ready → ${backupPath}`);
+    return { path: backupPath };
+  } catch (e) {
+    const message = typeof e === "string" ? e : (e?.message ?? String(e));
+    logger.error(
+      "ScenePersistence",
+      `Could not back up the scene before loading it with problems | Error: ${message}`,
+    );
+    return { error: message };
   }
 }

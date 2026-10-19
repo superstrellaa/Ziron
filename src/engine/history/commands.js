@@ -226,18 +226,25 @@ export function DuplicateCommand(
 }
 
 export function DeleteCommand(sceneManager, entity, projectData) {
-  if (entity.type === "sun") throw new Error("The sun cannot be deleted");
+  if (entity?.type === "sun") throw new Error("The sun cannot be deleted");
   const snapshot = captureSnapshot(sceneManager, entity);
 
   return {
     type: EventType.DeleteObject,
     execute() {
-      if (!sceneManager.remove(entity.id)) {
-        throw new Error(`Could not delete "${entity.name}" (id:${entity.id})`);
+      const current = snapshot.entity;
+      if (!sceneManager.remove(current.id)) {
+        throw new Error(
+          `Could not delete "${snapshot.name}" (id:${current.id})`,
+        );
       }
     },
     async undo() {
-      await restoreEntity(sceneManager, snapshot, projectData);
+      snapshot.entity = await restoreEntity(
+        sceneManager,
+        snapshot,
+        projectData,
+      );
     },
   };
 }
@@ -254,14 +261,14 @@ export function MultiDeleteCommand(sceneManager, entities, projectData) {
   return {
     type: EventType.DeleteObject,
     async execute() {
-      await sceneManager.removeBatch(snapshots.map((s) => s.id));
+      await sceneManager.removeBatch(snapshots.map((s) => s.entity.id));
     },
     async undo() {
       let failures = 0;
 
       for (const s of snapshots.filter((s) => s.type === "model")) {
         try {
-          await restoreEntity(sceneManager, s, projectData);
+          s.entity = await restoreEntity(sceneManager, s, projectData);
         } catch (e) {
           failures++;
           logger.error(
@@ -288,15 +295,27 @@ export function MultiDeleteCommand(sceneManager, entities, projectData) {
         }));
 
         try {
-          await sceneManager.addBatch(items, (entity, item) => {
-            const src = item._source;
-            entity.mesh.quaternion.copy(src.quaternion);
-            entity.mesh.scale.copy(src.scale);
-            if (src.components) {
-              entity.components = structuredClone(src.components);
-            }
-            if (!src.active) sceneManager.setActive(entity.id, false);
-          });
+          await sceneManager.addBatch(
+            items,
+            (entity, item) => {
+              const src = item._source;
+              src.entity = entity;
+              entity.mesh.quaternion.copy(src.quaternion);
+              entity.mesh.scale.copy(src.scale);
+              if (src.components) {
+                entity.components = structuredClone(src.components);
+              }
+              if (!src.active) sceneManager.setActive(entity.id, false);
+            },
+            null,
+            (item, err) => {
+              failures++;
+              logger.error(
+                "History",
+                `Could not restore "${item._source.name}" | Error: ${err}`,
+              );
+            },
+          );
         } catch (e) {
           failures++;
           logger.error("History", `Could not restore primitives | Error: ${e}`);

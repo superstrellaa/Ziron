@@ -1,7 +1,5 @@
 import { t } from "../../../engine/i18n/i18n.js";
 import {
-  SetActiveCommand,
-  RenameCommand,
   GenericCommand,
   MultiRenameCommand,
   MultiSetActiveCommand,
@@ -627,14 +625,20 @@ export function createProperties(
     buildContent(entities);
   }
 
-  selection.onChange((single, multi) => {
-    const entities = multi?.length > 0 ? multi : single ? null : null;
+  const onSelectionChange = (single, multi) => {
     if (!single && (!multi || multi.length === 0)) {
       showEmpty();
       return;
     }
     refresh(single, multi?.length > 0 ? multi : []);
-  });
+  };
+  const _unsubSelection = selection.onChange(onSelectionChange);
 
-  return { refresh };
+  return {
+    refresh,
+    destroy() {
+      stopLoop();
+      _unsubSelection();
+    },
+  };
 }

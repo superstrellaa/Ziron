@@ -13,7 +13,11 @@ const GEOMETRIES = {
 };
 
 export function isKnownType(type) {
-  return type in GEOMETRIES || type === "camera";
+  return (
+    typeof type === "string" &&
+    (Object.prototype.hasOwnProperty.call(GEOMETRIES, type) ||
+      type === "camera")
+  );
 }
 
 export function buildEntity(type, options = {}, nextId) {

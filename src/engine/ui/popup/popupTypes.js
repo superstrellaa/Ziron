@@ -1,5 +1,5 @@
 import { t } from "../../i18n/i18n.js";
-import { openPopup } from "./popup.js";
+import { openPopup, escapeHtml } from "./popup.js";
 
 const UNSAVED_LABELS = {
   close: {
@@ -16,19 +16,12 @@ const UNSAVED_LABELS = {
   },
 };
 
-function escapeHtml(text) {
-  return String(text)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;");
-}
-
 export const Popup = {
   fatalStartupError: (summary, fullText = summary) =>
     openPopup({
       type: "error",
       titleKey: "popups.startupError.title",
-      message: `${t("popups.startupError.message")}<br><br>${escapeHtml(summary)}`,
+      messageHtml: `${escapeHtml(t("popups.startupError.message"))}<br><br>${escapeHtml(summary)}`,
       buttons: [
         {
           id: "copy",
@@ -157,6 +150,26 @@ export const Popup = {
         { id: "update", labelKey: "popups.buttons.update", variant: "primary" },
       ],
       keybinds: { Escape: "later", Enter: "update" },
+    }),
+
+  sceneLoadIssues: (count, summary, fullText = summary, backupNote = "") =>
+    openPopup({
+      type: "warning",
+      titleKey: "popups.sceneLoadIssues.title",
+      messageHtml:
+        `${escapeHtml(t("popups.sceneLoadIssues.message").replace("{n}", count))}<br><br>` +
+        `${escapeHtml(summary).replaceAll("\n", "<br>")}` +
+        (backupNote ? `<br><br>${escapeHtml(backupNote)}` : ""),
+      buttons: [
+        {
+          id: "copy",
+          labelKey: "popups.buttons.copyError",
+          copyText: fullText,
+          variant: "default",
+        },
+        { id: "close", labelKey: "popups.buttons.close", variant: "primary" },
+      ],
+      keybinds: { Escape: "close" },
     }),
 
   /**

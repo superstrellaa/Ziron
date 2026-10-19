@@ -1,7 +1,7 @@
 use base64::{engine::general_purpose::STANDARD, Engine as _};
 use std::path::{Path, PathBuf};
-use std::sync::{Arc, Mutex};
 
+use crate::util::run_blocking;
 use crate::logger;
 
 const PNG_SIGNATURE: [u8; 8] = [0x89, b'P', b'N', b'G', 0x0D, 0x0A, 0x1A, 0x0A];
@@ -56,22 +56,19 @@ pub async fn save_render_png(
         return Err("Render data is not a valid PNG image".to_string());
     }
 
-    let (tx, rx) = std::sync::mpsc::channel();
-    let tx = Arc::new(Mutex::new(Some(tx)));
-
-    app.dialog()
-        .file()
-        .set_file_name(&default_name)
-        .add_filter("PNG Image", &["png"])
-        .save_file(move |path| {
-            if let Some(tx) = tx.lock().unwrap().take() {
-                let _ = tx.send(path.map(|p| p.to_string()));
-            }
-        });
-
-    let chosen = rx
-        .recv()
-        .map_err(|_| "Save dialog closed without a result".to_string())?;
+    let chosen = run_blocking({
+    let app = app.clone();
+    let default_name = default_name.clone();
+    move || {
+        app.dialog()
+            .file()
+            .set_file_name(&default_name)
+            .add_filter("PNG Image", &["png"])
+            .blocking_save_file()
+        }
+    })
+    .await?
+    .map(|p| p.to_string());
 
     if let Some(path_str) = &chosen {
         write_png_atomically(Path::new(path_str), &bytes)?;

@@ -36,11 +36,24 @@ export async function createViewport(container, projectData) {
   topArea.appendChild(viewportEl);
 
   // ── Sistemas core ─────────────────────────────────────────────────────────
-  const { renderer, camera } = createRenderer(viewportEl);
-  const { scene, sceneManager, firstSelected, sun, sceneName } =
-    await createScene(renderer, projectData, (loaded, total) => {
+  const {
+    renderer,
+    camera,
+    dispose: disposeRenderer,
+  } = createRenderer(viewportEl);
+
+  let created;
+  try {
+    created = await createScene(renderer, projectData, (loaded, total) => {
       logger.info("Viewport", `Loading scene... ${loaded}/${total}`);
     });
+  } catch (e) {
+    topArea.remove();
+    disposeRenderer();
+    throw e;
+  }
+  const { scene, sceneManager, firstSelected, sun, sceneName } = created;
+
   const flyControls = createFlyCamera(camera, viewportEl);
   const gizmo = createGizmo(camera, renderer.domElement, scene, flyControls);
 
@@ -97,18 +110,19 @@ export async function createViewport(container, projectData) {
   // ── Callback compartido de añadir modelo ────────────────────────────────
   async function addModelToScene(absolutePath, modelPath, name) {
     let entity = null;
-    const cmd = CreateModelCommand(
-      sceneManager,
-      absolutePath,
-      modelPath,
-      { name },
-      (created) => {
-        entity = created;
-      },
+    const cmd = await runner.run("Create model", () =>
+      CreateModelCommand(
+        sceneManager,
+        absolutePath,
+        modelPath,
+        { name },
+        (created) => {
+          entity = created;
+        },
+      ),
     );
-    await cmd.execute();
-    history.push(cmd);
-    if (!history.isDirty()) hierarchy.setDirty(true);
+    if (!cmd) return null;
+    if (history.isDirty()) hierarchy.setDirty(true);
     return entity;
   }
 
@@ -123,12 +137,11 @@ export async function createViewport(container, projectData) {
   );
   topArea.insertBefore(container.querySelector("#hierarchy"), viewportEl);
 
-  const history = setupHistory(
-    gizmo.gizmo,
-    selection,
-    sceneManager,
-    projectData,
-  );
+  const {
+    history,
+    runner,
+    destroy: destroyHistory,
+  } = setupHistory(gizmo.gizmo, selection, sceneManager, projectData);
 
   const properties = createProperties(
     container,
@@ -149,7 +162,7 @@ export async function createViewport(container, projectData) {
   const ctxMenu = createContextMenu(
     viewportEl,
     sceneManager,
-    history,
+    runner,
     selection,
     camera,
     flyControls,
@@ -158,8 +171,15 @@ export async function createViewport(container, projectData) {
   hierarchy.setContextMenu(ctxMenu);
 
   async function triggerSave(toast = true) {
-    await saveScene(projectData, sceneManager, history, sceneName, toast);
-    hierarchy.setDirty(false);
+    const ok = await saveScene(
+      projectData,
+      sceneManager,
+      history,
+      sceneName,
+      toast,
+    );
+    if (ok) hierarchy.setDirty(false);
+    return ok;
   }
 
   // ── Auto-save ─────────────────────────────────────────────────────────────
@@ -210,12 +230,25 @@ export async function createViewport(container, projectData) {
   return {
     // Función usada para eliminar y limpiar el viewport activo
     destroy() {
-      autoSave.stop();
-      renderLoop.stop();
-      destroyEvents();
-      destroyDragDrop();
-      cameraFrustumSystem.clear();
-      cameraPreview.dispose();
+      const steps = [
+        ["autoSave", () => autoSave.stop()],
+        ["renderLoop", () => renderLoop.stop()],
+        ["viewportEvents", destroyEvents],
+        ["modelDragDrop", destroyDragDrop],
+        ["history", destroyHistory],
+        ["contextMenu", () => ctxMenu.destroy()],
+        ["properties", () => properties.destroy()],
+        ["cameraFrustumSystem", () => cameraFrustumSystem.clear()],
+        ["cameraPreview", () => cameraPreview.dispose()],
+        ["renderer", disposeRenderer],
+      ];
+      for (const [name, step] of steps) {
+        try {
+          step();
+        } catch (e) {
+          logger.error("Viewport", `Failed to destroy ${name} | Error: ${e}`);
+        }
+      }
     },
     // esto es para obtener si hay cambios
     isDirty: () => history.isDirty(),

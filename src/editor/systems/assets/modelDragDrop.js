@@ -18,7 +18,7 @@ export function connectModelDragDrop({ viewportEl, camera, addModelToScene }) {
     const hit = raycaster.ray.intersectPlane(groundPlane, hitPoint);
 
     const entity = await addModelToScene(absolutePath, diskPath, name);
-    if (hit) entity.mesh.position.copy(hit);
+    if (hit && entity) entity.mesh.position.copy(hit);
   }
 
   const unregister = registerDropZone(viewportEl, onDrop);

@@ -3,6 +3,7 @@ mod cursor;
 mod config;
 mod project;
 mod render;
+mod util;
 
 use tauri::Manager;
 
@@ -29,6 +30,26 @@ fn resolve_launch_path(raw: &str) -> Option<String> {
     None
 }
 
+fn persist_window_state(app: &tauri::AppHandle) -> Result<(), String> {
+    let window = app.get_webview_window("main").ok_or("Window not found")?;
+    let is_maximized = window.is_maximized().map_err(|e| e.to_string())?;
+
+    let (w, h) = if is_maximized {
+        (800.0, 600.0)
+    } else {
+        let size = window.inner_size().map_err(|e| e.to_string())?;
+        let scale = window.scale_factor().map_err(|e| e.to_string())?;
+        (size.width as f64 / scale, size.height as f64 / scale)
+    };
+
+    config::update_window_state(app, is_maximized, w, h)
+}
+
+#[tauri::command]
+async fn save_window_state(app: tauri::AppHandle) -> Result<(), String> {
+    persist_window_state(&app)
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -40,16 +61,19 @@ pub fn run() {
         .plugin(tauri_plugin_updater::Builder::new().build())
         .setup(|app| {
             let args: Vec<String> = std::env::args().collect();
+
             fn is_project_file(s: &str) -> bool {
                 let lower = s.to_lowercase();
                 lower.ends_with(".ziron.project") || lower.ends_with(".ziron.scene")
             }
 
-            let project = args.windows(2)
+            let project = args
+                .windows(2)
                 .find(|pair| pair[0] == "--project" && is_project_file(&pair[1]))
                 .map(|pair| pair[1].clone())
                 .or_else(|| {
-                    args.iter().skip(1)
+                    args.iter()
+                        .skip(1)
                         .find(|a| is_project_file(a))
                         .cloned()
                 })
@@ -57,15 +81,17 @@ pub fn run() {
 
             app.manage(LaunchProject(project));
 
-            let window = app.get_webview_window("main").unwrap();
+            let window = app
+                .get_webview_window("main")
+                .ok_or("Main window not found")?;
 
             // ── Aplicar config de ventana ──────────────────────────────────
             let cfg = config::read_config(&app.app_handle());
             let win_cfg = &cfg["window"];
 
             let maximized = win_cfg["maximized"].as_bool().unwrap_or(true);
-            let width     = win_cfg["width"].as_f64().unwrap_or(800.0);
-            let height    = win_cfg["height"].as_f64().unwrap_or(600.0);
+            let width = win_cfg["width"].as_f64().unwrap_or(800.0);
+            let height = win_cfg["height"].as_f64().unwrap_or(600.0);
 
             if maximized {
                 let _ = window.maximize();
@@ -80,28 +106,15 @@ pub fn run() {
             let app_handle = app.app_handle().clone();
             window.on_window_event(move |event| {
                 if let tauri::WindowEvent::CloseRequested { .. } = event {
-                    let window = app_handle.get_webview_window("main").unwrap();
-                    let is_maximized = window.is_maximized().unwrap_or(false);
-                    
-                    let (w, h) = if is_maximized {
-                        // Guardar tamaño por defecto si está maximizado
-                        (800.0, 600.0)
-                    } else {
-                        let size = window.inner_size().unwrap_or(
-                            tauri::PhysicalSize { width: 800, height: 600 }
+                    if let Err(e) = persist_window_state(&app_handle) {
+                        logger::log(
+                            "ERROR".to_string(),
+                            "window".to_string(),
+                            format!("Could not save window state on close: {e}"),
+                            None,
+                            None,
                         );
-                        let scale = window.scale_factor().unwrap_or(1.0);
-                        (size.width as f64 / scale, size.height as f64 / scale)
-                    };
-
-                    let mut current = config::read_config(&app_handle);
-                    current["window"]["maximized"] = serde_json::json!(is_maximized);
-                    current["window"]["width"]     = serde_json::json!(w);
-                    current["window"]["height"]    = serde_json::json!(h);
-
-                    let path = config::config_path(&app_handle).unwrap();
-                    let text = serde_json::to_string_pretty(&current).unwrap();
-                    let _ = std::fs::write(&path, text);
+                    }
                 }
             });
 
@@ -118,9 +131,10 @@ pub fn run() {
             config::save_config,
             config::get_default_config,
             project::create_project,
-            project::load_project, 
+            project::load_project,
             project::save_scene,
             project::load_scene,
+            project::backup_scene,
             project::get_recent_projects,
             project::remove_recent_project,
             project::pick_folder,
@@ -143,32 +157,4 @@ pub fn run() {
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
-}
-
-/// Comando para guardar manualmente el estado de la ventana
-#[tauri::command]
-async fn save_window_state(app: tauri::AppHandle) -> Result<(), String> {
-    let window = app.get_webview_window("main")
-        .ok_or("Window not found")?;
-    
-    let is_maximized = window.is_maximized().map_err(|e| e.to_string())?;
-    
-    let (w, h) = if is_maximized {
-        (800.0, 600.0)
-    } else {
-        let size = window.inner_size().map_err(|e| e.to_string())?;
-        let scale = window.scale_factor().map_err(|e| e.to_string())?;
-        (size.width as f64 / scale, size.height as f64 / scale)
-    };
-
-    let mut current = config::read_config(&app);
-    current["window"]["maximized"] = serde_json::json!(is_maximized);
-    current["window"]["width"]     = serde_json::json!(w);
-    current["window"]["height"]    = serde_json::json!(h);
-
-    let path = config::config_path(&app)?;
-    let text = serde_json::to_string_pretty(&current).map_err(|e| e.to_string())?;
-    std::fs::write(&path, text).map_err(|e| e.to_string())?;
-    
-    Ok(())
 }

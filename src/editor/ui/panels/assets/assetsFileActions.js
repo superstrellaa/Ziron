@@ -5,10 +5,48 @@ import { Toast } from "../../../../engine/ui/toasts/toastTypes.js";
 import { findParent, getNodePath, isImageFile } from "./assetsContext.js";
 import { buildAssetFileNode } from "./assetsTreeLoader.js";
 
+const LOG = "Assets";
+
+function errorText(e) {
+  return typeof e === "string" ? e : (e?.message ?? String(e));
+}
+
+function baseName(path) {
+  return String(path).split(/[\\/]/).pop();
+}
+
+function addFileNode(targetNode, fileName, diskPath) {
+  if (targetNode.children.some((c) => c._diskPath === diskPath)) return;
+  targetNode.children.push(buildAssetFileNode(fileName, diskPath));
+}
+
+function uniqueCopyName(siblings, stem, ext) {
+  const taken = new Set(siblings.map((c) => c._diskName));
+  let name = `${stem} Copy${ext}`;
+  for (let n = 2; taken.has(name); n++) {
+    name = `${stem} Copy ${n}${ext}`;
+  }
+  return name;
+}
+
+async function pickPaths(command, notifyFailure) {
+  try {
+    const picked = await invoke(command);
+    if (Array.isArray(picked)) return picked;
+    return picked ? [picked] : [];
+  } catch (e) {
+    logger.error(LOG, `${command} failed | Error: ${errorText(e)}`);
+    notifyFailure();
+    Popup.error("Failed to open the file picker: " + errorText(e));
+    return [];
+  }
+}
+
 export function initFileActions(ctx) {
-  ctx.importTexture = async function importTexture() {
-    const sourcePaths = await invoke("pick_texture_files");
-    if (!sourcePaths || sourcePaths.length === 0) return;
+  let importQueue = Promise.resolve();
+
+  async function importPaths(sourcePaths, via) {
+    if (!sourcePaths?.length) return;
 
     const targetFolder = getNodePath(ctx, ctx.currentFolderNode);
     const targetNode =
@@ -17,6 +55,9 @@ export function initFileActions(ctx) {
         ? ctx.currentFolderNode
         : ctx.treeData[0];
 
+    let renamed = 0;
+    const failures = [];
+
     for (const sourcePath of sourcePaths) {
       try {
         const fileName = await invoke("import_asset_file", {
@@ -24,110 +65,82 @@ export function initFileActions(ctx) {
           sourcePath,
           targetFolder,
         });
+
+        const original = baseName(sourcePath);
+        if (fileName !== original) {
+          renamed++;
+          logger.info(
+            LOG,
+            `"${original}" was already taken; imported as "${fileName}"`,
+          );
+        }
         logger.info(
-          "Assets",
-          `Imported texture "${fileName}" → "${targetFolder || "assets/"}"`,
+          LOG,
+          `Imported "${fileName}" (${via}) → "${targetFolder || "assets/"}"`,
         );
 
         const diskPath = targetFolder
           ? `${targetFolder}/${fileName}`
           : fileName;
-        targetNode.children.push(buildAssetFileNode(fileName, diskPath));
+        addFileNode(targetNode, fileName, diskPath);
       } catch (e) {
-        logger.warn("Assets", `Failed to import texture "${sourcePath}": ${e}`);
-        Toast.failedToImportTexture();
-        Popup.error(
-          "Failed to import texture: " +
-            (typeof e === "string" ? e : (e?.message ?? String(e))),
+        logger.error(
+          LOG,
+          `Failed to import "${sourcePath}" (${via}) | Error: ${errorText(e)}`,
         );
+        failures.push({ sourcePath, message: errorText(e) });
       }
     }
 
     ctx.rebuildTree();
     ctx.renderGrid(targetNode);
+
+    // Un unico aviso por lote, no uno por archivo
+    if (renamed > 0) Toast.assetRenamedOnImport();
+
+    if (failures.length > 0) {
+      if (failures.every((f) => isImageFile(f.sourcePath))) {
+        Toast.failedToImportTexture();
+      } else {
+        Toast.failedToImportModel();
+      }
+      Popup.error(
+        "Failed to import file: " +
+          failures
+            .map((f) => `${baseName(f.sourcePath)}: ${f.message}`)
+            .join("; "),
+      );
+    }
+  }
+
+  function enqueueImport(sourcePaths, via) {
+    importQueue = importQueue
+      .then(() => importPaths(sourcePaths, via))
+      .catch((e) =>
+        logger.error(
+          LOG,
+          `Import failed unexpectedly | Error: ${errorText(e)}`,
+        ),
+      );
+    return importQueue;
+  }
+
+  ctx.importTexture = async function importTexture() {
+    const sourcePaths = await pickPaths("pick_texture_files", () =>
+      Toast.failedToImportTexture(),
+    );
+    await enqueueImport(sourcePaths, "dialog");
   };
 
   ctx.importModel = async function importModel() {
-    const sourcePath = await invoke("pick_model_file");
-    if (!sourcePath) return;
-
-    const targetFolder = getNodePath(ctx, ctx.currentFolderNode);
-
-    try {
-      const fileName = await invoke("import_asset_file", {
-        projectFolder: ctx.projectData._folder,
-        sourcePath,
-        targetFolder,
-      });
-      logger.info(
-        "Assets",
-        `Imported "${fileName}" → "${targetFolder || "assets/"}"`,
-      );
-
-      const diskPath = targetFolder ? `${targetFolder}/${fileName}` : fileName;
-      const node = buildAssetFileNode(fileName, diskPath);
-
-      const targetNode =
-        ctx.currentFolderNode.type === "asset-folder" ||
-        ctx.currentFolderNode.type === "root"
-          ? ctx.currentFolderNode
-          : ctx.treeData[0];
-
-      targetNode.children.push(node);
-      ctx.rebuildTree();
-      ctx.renderGrid(targetNode);
-    } catch (e) {
-      logger.warn("Assets", `Failed to import model: ${e}`);
-      Toast.failedToImportModel();
-      Popup.error(
-        "Failed to import model: " +
-          (typeof e === "string" ? e : (e?.message ?? String(e))),
-      );
-    }
+    const sourcePaths = await pickPaths("pick_model_file", () =>
+      Toast.failedToImportModel(),
+    );
+    await enqueueImport(sourcePaths, "dialog");
   };
 
-  ctx.importExternalPaths = async function importExternalPaths(sourcePaths) {
-    if (!sourcePaths || sourcePaths.length === 0) return;
-
-    const targetFolder = getNodePath(ctx, ctx.currentFolderNode);
-    const targetNode =
-      ctx.currentFolderNode.type === "asset-folder" ||
-      ctx.currentFolderNode.type === "root"
-        ? ctx.currentFolderNode
-        : ctx.treeData[0];
-
-    for (const sourcePath of sourcePaths) {
-      try {
-        const fileName = await invoke("import_asset_file", {
-          projectFolder: ctx.projectData._folder,
-          sourcePath,
-          targetFolder,
-        });
-        logger.info(
-          "Assets",
-          `Imported "${fileName}" (drag & drop) → "${targetFolder || "assets/"}"`,
-        );
-
-        const diskPath = targetFolder
-          ? `${targetFolder}/${fileName}`
-          : fileName;
-        targetNode.children.push(buildAssetFileNode(fileName, diskPath));
-      } catch (e) {
-        logger.warn(
-          "Assets",
-          `Failed to import "${sourcePath}" (drag & drop): ${e}`,
-        );
-        if (isImageFile(sourcePath)) Toast.failedToImportTexture();
-        else Toast.failedToImportModel();
-        Popup.error(
-          "Failed to import file: " +
-            (typeof e === "string" ? e : (e?.message ?? String(e))),
-        );
-      }
-    }
-
-    ctx.rebuildTree();
-    ctx.renderGrid(targetNode);
+  ctx.importExternalPaths = function importExternalPaths(sourcePaths) {
+    return enqueueImport(sourcePaths ?? [], "drag & drop");
   };
 
   ctx.deleteModel = async function deleteModel(node) {
@@ -159,12 +172,10 @@ export function initFileActions(ctx) {
     const dotIdx = node._diskName.lastIndexOf(".");
     const stem = dotIdx > 0 ? node._diskName.slice(0, dotIdx) : node._diskName;
     const ext = dotIdx > 0 ? node._diskName.slice(dotIdx) : "";
-    const newName = stem + " Copy" + ext;
 
-    const parentPath = getNodePath(
-      ctx,
-      findParent(ctx.treeData, node) ?? ctx.currentFolderNode,
-    );
+    const parent = findParent(ctx.treeData, node) ?? ctx.currentFolderNode;
+    const parentPath = getNodePath(ctx, parent);
+    const newName = uniqueCopyName(parent.children, stem, ext);
     const destPath = parentPath ? `${parentPath}/${newName}` : newName;
 
     try {
@@ -173,19 +184,17 @@ export function initFileActions(ctx) {
         sourcePath: node._diskPath,
         destPath,
       });
-      logger.info("Assets", `Duplicated model "${node.label}" → "${newName}"`);
-      const newNode = buildAssetFileNode(newName, destPath);
-      const parent = findParent(ctx.treeData, node) ?? ctx.currentFolderNode;
-      parent.children.push(newNode);
+      logger.info(LOG, `Duplicated model "${node.label}" → "${newName}"`);
+      parent.children.push(buildAssetFileNode(newName, destPath));
       ctx.rebuildTree();
       ctx.renderGrid(ctx.currentFolderNode);
     } catch (e) {
-      logger.warn("Assets", `Failed to duplicate model "${node.label}": ${e}`);
-      Toast.failedToDuplicateModel();
-      Popup.error(
-        "Failed to duplicate model: " +
-          (typeof e === "string" ? e : (e?.message ?? String(e))),
+      logger.error(
+        LOG,
+        `Failed to duplicate model "${node.label}" | Error: ${errorText(e)}`,
       );
+      Toast.failedToDuplicateModel();
+      Popup.error("Failed to duplicate model: " + errorText(e));
     }
   };
 

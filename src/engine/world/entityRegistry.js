@@ -5,15 +5,45 @@ export function createEntityRegistry() {
   let nextId = 1;
   let nextHierarchyOrder = 1;
 
-  function consumeId(requestedId = null) {
-    if (requestedId != null) {
-      if (requestedId >= nextId) nextId = requestedId + 1;
-      return requestedId;
-    }
+  // Siempre devuelve un id libre
+  function allocateId() {
+    while (entities.has(nextId)) nextId++;
     return nextId++;
   }
 
+  function consumeId(requestedId = null) {
+    if (requestedId == null) return allocateId();
+
+    if (!Number.isInteger(requestedId)) {
+      const assigned = allocateId();
+      logger.warn(
+        "EntityRegistry",
+        `Invalid entity id ${JSON.stringify(requestedId)}; assigned ${assigned}`,
+      );
+      return assigned;
+    }
+
+    if (entities.has(requestedId)) {
+      const assigned = allocateId();
+      logger.warn(
+        "EntityRegistry",
+        `Entity id ${requestedId} is already in use; assigned ${assigned}`,
+      );
+      return assigned;
+    }
+
+    if (requestedId >= nextId) nextId = requestedId + 1;
+    return requestedId;
+  }
+
   function consumeHierarchyOrder(requestedOrder = null) {
+    if (requestedOrder != null && !Number.isFinite(requestedOrder)) {
+      logger.warn(
+        "EntityRegistry",
+        `Invalid hierarchy order ${JSON.stringify(requestedOrder)}; assigning a new one`,
+      );
+      requestedOrder = null;
+    }
     if (requestedOrder != null) {
       if (requestedOrder >= nextHierarchyOrder) {
         nextHierarchyOrder = requestedOrder + 1;

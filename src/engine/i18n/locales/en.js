@@ -333,6 +333,11 @@ export default {
       title: "Install Failed",
       message: "Could not install the update.",
     },
+    assetRenamedOnImport: {
+      title: "Asset Renamed",
+      message:
+        "A file with that name already exists, so the imported file was renamed. Check the assets panel for its new name.",
+    },
   },
   popups: {
     startupError: {
@@ -372,6 +377,13 @@ export default {
       title: "Update {version} available",
       message:
         "A new version of ZIRON Studio ({version}) is available. Updating is optional: you can stay on your current version as long as you like.",
+    },
+    sceneLoadIssues: {
+      title: "Scene loaded with problems",
+      message:
+        "{n} object(s) could not be loaded and were left out of the scene. They will be removed from the scene file the next time you save.",
+      backupSaved: "A copy of the original file was saved as {file}.",
+      backupFailed: "A backup copy of the original file could not be created.",
     },
     error: {
       title: "An error occurred",

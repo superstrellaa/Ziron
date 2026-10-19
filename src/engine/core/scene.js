@@ -3,10 +3,17 @@ import { logger } from "./logger.js";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 import { createSceneManager } from "../world/sceneManager.js";
 import { createSunEntity } from "../world/sunEntity.js";
-import { loadScene } from "../../editor/systems/persistence/scenePersistence.js";
 import { createProceduralSky } from "../world/environment/proceduralSky.js";
 import { createInfiniteGrid } from "../world/environment/infiniteGrid.js";
-import { loadSavedEntities } from "../world/persistence/sceneLoader.js";
+import {
+  loadScene,
+  backupScene,
+} from "../../editor/systems/persistence/scenePersistence.js";
+import {
+  loadSavedEntities,
+  notifyLoadReport,
+  needsBackup,
+} from "../world/persistence/sceneLoader.js";
 
 export async function createScene(renderer, projectData, onProgress = null) {
   const scene = new THREE.Scene();
@@ -34,21 +41,31 @@ export async function createScene(renderer, projectData, onProgress = null) {
   let sceneName = "main";
 
   if (projectData) {
-    const startupScene = projectData.startup_scene ?? "scenes/main.ziron.scene";
+    const startupScene =
+      typeof projectData.startup_scene === "string" && projectData.startup_scene
+        ? projectData.startup_scene
+        : "scenes/main.ziron.scene";
     const sceneNameFromFile = startupScene
       .replace("scenes/", "")
       .replace(".ziron.scene", "");
 
     const saved = await loadScene(projectData, sceneNameFromFile);
-    sceneName = saved?.name ?? "main";
+    sceneName =
+      typeof saved?.name === "string" && saved.name ? saved.name : "main";
 
-    const hasEntities = saved?.entities?.some((e) => e.type !== "sun");
+    if (saved?.entities != null && !Array.isArray(saved.entities)) {
+      throw new Error(
+        `Scene "${sceneNameFromFile}" is malformed: "entities" is not a list`,
+      );
+    }
+
+    const hasEntities = saved?.entities?.some((e) => e?.type !== "sun");
 
     if (!hasEntities) {
       firstSelected = sceneManager.add("cube", { name: "Cube" });
       logger.info("Scene", "New scene — default cube added");
     } else {
-      const added = await loadSavedEntities(
+      const { added, report } = await loadSavedEntities(
         saved,
         sceneManager,
         sun,
@@ -56,10 +73,16 @@ export async function createScene(renderer, projectData, onProgress = null) {
         onProgress,
       );
       firstSelected = added[0] ?? null;
+
+      const backup = needsBackup(report)
+        ? await backupScene(projectData, sceneNameFromFile)
+        : null;
+
       logger.info(
         "Scene",
-        `Loaded ${saved.entities.length} entities from disk`,
+        `Loaded ${added.length}/${saved.entities.length} entities (skipped: ${report.skipped.length}, repaired: ${report.repaired.length})`,
       );
+      notifyLoadReport(report, backup);
     }
   } else {
     firstSelected = sceneManager.add("cube", { name: "Cube" });

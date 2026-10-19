@@ -10,17 +10,27 @@ export function createRenderer(container) {
   const camera = new THREE.PerspectiveCamera(60, 1, 0.1, 1000);
   camera.position.set(5, 4, 7);
   camera.lookAt(0, 0, 0);
-  camera.layers.enable(1); // capa 1: chrome de editor (excluida de la preview)
+  camera.layers.enable(1);
 
   function resize() {
     const w = container.clientWidth;
     const h = container.clientHeight;
+    if (!w || !h) return;
     renderer.setSize(w, h);
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
   }
   resize();
-  new ResizeObserver(resize).observe(container);
 
-  return { renderer, camera };
+  const resizeObserver = new ResizeObserver(resize);
+  resizeObserver.observe(container);
+
+  function dispose() {
+    resizeObserver.disconnect();
+    renderer.dispose();
+    renderer.forceContextLoss();
+    renderer.domElement.remove();
+  }
+
+  return { renderer, camera, dispose };
 }

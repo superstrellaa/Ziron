@@ -247,6 +247,10 @@ export function createSelectionSystem(
     refreshMultiPivot,
     onChange(cb) {
       changeListeners.push(cb);
+      return () => {
+        const index = changeListeners.indexOf(cb);
+        if (index !== -1) changeListeners.splice(index, 1);
+      };
     },
   };
 }

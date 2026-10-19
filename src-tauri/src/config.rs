@@ -1,6 +1,9 @@
-use std::fs::{create_dir_all, read_to_string, write};
+use std::fs::{create_dir_all, read_to_string};
 use serde_json::{Value, json};
 use tauri::Manager;
+
+use crate::logger;
+use crate::util::write_atomic;
 
 pub fn config_path(app: &tauri::AppHandle) -> Result<std::path::PathBuf, String> {
     let mut path = app
@@ -64,7 +67,7 @@ pub fn load_config(app: tauri::AppHandle) -> Result<Value, String> {
     if !path.exists() {
         let defaults = default_config();
         let text = serde_json::to_string_pretty(&defaults).map_err(|e| e.to_string())?;
-        write(&path, text).map_err(|e| e.to_string())?;
+        write_atomic(&path, text.as_bytes())?;
         return Ok(defaults);
     }
 
@@ -93,10 +96,12 @@ pub fn load_config(app: tauri::AppHandle) -> Result<Value, String> {
 
 #[tauri::command]
 pub fn save_config(app: tauri::AppHandle, config: Value) -> Result<(), String> {
+    if !config.is_object() {
+        return Err("Refusing to save: config is not a JSON object".to_string());
+    }
     let path = config_path(&app)?;
     let text = serde_json::to_string_pretty(&config).map_err(|e| e.to_string())?;
-    write(&path, text).map_err(|e| e.to_string())?;
-    Ok(())
+    write_atomic(&path, text.as_bytes())
 }
 
 fn merge_defaults(target: &mut Value, defaults: &Value) {
@@ -111,28 +116,37 @@ fn merge_defaults(target: &mut Value, defaults: &Value) {
     }
 }
 
-pub fn read_config(app: &tauri::AppHandle) -> Value {
-    let path = match config_path(app) {
-        Ok(p) => p,
-        Err(_) => return default_config(),
-    };
-
+fn read_config_strict(app: &tauri::AppHandle) -> Result<Value, String> {
+    let path = config_path(app)?;
     if !path.exists() {
-        return default_config();
+        return Ok(default_config());
     }
 
-    let text = match read_to_string(&path) {
-        Ok(t) => t,
-        Err(_) => return default_config(),
-    };
-
-    let mut config: Value = match serde_json::from_str(&text) {
-        Ok(v) => v,
-        Err(_) => return default_config(),
-    };
+    let text = read_to_string(&path).map_err(|e| format!("Could not read config: {e}"))?;
+    let mut config: Value =
+        serde_json::from_str(&text).map_err(|e| format!("Config is not valid JSON: {e}"))?;
+    if !config.is_object() {
+        return Err("Config root is not a JSON object".to_string());
+    }
 
     merge_defaults(&mut config, &default_config());
-    config
+    Ok(config)
+}
+
+pub fn read_config(app: &tauri::AppHandle) -> Value {
+    match read_config_strict(app) {
+        Ok(config) => config,
+        Err(e) => {
+            logger::log(
+                "WARN".to_string(),
+                "config".to_string(),
+                format!("Using default config values: {e}"),
+                None,
+                None,
+            );
+            default_config()
+        }
+    }
 }
 
 #[tauri::command]
@@ -147,4 +161,24 @@ fn backup_corrupt_config(path: &std::path::Path) -> Result<std::path::PathBuf, S
         format!("Config file is invalid and could not be backed up ({e}); it was left untouched.")
     })?;
     Ok(backup)
+}
+
+pub fn update_window_state(
+    app: &tauri::AppHandle,
+    maximized: bool,
+    width: f64,
+    height: f64,
+) -> Result<(), String> {
+    let mut current = read_config_strict(app)?;
+
+    if !current["window"].is_object() {
+        current["window"] = json!({});
+    }
+    current["window"]["maximized"] = json!(maximized);
+    current["window"]["width"] = json!(width);
+    current["window"]["height"] = json!(height);
+
+    let path = config_path(app)?;
+    let text = serde_json::to_string_pretty(&current).map_err(|e| e.to_string())?;
+    write_atomic(&path, text.as_bytes())
 }

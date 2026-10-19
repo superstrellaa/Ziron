@@ -61,7 +61,7 @@ let activeMenu = null;
 export function createContextMenu(
   container,
   sceneManager,
-  history,
+  runner,
   selection,
   camera,
   flyControls,
@@ -71,16 +71,16 @@ export function createContextMenu(
     mouseDownY = 0,
     mouseDownTime = 0;
 
-  window.addEventListener("contextmenu", (e) => e.preventDefault());
+  const onContextMenu = (e) => e.preventDefault();
 
-  container.addEventListener("mousedown", (e) => {
+  const onMouseDown = (e) => {
     if (e.button !== 2) return;
     mouseDownX = e.clientX;
     mouseDownY = e.clientY;
     mouseDownTime = performance.now();
-  });
+  };
 
-  container.addEventListener("mouseup", (e) => {
+  const onMouseUp = (e) => {
     if (e.button !== 2) return;
     if (flyControls.didFly()) return;
 
@@ -114,24 +114,40 @@ export function createContextMenu(
       e.clientX,
       e.clientY,
       sceneManager,
-      history,
+      runner,
       selection,
       hitEntity,
       projectData,
     );
-  });
+  };
 
-  window.addEventListener("mousedown", (e) => {
+  const onWindowMouseDown = (e) => {
     if (activeMenu && !activeMenu.contains(e.target)) closeMenu();
-  });
+  };
 
-  window.addEventListener("keydown", (e) => {
+  const onKeyDown = (e) => {
     if (e.key === "Escape") closeMenu();
-  });
+  };
+
+  window.addEventListener("contextmenu", onContextMenu);
+  container.addEventListener("mousedown", onMouseDown);
+  container.addEventListener("mouseup", onMouseUp);
+  window.addEventListener("mousedown", onWindowMouseDown);
+  window.addEventListener("keydown", onKeyDown);
 
   return {
     showAt(x, y, hitEntity = null) {
-      showMenu(x, y, sceneManager, history, selection, hitEntity, projectData);
+      showMenu(x, y, sceneManager, runner, selection, hitEntity, projectData);
+    },
+
+    destroy() {
+      window.removeEventListener("contextmenu", onContextMenu);
+      container.removeEventListener("mousedown", onMouseDown);
+      container.removeEventListener("mouseup", onMouseUp);
+      window.removeEventListener("mousedown", onWindowMouseDown);
+      window.removeEventListener("keydown", onKeyDown);
+      closeMenu();
+      _clipboard = null;
     },
   };
 }
@@ -147,7 +163,7 @@ function showMenu(
   x,
   y,
   sceneManager,
-  history,
+  runner,
   selection,
   hitEntity,
   projectData,
@@ -167,52 +183,46 @@ function showMenu(
     const ul = document.createElement("ul");
     ul.className = "ctx-menu";
 
-    const liCopy = makeItem(t("contextMenu.copy"), () => {
-      _clipboard = hitEntity;
-      closeMenu();
-    });
-    ul.appendChild(liCopy);
+    ul.appendChild(
+      makeItem(t("contextMenu.copy"), () => {
+        _clipboard = hitEntity;
+        closeMenu();
+      }),
+    );
 
-    const liDup = makeItem(t("contextMenu.duplicate"), () => {
-      const cmd = DuplicateCommand(
-        sceneManager,
-        hitEntity,
-        reselect,
-        projectData,
-      );
-      cmd.execute();
-      history.push(cmd);
-      closeMenu();
-    });
-    ul.appendChild(liDup);
+    ul.appendChild(
+      makeItem(t("contextMenu.duplicate"), () => {
+        closeMenu();
+        runner.run("Duplicate", () =>
+          DuplicateCommand(sceneManager, hitEntity, reselect, projectData),
+        );
+      }),
+    );
 
-    const liRename = makeItem(t("contextMenu.rename"), () => {
-      closeMenu();
-      window.dispatchEvent(
-        new CustomEvent("ziron:rename", { detail: { id: hitEntity.id } }),
-      );
-    });
-    ul.appendChild(liRename);
+    ul.appendChild(
+      makeItem(t("contextMenu.rename"), () => {
+        closeMenu();
+        window.dispatchEvent(
+          new CustomEvent("ziron:rename", { detail: { id: hitEntity.id } }),
+        );
+      }),
+    );
 
     ul.appendChild(makeSeparator());
 
-    const liDelete = makeItem(
-      t("contextMenu.delete"),
-      () => {
-        const cmd = DeleteCommand(
-          sceneManager,
-          hitEntity,
-          reselect,
-          projectData,
-        );
-        cmd.execute();
-        history.push(cmd);
-        selection.deselect();
-        closeMenu();
-      },
-      true,
+    ul.appendChild(
+      makeItem(
+        t("contextMenu.delete"),
+        async () => {
+          closeMenu();
+          const cmd = await runner.run("Delete", () =>
+            DeleteCommand(sceneManager, hitEntity, projectData),
+          );
+          if (cmd) selection.deselect();
+        },
+        true,
+      ),
     );
-    ul.appendChild(liDelete);
 
     menu.appendChild(ul);
     menu.appendChild(makeSeparator());
@@ -221,24 +231,20 @@ function showMenu(
   if (_clipboard) {
     const ulPaste = document.createElement("ul");
     ulPaste.className = "ctx-menu";
-    const liPaste = makeItem(t("contextMenu.paste"), () => {
-      const cmd = DuplicateCommand(
-        sceneManager,
-        _clipboard,
-        reselect,
-        projectData,
-      );
-      cmd.execute();
-      history.push(cmd);
-      closeMenu();
-    });
-    ulPaste.appendChild(liPaste);
+    ulPaste.appendChild(
+      makeItem(t("contextMenu.paste"), () => {
+        const source = _clipboard;
+        closeMenu();
+        runner.run("Paste", () =>
+          DuplicateCommand(sceneManager, source, reselect, projectData),
+        );
+      }),
+    );
     menu.appendChild(ulPaste);
     menu.appendChild(makeSeparator());
   }
 
-  const addMenu = buildMenu(getMenuStructure(), sceneManager, history);
-  menu.appendChild(addMenu);
+  menu.appendChild(buildMenu(getMenuStructure(), sceneManager, runner));
 
   menu.style.left = x + "px";
   menu.style.top = y + "px";
@@ -279,7 +285,7 @@ function makeSeparator() {
   return sep;
 }
 
-function buildMenu(structure, sceneManager, history) {
+function buildMenu(structure, sceneManager, runner) {
   const ul = document.createElement("ul");
   ul.className = "ctx-menu";
 
@@ -291,7 +297,7 @@ function buildMenu(structure, sceneManager, history) {
       li.innerHTML = `<span class="ctx-label">${label}</span><i data-lucide="chevron-right"></i>`;
       li.classList.add("ctx-has-sub");
 
-      const sub = buildMenu(value, sceneManager, history);
+      const sub = buildMenu(value, sceneManager, runner);
       sub.classList.add("ctx-submenu");
       li.appendChild(sub);
 
@@ -323,10 +329,10 @@ function buildMenu(structure, sceneManager, history) {
       const icon = TYPE_ICONS[value];
       li.innerHTML = `${icon ? `<i data-lucide="${icon}" class="ctx-item-icon"></i>` : ""}<span class="ctx-label">${label}</span>`;
       li.addEventListener("click", () => {
-        const cmd = CreateCommand(sceneManager, value, { name: value });
-        cmd.execute();
-        history.push(cmd);
         closeMenu();
+        runner.run("Create", () =>
+          CreateCommand(sceneManager, value, { name: value }),
+        );
       });
     }
 

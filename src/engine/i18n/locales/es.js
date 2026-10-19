@@ -345,6 +345,11 @@ export default {
       title: "Error al Instalar",
       message: "No se pudo instalar la actualización.",
     },
+    assetRenamedOnImport: {
+      title: "Asset Renombrado",
+      message:
+        "Ya existe un archivo con ese nombre, así que el archivo importado se ha renombrado. Mira el panel de assets para ver su nombre nuevo.",
+    },
   },
   popups: {
     startupError: {
@@ -385,6 +390,14 @@ export default {
       title: "Actualización {version} disponible",
       message:
         "Hay una nueva versión de ZIRON Studio ({version}). Actualizar es opcional: puedes seguir con tu versión actual todo el tiempo que quieras.",
+    },
+    sceneLoadIssues: {
+      title: "Escena cargada con problemas",
+      message:
+        "{n} objeto(s) no se pudieron cargar y se han dejado fuera de la escena. Se eliminarán del archivo la próxima vez que guardes.",
+      backupSaved: "Se guardó una copia del archivo original como {file}.",
+      backupFailed:
+        "No se pudo crear una copia de seguridad del archivo original.",
     },
     error: {
       title: "Ocurrió un error",

@@ -89,26 +89,31 @@ export function initMenuBar({ onLoadProject, onNewProject, onCloseProject }) {
 
   document.getElementById("menu-load").addEventListener("click", async () => {
     closeMenu();
-    const projectFile = await invoke("pick_project_file").catch(() => null);
-    if (!projectFile) return;
+
+    let projectFile;
     try {
-      const projectData = await invoke("load_project", { projectFile });
-      logger.info("Menu", `Opened project "${projectData.name}"`);
-      _onLoadProject?.(projectData);
+      projectFile = await invoke("pick_project_file");
     } catch (e) {
-      logger.warn("Menu", `Failed to open project: ${e}`);
+      const message = typeof e === "string" ? e : (e?.message ?? String(e));
+      logger.error("Menu", `Failed to pick a project file | Error: ${message}`);
       Toast.failedToOpenProject();
-      Popup.error(
-        "Failed to open project: " +
-          (typeof e === "string" ? e : (e?.message ?? String(e))),
-      );
+      Popup.error("Failed to open project: " + message);
+      return;
     }
+    if (!projectFile) return; // dialogo cancelado
+
+    await _onLoadProject?.(projectFile);
   });
 
-  document.getElementById("menu-save").addEventListener("click", () => {
+  document.getElementById("menu-save").addEventListener("click", async () => {
     if (!_hasProject || !_onSave) return;
     closeMenu();
-    _onSave();
+    try {
+      await _onSave();
+    } catch (e) {
+      logger.error("Menu", `Save from the menu failed | Error: ${e}`);
+      Toast.saveError();
+    }
   });
 
   document

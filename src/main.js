@@ -77,7 +77,7 @@ async function main() {
 
   // ── Sistemas ──────────────────────────────────────────────────────────────────
   initWorkspaceManager();
-  initWindowManager(getActiveViewport);
+  await initWindowManager(getActiveViewport);
   initProjectMenuBar();
   initDragDropOverlay();
 

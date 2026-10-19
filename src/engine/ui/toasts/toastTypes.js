@@ -272,6 +272,13 @@ export const Toast = {
       messageKey: "toasts.updateInstallFailed.message",
       ...extra,
     }),
+  assetRenamedOnImport: (extra) =>
+    pushToast({
+      type: "info",
+      titleKey: "toasts.assetRenamedOnImport.title",
+      messageKey: "toasts.assetRenamedOnImport.message",
+      ...extra,
+    }),
 
   info: (title, message, duration) =>
     pushToast({ type: "info", title, message, duration }),
